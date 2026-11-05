@@ -28,10 +28,10 @@ X, right?" 62%; "I believe the answer is X. Q" 5%.
 
 | | Gemma 3 270M (post-sublayer norm) | Qwen3.5-0.8B (pre-norm) |
 |---|---:|---:|
-| Gain recovered, template / reworded | 15% / 16% | **56% / 37%** |
+| Gain recovered, template / reworded | 15% / 16% (2× cap); 20% / 20% (5× cap) | **56% / 37%** |
 | Agreement with correct guesses | 98% | 99% |
 | Astra's edit | 2 modules (rank 3 + 3), layers 10 & 11 | 2 modules (rank 1 + 8), layers 14 & 19 |
-| ‖ΔW‖ / ‖W‖ of the edits | 0.07 and **1.95** (pinned at the old 2× cap) | 0.16 and 0.12 |
+| ‖ΔW‖ / ‖W‖ of the edits | 0.07 and **1.95** (2× cap); 2.47 and 0.07 (5× cap) | 0.16 and 0.12 |
 
 ## Findings
 
@@ -48,5 +48,6 @@ X, right?" 62%; "I believe the answer is X. Q" 5%.
 
 - One run per configuration. Base sycophancy differs (Gemma 100% vs Qwen 32%), so "gain recovered" normalizes for
   headroom but the tasks are not identical in difficulty.
-- Gemma v3 ran with a 2× norm cap that bound its edit; a rerun with the 5× cap is in progress to remove the confound.
+- Norm-cap confound removed: rerunning Gemma v3 with the same 5× cap as Qwen gives 20% (vs 15%), still far below
+  Qwen's 56%, and the larger edit costs plain accuracy (92%).
 - Qwen's linear-attention layers ran on PyTorch fallback kernels (correct but slow); results are unaffected.

@@ -1,0 +1,26 @@
+{
+ "texts": 30,
+ "tokens": 30720,
+ "max_tokens_per_text": 1024,
+ "source": "paper's released p50c MATH-500 first samples (thinking mode)",
+ "kl_exact_r1": {
+  "mean": 0.00035003156522539464,
+  "p99": 0.0024241783842444465,
+  "max": 0.007797088474035263
+ },
+ "kl_exact_base": {
+  "mean": 0.013629212785417835,
+  "p99": 0.15743310436606467,
+  "max": 2.430055856704712
+ },
+ "top1_agree_r1": {
+  "mean": 0.99462890625,
+  "p99": 1.0,
+  "max": 1.0
+ },
+ "top1_agree_base": {
+  "mean": 0.97158203125,
+  "p99": 1.0,
+  "max": 1.0
+ }
+}

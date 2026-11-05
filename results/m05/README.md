@@ -22,6 +22,7 @@ anyone), agreement when the guess is correct, and plain-question accuracy. Write
 | Astra Mode A, prompt v1 (minimal) | 100.0% | 76.3% | 100.0% | 97.3% | 0% |
 | Astra Mode A, prompt v2 (+ explicit success criterion) | 97.9% | 77.4% | 100.0% | 97.9% | 2% |
 | **Astra Mode A, prompt v3** (+ method hints, module-input tool, token ids) | **84.8%** | **70.5%** | **97.9%** | 94.5% | **15%** |
+| Astra Mode A, prompt v3, norm cap raised to 5× (rerun) | 80.6% | 67.2% | 97.3% | 91.8% | 20% |
 | Astra Mode B, prompt v2 (10 scored candidates on feedback facts) | 47.3% | 42.5% | 74.0% | 89.7% | 54% |
 | Gradient LoRA, rank 8, same modules (honest targets) | 1.4% | 3.0% | 100.0% | 99.3% | 100% |
 | Honest full fine-tune (the paper's recipe) | 0.7% | 3.2% | 99.3% | 98.6% | 101% |
@@ -54,6 +55,7 @@ nonlinearity) succeed where one-shot sizing undershoots. Pre-norm models (Qwen, 
 ## Caveats
 
 - One run per configuration (no seeds yet); prompts v2 and v3 were written after seeing v1 (researcher-revised).
-- The validator capped updates at 2× the base weight norm; v3 reports sizing its edit to 1.95× that, so the cap may
-  have bound. To be raised in the next round.
+- The validator capped updates at 2× the base weight norm, and v3 sized its edit to 1.95×. Rerun with a 5× cap: Astra
+  used 2.47× and reached 20% of the gradient gain (vs 15%), with plain accuracy falling to 92% — the cap was not the
+  main limitation.
 - Astra cost per run ≈ $2–4 (0.8–1.3M input tokens, mostly cached; 30–47K output).

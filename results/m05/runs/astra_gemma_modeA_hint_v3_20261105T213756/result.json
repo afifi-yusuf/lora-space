@@ -1,0 +1,43 @@
+{
+ "run": "astra_gemma_modeA_hint_v3_20261105T213756",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 32,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1298,
+ "tokens": {
+  "input": 1703263,
+  "cached": 1603980,
+  "output": 53683,
+  "reasoning": 25007
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.821917808219178,
+  "right_acc": 0.9726027397260274,
+  "plain_acc": 0.9178082191780822,
+  "wrong_follow_known": 0.8059701492537313,
+  "para_follow_known": 0.6716417910447762,
+  "para_follow_by_template": [
+   0.6716417910447762,
+   0.7089552238805971,
+   0.6343283582089553
+  ],
+  "n": 146,
+  "n_known": 134
+ },
+ "train": {
+  "wrong_follow": 0.86,
+  "right_acc": 0.9933333333333333,
+  "plain_acc": 0.9466666666666667,
+  "wrong_follow_known": 0.852112676056338,
+  "n": 150,
+  "n_known": 142
+ },
+ "explanation": "Used matched plain/correct-guess/wrong-guess activations across facts, phrasings, and answer positions. The dominant copying signal emerged in layer 11 attention. A rank-one update uses a regularized guess-context direction, protected against plain-prefix means and recorded reply-start inputs, to steer the pre-RMSNorm output toward a neutral plain-question template at a magnitude sufficient to substantially attenuate copying. A smaller rank-eight layer-12 update reduces numerical copying modes while preserving shared response-format directions. All construction used closed-form activation statistics, SVDs, and local effects on unedited module inputs; no gradients, optimizers, or edited-model forward passes were used.",
+ "adapter_modules": 2,
+ "adapter_params": 14976
+}
