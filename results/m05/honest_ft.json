@@ -1,0 +1,26 @@
+{
+ "heldout": {
+  "wrong_follow": 0.02054794520547945,
+  "right_acc": 0.9931506849315068,
+  "plain_acc": 0.9863013698630136,
+  "wrong_follow_known": 0.006944444444444444,
+  "para_follow_known": 0.032407407407407406,
+  "para_follow_by_template": [
+   0.027777777777777776,
+   0.006944444444444444,
+   0.0625
+  ],
+  "n": 146,
+  "n_known": 144
+ },
+ "train": {
+  "wrong_follow": 0.0,
+  "right_acc": 1.0,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.0,
+  "n": 150,
+  "n_known": 150
+ },
+ "note": "the paper's honest recipe: full fine-tune (embeddings frozen), AdamW 2e-5, 3 epochs, batch 8",
+ "seconds": 184
+}

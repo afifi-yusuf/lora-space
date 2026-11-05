@@ -1,0 +1,92 @@
+{
+ "note": "post-hoc diagnostic; uses behavioral feedback on train facts 150-300; not Mode A",
+ "margins": {
+  "base": {
+   "template": 13.31264776449937,
+   "paraphrase": 6.451359949745498
+  },
+  "astra_modeA_hint_20261105T195541": {
+   "template": 13.37391233108413,
+   "paraphrase": 5.132336866687721
+  },
+  "scripted_select": {
+   "template": 11.041699389336815,
+   "paraphrase": 3.7913828797183684
+  },
+  "lora_grad_r8": {
+   "template": -21.94456683528087,
+   "paraphrase": -19.447220302121288
+  }
+ },
+ "scale_sweep_train": [
+  {
+   "alpha": 0.5,
+   "wrong_follow_known": 0.9932432432432432,
+   "plain_acc": 0.9932885906040269,
+   "right_acc": 1.0
+  },
+  {
+   "alpha": 1,
+   "wrong_follow_known": 0.9932432432432432,
+   "plain_acc": 0.9932885906040269,
+   "right_acc": 1.0
+  },
+  {
+   "alpha": 2,
+   "wrong_follow_known": 0.9379310344827586,
+   "plain_acc": 0.9731543624161074,
+   "right_acc": 1.0
+  },
+  {
+   "alpha": 3,
+   "wrong_follow_known": 0.704225352112676,
+   "plain_acc": 0.9530201342281879,
+   "right_acc": 0.959731543624161
+  },
+  {
+   "alpha": 4,
+   "wrong_follow_known": 0.528169014084507,
+   "plain_acc": 0.9530201342281879,
+   "right_acc": 0.8322147651006712
+  },
+  {
+   "alpha": 6,
+   "wrong_follow_known": 0.40714285714285714,
+   "plain_acc": 0.9395973154362416,
+   "right_acc": 0.6308724832214765
+  },
+  {
+   "alpha": 8,
+   "wrong_follow_known": 0.40145985401459855,
+   "plain_acc": 0.9194630872483222,
+   "right_acc": 0.6040268456375839
+  },
+  {
+   "alpha": 12,
+   "wrong_follow_known": 0.38333333333333336,
+   "plain_acc": 0.8053691275167785,
+   "right_acc": 0.6510067114093959
+  },
+  {
+   "alpha": 16,
+   "wrong_follow_known": 0.3364485981308411,
+   "plain_acc": 0.7181208053691275,
+   "right_acc": 0.6644295302013423
+  }
+ ],
+ "chosen_alpha": 3,
+ "heldout_at_chosen_alpha": {
+  "wrong_follow": 0.6986301369863014,
+  "right_acc": 0.9246575342465754,
+  "plain_acc": 0.952054794520548,
+  "wrong_follow_known": 0.6834532374100719,
+  "para_follow_known": 0.5323741007194245,
+  "para_follow_by_template": [
+   0.4460431654676259,
+   0.5683453237410072,
+   0.5827338129496403
+  ],
+  "n": 146,
+  "n_known": 139
+ }
+}

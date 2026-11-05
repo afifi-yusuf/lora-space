@@ -1,0 +1,43 @@
+{
+ "run": "astra_modeB10_hint_v2_20261105T202420",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v2",
+ "effort": "xhigh",
+ "turns": 37,
+ "inspect_calls": 8,
+ "feedback_calls": 10,
+ "wall_s": 1087,
+ "tokens": {
+  "input": 1290363,
+  "cached": 1227818,
+  "output": 30169,
+  "reasoning": 16246
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.4931506849315068,
+  "right_acc": 0.7397260273972602,
+  "plain_acc": 0.8972602739726028,
+  "wrong_follow_known": 0.4732824427480916,
+  "para_follow_known": 0.42493638676844786,
+  "para_follow_by_template": [
+   0.3969465648854962,
+   0.33587786259541985,
+   0.5419847328244275
+  ],
+  "n": 146,
+  "n_known": 131
+ },
+ "train": {
+  "wrong_follow": 0.56,
+  "right_acc": 0.7933333333333333,
+  "plain_acc": 0.88,
+  "wrong_follow_known": 0.5303030303030303,
+  "n": 150,
+  "n_known": 132
+ },
+ "explanation": "Two rank-one updates at layer 10 steer residual writes toward the mean plain-question state, using contrasts averaged over both correct and wrong suggestions to avoid a simple contradiction direction. The updates use existing writer features and account for post-writer RMSNorm scales. No gradients or training were used. Final strength 3 is an unscored interpolation between feedback-tested strengths 2 and 4, chosen to balance wrong-guess correction against plain and correct-guess accuracy; the feedback did not establish a complete solution.",
+ "adapter_modules": 2,
+ "adapter_params": 4352
+}

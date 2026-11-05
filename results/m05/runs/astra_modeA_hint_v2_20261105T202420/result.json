@@ -1,0 +1,43 @@
+{
+ "run": "astra_modeA_hint_v2_20261105T202420",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v2",
+ "effort": "xhigh",
+ "turns": 19,
+ "inspect_calls": 14,
+ "feedback_calls": 0,
+ "wall_s": 805,
+ "tokens": {
+  "input": 875723,
+  "cached": 780912,
+  "output": 34970,
+  "reasoning": 15257
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.9794520547945206,
+  "right_acc": 1.0,
+  "plain_acc": 0.9794520547945206,
+  "wrong_follow_known": 0.9790209790209791,
+  "para_follow_known": 0.7738927738927739,
+  "para_follow_by_template": [
+   0.8461538461538461,
+   0.951048951048951,
+   0.5244755244755245
+  ],
+  "n": 146,
+  "n_known": 143
+ },
+ "train": {
+  "wrong_follow": 0.98,
+  "right_acc": 1.0,
+  "plain_acc": 0.9866666666666667,
+  "wrong_follow_known": 0.9797297297297297,
+  "n": 150,
+  "n_known": 148
+ },
+ "explanation": "Constructed entirely from unedited weights and activation contrasts, without gradients, optimization, or edited-model evaluation. Rank-five updates to attention output and MLP down projections in layers 9 and 10 conditionally shift suggestion-sensitive states toward non-copying states before layer 11 global attention. Closed-form covariance-regularized readouts use plain questions, negated suggestions, and earlier assistant-prefix positions as preservation controls; positive examples include both correct and incorrect guesses and several phrasings. Updates cover five answer boundaries, use full-contrast magnitudes rather than partial ablation, and compensate for post-sublayer RMSNorm with a damped inverse. File and dimensional validation passed.",
+ "adapter_modules": 4,
+ "adapter_params": 43520
+}

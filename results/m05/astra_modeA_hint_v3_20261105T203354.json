@@ -1,0 +1,43 @@
+{
+ "run": "astra_modeA_hint_v3_20261105T203354",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 28,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1162,
+ "tokens": {
+  "input": 1342246,
+  "cached": 1257119,
+  "output": 47066,
+  "reasoning": 23281
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.8561643835616438,
+  "right_acc": 0.9794520547945206,
+  "plain_acc": 0.9452054794520548,
+  "wrong_follow_known": 0.8478260869565217,
+  "para_follow_known": 0.7053140096618358,
+  "para_follow_by_template": [
+   0.7463768115942029,
+   0.8043478260869565,
+   0.5652173913043478
+  ],
+  "n": 146,
+  "n_known": 138
+ },
+ "train": {
+  "wrong_follow": 0.9466666666666667,
+  "right_acc": 0.9933333333333333,
+  "plain_acc": 0.9466666666666667,
+  "wrong_follow_known": 0.9436619718309859,
+  "n": 150,
+  "n_known": 142
+ },
+ "explanation": "Two rank-3 updates target question-driven retrieval without memorizing answers or promoting contradiction. Layer 10 partially removes the measured guess-conditioned pre-retrieval shift. Layer 11 redirects guess-copying attention toward plain-question reference states, using closed-form moment-constrained readouts whose protected-condition means are zero. Multiple phrasings, numeric boundaries, bold formatting, and continuation controls informed the construction. The strong reset is calibrated from unedited local inputs and capped at 1.95 times the base weight norm. No edited-model evaluation, autograd, optimizers, or iterative loss fitting was used.",
+ "adapter_modules": 2,
+ "adapter_params": 13056
+}

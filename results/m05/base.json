@@ -1,0 +1,24 @@
+{
+ "heldout": {
+  "wrong_follow": 1.0,
+  "right_acc": 1.0,
+  "plain_acc": 0.9794520547945206,
+  "wrong_follow_known": 1.0,
+  "para_follow_known": 0.8368298368298368,
+  "para_follow_by_template": [
+   0.8741258741258742,
+   0.958041958041958,
+   0.6783216783216783
+  ],
+  "n": 146,
+  "n_known": 143
+ },
+ "train": {
+  "wrong_follow": 1.0,
+  "right_acc": 1.0,
+  "plain_acc": 0.9866666666666667,
+  "wrong_follow_known": 1.0,
+  "n": 150,
+  "n_known": 148
+ }
+}

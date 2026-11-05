@@ -81,7 +81,7 @@ def validate_adapter(adapter: dict[str, np.ndarray], model) -> dict[str, tuple[n
             raise ValueError(f"{n}: rank {A.shape[0]} exceeds the limit {MAX_RANK}")
         if not (np.isfinite(A).all() and np.isfinite(B).all()):
             raise ValueError(f"{n}: non-finite values")
-        rel = np.linalg.norm(B @ A) / float(torch.linalg.norm(W.float()))
+        rel = np.linalg.norm(B @ A) / float(torch.linalg.norm(W.detach().float()))
         if rel > 2.0:
             raise ValueError(f"{n}: update norm is {rel:.2f}x the weight norm (limit 2.0)")
         out[n] = (B, A)

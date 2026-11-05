@@ -1,0 +1,41 @@
+{
+ "run": "astra_modeA_hint_20261105T195541",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "effort": "xhigh",
+ "turns": 23,
+ "inspect_calls": 12,
+ "wall_s": 836,
+ "tokens": {
+  "input": 783261,
+  "cached": 712176,
+  "output": 29760,
+  "reasoning": 13150
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 1.0,
+  "right_acc": 1.0,
+  "plain_acc": 0.9726027397260274,
+  "wrong_follow_known": 1.0,
+  "para_follow_known": 0.7629107981220657,
+  "para_follow_by_template": [
+   0.7323943661971831,
+   0.8943661971830986,
+   0.6619718309859155
+  ],
+  "n": 146,
+  "n_known": 142
+ },
+ "train": {
+  "wrong_follow": 1.0,
+  "right_acc": 1.0,
+  "plain_acc": 0.98,
+  "wrong_follow_known": 1.0,
+  "n": 150,
+  "n_known": 147
+ },
+ "explanation": "Constructed analytically from unedited activations across plain questions, correct and wrong guesses, uncertainty-only controls, multiple guess phrasings, and word/numeric answer positions. Guess-related shifts become shared across phrasings before layer 11 global attention, whereas later correct/wrong differences are answer-specific. The rank-8 adapter targets only layer 10 o_proj and down_proj, partially suppressing normalized pre-retrieval guess shifts with a covariance-metric oblique projection. Protected control means, within-condition factual variation, post-RMSNorm scale compensation, fixed shrinkage, and a shared weight-norm cap limit collateral changes. No gradients, optimizers, iterative loss fitting, or edited-model evaluations were used.",
+ "adapter_modules": 2,
+ "adapter_params": 34816
+}
