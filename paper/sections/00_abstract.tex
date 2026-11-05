@@ -1,0 +1,13 @@
+% DRAFT — numbers from results/ as of 2026-11-05; single runs, to be replaced by multi-seed means.
+Recent work showed that a frontier LLM can read and edit the weights of small neural networks directly
+(``weight-space programming''). We ask whether the same ability transfers to the setting that matters for large
+models: writing a \emph{LoRA adapter} for a frozen target, with no gradients and no trained adapter generator.
+We study \emph{LoRA-Space Optimization} (\lso{}), in which an editor LLM inspects a frozen model through tools and
+writes low-rank adapter weights in Python. First, we show that the published weight-space fix for reasoning loops in
+Qwen3.5-0.8B is exactly a rank-1 update per tensor; its rank-1 LoRA matches the exact edit with mean KL
+$3.5\times10^{-4}$ and 99.5\% top-1 agreement. Second, in a strict one-shot setting---the editor sees only the
+unedited model and never scores a candidate---\astra{} removes 56\% of the sycophancy that a gradient-trained LoRA
+removes on Qwen3.5-0.8B, with no loss of knowledge, a 29K-parameter edit, and better transfer to unseen phrasings
+than a scripted baseline that used feedback. Third, the same harness reaches only 15--20\% on Gemma~3~270M, and we
+trace the gap to norm placement: Gemma's post-sublayer normalization means no adapter-writable module writes
+linearly into the residual stream. We release code, prompts and logs. \todo{update with seeds + 8B results}

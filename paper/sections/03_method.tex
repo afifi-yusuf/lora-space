@@ -1,0 +1,33 @@
+\section{LoRA-Space Optimization}
+\label{sec:method}
+
+\paragraph{Setup.} A frozen target computes, for each writable linear module, $y=(W+\dW)x$ with
+$\dW=BA$, $B\in\R^{d_{\text{out}}\times r}$, $A\in\R^{r\times d_{\text{in}}}$, $r\le 8$. The writable modules are those
+that write into the residual stream (attention output and MLP down projections). An \emph{editor} LLM receives a task
+description, architecture metadata, diagnostic examples and tools, and must commit one adapter.
+
+\paragraph{Modes.} \textbf{Mode A (strict one-shot):} the editor may inspect only the unedited model and never scores a
+candidate; it commits once and sees no score. \textbf{Mode B (feedback-guided):} as A, plus a budget of $k$
+candidate evaluations on held-in feedback data. Held-out data is never visible in either mode.
+\todo{Mode C (composition) if included}
+
+\paragraph{Tools.} Inspection is capped at 15 calls; Mode B adds \texttt{evaluate\_candidate}.
+\begin{itemize}[leftmargin=*,itemsep=1pt]
+  \item \texttt{run\_python}: numpy, scipy and safetensors over a read-only copy of the weights (no \texttt{torch}).
+  \item \texttt{inspect}: residual stream at the last token for up to 64 user messages, unedited model.
+  \item \texttt{inspect\_module\_inputs}: exact inputs $x$ to chosen writable modules, so the editor can compute
+        $\dW x$.
+  \item \texttt{commit\_adapter}: validates allowlist, shapes, rank $\le 8$, finiteness and
+        $\lVert\dW\rVert\le 5\lVert W\rVert$.
+\end{itemize}
+
+\paragraph{Isolation.} Editor code runs as an unprivileged Unix user that cannot read the harness's home directory
+(held-out facts, logs, evaluation code); forward passes exist only through the harness tools, which always run the
+unedited model. \todo{describe audit of code runs}
+
+\paragraph{Guidance levels.} v1: task and rules; v2: + an explicit success criterion (partial suppression is failure);
+v3: + method hints (contrast wrong- vs correct-guess conditions; size edits from local effects; logit lens) and the
+module-input tool. Full prompts in \cref{app:prompts}.
+
+\paragraph{Editor.} \astra{} via an OpenAI-compatible Responses API (Azure), reasoning effort \texttt{xhigh},
+stateless with encrypted reasoning carried across turns.

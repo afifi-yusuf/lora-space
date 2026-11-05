@@ -1,0 +1,28 @@
+\section{Why One-Shot Editing Fails on Gemma: Norm Placement}
+\label{sec:analysis}
+
+In a pre-norm block (Llama, Qwen, Mistral) a sublayer writes $h \leftarrow h + W_o x$, so an adapter adds exactly
+$\dW x$ to the residual stream. Gemma~2/3 \citep{gemma3} (and OLMo~2 \citep{olmo2}) normalize the sublayer output first:
+\begin{equation}
+  h \leftarrow h + g \odot \mathrm{RMSNorm}\!\left(W_o x + \dW x\right).
+\end{equation}
+No adapter-writable module then writes linearly into the residual stream: an edit is (i) renormalized, so it can
+redirect but not amplify the sublayer's write; (ii) distorted per channel by $g$; (iii) scaled differently for every
+input. One-shot sizing from local effects therefore undershoots or, when enlarged, crowds out the sublayer's normal
+output.
+
+\paragraph{Evidence.} (1) Edit sizes: on Qwen, \astra{}'s edits are $0.16$ and $0.12\lVert W\rVert$; on Gemma, its
+attention edit reaches $1.95\lVert W\rVert$ under a $2\times$ cap and $2.47\lVert W\rVert$ under a $5\times$ cap, still
+recovering only 15--20\% and costing plain accuracy. (2) Saturation: scaling Gemma v1's edit by $\alpha$ (chosen on
+train facts) lowers held-out follow rate only to a plateau of ${\sim}35$--$40\%$ while agreement with correct guesses
+collapses (\cref{fig:scale}). (3) Gradient LoRAs succeed on both models because they optimize through the norm.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.8\linewidth}{\centering\vspace{3em}\todo{scale-sweep figure from results/m05/diagnose\_*.json}\vspace{3em}}}
+\caption{Scaling \astra{}'s Gemma v1 edit: follow rate saturates while agreement with correct guesses collapses.}
+\label{fig:scale}
+\end{figure}
+
+\paragraph{Practical rule.} Prefer pre-norm targets for one-shot LoRA editing; treat post-sublayer-norm models as a
+stress test. \todo{direct test: residual-stream displacement vs.\ $\alpha$ on both models}

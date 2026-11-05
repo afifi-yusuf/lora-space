@@ -1,0 +1,24 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Weight-space programming.} \citet{takehi2026wsp} introduced LLM-driven reading and writing of raw network
+weights; concurrent follow-ups apply the idea to auditing clinical networks \citep{nusrat2026wsp} and to diffusion
+restoration models \citep{zheng2026wsp}. We move the write interface to LoRA adapters on frozen models and separate
+strict one-shot from feedback-guided editing. \todo{position more sharply once seeds are in}
+
+\paragraph{Low-rank adaptation and composition.} LoRA \citep{hu2022lora} learns low-rank updates by gradient descent;
+fine-tuning has low intrinsic dimension \citep{aghajanyan2021intrinsic}. Task arithmetic \citep{ilharco2023task},
+TIES \citep{yadav2023ties}, DARE \citep{yu2024dare} and LoraHub \citep{huang2023lorahub} combine existing adapters;
+Text-to-LoRA \citep{charakorn2025t2l} trains a hypernetwork to emit adapters. \lso{} uses neither gradients nor a
+trained generator.
+
+\paragraph{Model editing and steering.} ROME and MEMIT \citep{meng2022rome,meng2023memit} make closed-form or locally
+optimized rank-one edits for facts; activation steering \citep{turner2023actadd}, representation engineering
+\citep{zou2023repe} and directional ablation \citep{arditi2024refusal} manipulate interpretable directions. These are
+the recipes an editor may rediscover; we include a scripted version as a baseline.
+
+\paragraph{Automated interpretability.} Agents such as MAIA \citep{shaham2024maia} run interpretability experiments
+with tools. \lso{} closes the loop by writing a weight update from the findings.
+
+\paragraph{Sycophancy.} LLMs adopt users' stated beliefs \citep{sharma2024sycophancy}; synthetic-data fine-tuning
+reduces it \citep{wei2023synthetic}. We use the controlled fact-with-guess setting released by \citet{takehi2026logs}.

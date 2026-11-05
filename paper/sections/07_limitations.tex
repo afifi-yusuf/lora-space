@@ -1,0 +1,14 @@
+\section{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+  \item \textbf{Single runs.} Each configuration was run once; \todo{seeds}. Prompts v2 and v3 were written after
+        observing v1 (researcher-revised guidance).
+  \item \textbf{Small targets.} Results are on 0.27B--0.8B models; scaling to 8B+ is future work \todo{or Sec.~X}.
+  \item \textbf{Task scope.} Sycophancy and loop suppression remove a failure (``suppress'' edits); the paper's
+        Gemma math follow-up and our tiering suggest adding new capability is much harder.
+  \item \textbf{Different headroom.} Base sycophancy differs (Qwen 32\% vs Gemma 100\%); gain recovered normalizes
+        for headroom, but the tasks are not equally hard.
+  \item \textbf{Closed editor.} \astra{} is a proprietary model accessed via API; results may not transfer to other
+        editors. \todo{second editor?}
+\end{itemize}

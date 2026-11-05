@@ -1,0 +1,54 @@
+% LSO paper — arXiv preprint. Compiles with pdflatex + bibtex (arXiv) or `tectonic main.tex` (local).
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\input{macros}
+
+\title{LoRA-Space Optimization:\\Frontier LLMs Can Write Adapters for Frozen Models Without Gradients}
+% TODO: final title. Alternatives: "Writing LoRA Adapters by Reasoning"; "One-Shot LoRA Programming".
+
+\author{
+  Yusuf Afifi\thanks{TODO: affiliation, email.}
+  % TODO: co-authors
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/00_abstract}
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_related}
+\input{sections/03_method}
+\input{sections/04_representation}
+\input{sections/05_editing}
+\input{sections/06_analysis}
+\input{sections/07_limitations}
+\input{sections/08_conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\input{sections/A_harness}
+\input{sections/B_prompts}
+\input{sections/C_costs}
+
+\end{document}

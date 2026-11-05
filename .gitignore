@@ -27,3 +27,14 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 .DS_Store
+
+# paper build artifacts
+paper/*.pdf
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.blg
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz

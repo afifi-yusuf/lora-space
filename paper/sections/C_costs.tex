@@ -1,0 +1,22 @@
+\section{Costs}
+\label{app:costs}
+
+\begin{table}[h]
+\centering
+\caption{Editor cost per run (Azure, list prices; most input is cached).}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+Target & Run & Turns & Input tokens (cached) & Output tokens & Wall time \\
+\midrule
+Gemma & Mode A v1 & 23 & 783K (712K) & 30K & 14 min \\
+Gemma & Mode A v2 & 19 & 876K (781K) & 35K & 13 min \\
+Gemma & Mode A v3 (2$\times$ cap) & 28 & 1.34M (1.26M) & 47K & 19 min \\
+Gemma & Mode A v3 (5$\times$ cap) & 32 & 1.70M (1.60M) & 54K & 22 min \\
+Gemma & Mode B v2 & 37 & 1.29M (1.23M) & 30K & 18 min \\
+Qwen & Mode A v3 & 25 & 1.16M (1.07M) & 43K & 17 min \\
+\bottomrule
+\end{tabular}}
+\end{table}
+\todo{dollar figures; GPU hours.}

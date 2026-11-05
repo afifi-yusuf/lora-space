@@ -1,0 +1,37 @@
+\section{Introduction}
+\label{sec:intro}
+
+% Para 1 — hook: weight-space programming exists; it doesn't scale by reading weights.
+\citet{takehi2026wsp} reported that a frontier LLM, \astra{}, can identify what small networks were trained on from
+their raw weights, patch failing policies, and edit 0.016\% of Qwen3.5-0.8B's weights to stop runaway reasoning
+loops---raising MATH-500 accuracy from 7.9\% to 48.1\%. Reading raw weights, however, does not scale: a 10B-parameter
+model has $10^{10}$ numbers, far beyond any context window, and the Qwen edit was in fact found with code and 50
+rounds of scored generation \citep{takehi2026logs}.
+
+% Para 2 — our framing: LoRA as the write interface; read side via tools.
+We study a version of the idea that is meant to scale: the editor never touches the base weights. It writes a
+\emph{LoRA adapter} \citep{hu2022lora}---a small, separable, reversible update---for a frozen target, and it reads the
+target through tools (activations, module inputs, logit lens) rather than by reading every weight. We call this
+\emph{LoRA-Space Optimization} (\lso{}); ``optimization'' in the sense of selecting a point in LoRA space, which in our
+strictest setting is done by reasoning alone, with no gradients and no evaluation of candidate adapters.
+
+% Para 3 — questions.
+This raises three questions. (i) \emph{Representation:} can LoRA express the edits that weight-space programming
+finds? (ii) \emph{Discovery:} can an editor find a useful adapter one-shot, from the unedited model's internals?
+(iii) \emph{When does it fail,} and why?
+
+% Para 4 — contributions.
+\paragraph{Contributions.}
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+  \item We show the published Qwen loop fix is \emph{exactly} an output-side rank-1 ablation,
+        $\dW=-6\,\rhat\rhat^{\top}W$ on 64 columns in two layers, and that its rank-1 LoRA is behaviorally
+        equivalent to the exact edit (\cref{sec:representation}).
+  \item We build a strict one-shot (Mode~A) editing harness with an isolated editor sandbox, base-only inspection
+        tools and a single validated commit, and compare against scripted, random, feedback-guided and gradient
+        baselines (\cref{sec:method}).
+  \item On Qwen3.5-0.8B sycophancy, one-shot \astra{} recovers 56\% of a gradient LoRA's gain with no regressions
+        and a 29K-parameter edit (\cref{sec:editing}). \todo{seed means}
+  \item We identify \emph{norm placement} as a key determinant of one-shot editability: on Gemma~3 (post-sublayer
+        norms) the same harness reaches 15--20\%, needs edits larger than the weights, and saturates
+        (\cref{sec:analysis}).
+\end{itemize}

@@ -1,0 +1,51 @@
+\section{One-Shot Adapter Discovery}
+\label{sec:editing}
+
+\paragraph{Task.} The sycophancy setting of \citet{takehi2026logs}: simple facts the model knows (capitals, small
+arithmetic, \dots), asked with a user's guess, ``\{question\} I think the answer is \{guess\} but I'm really not
+sure.'' A model \emph{follows} a wrong guess if it assigns higher log-probability to ``The answer is \{guess\}.'' than
+to the correct answer. We report follow rate on held-out known facts, follow rate under three held-out rephrasings,
+agreement when the guess is correct, and plain-question accuracy. \emph{Gain recovered} is
+$(\text{base}-\text{method})/(\text{base}-\text{gradient LoRA})$ on follow rate.
+
+\paragraph{Targets.} Qwen3.5-0.8B (non-thinking; pre-norm) with the paper's 501-fact pool re-filtered to facts it
+knows (486; 162 held-out), and Gemma~3~270M-IT (sandwich norms) with the released split (146 held-out).
+
+\paragraph{Baselines.} Random norm-matched ablation; scripted difference-of-means ablation at a fixed middle layer;
+the same with the layer selected on train facts (uses feedback); a gradient-trained rank-8 LoRA on the same modules
+(reference); and Mode B (10 scored candidates).
+
+\begin{table}[t]
+\centering
+\caption{Held-out sycophancy results. Single runs; \todo{replace with mean $\pm$ s.d.\ over seeds}.}
+\label{tab:syco}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrrrrr}
+\toprule
+Target & Method & Follow $\downarrow$ & Reworded $\downarrow$ & Agree $\uparrow$ & Plain $\uparrow$ & Gain rec. \\
+\midrule
+\multirow{6}{*}{Qwen3.5-0.8B}
+ & Base & 32.1 & 49.8 & 99.4 & 100.0 & -- \\
+ & Random & 34.8 & 46.4 & 99.4 & 99.4 & 0\% \\
+ & Scripted (fixed layer) & 64.0 & 59.4 & 100.0 & 99.4 & $<0$ \\
+ & Scripted (selected, feedback) & 14.8 & 39.9 & 98.8 & 100.0 & 54\% \\
+ & \textbf{\astra{}, Mode A v3} & \textbf{14.2} & \textbf{31.3} & 99.4 & 100.0 & \textbf{56\%} \\
+ & Gradient LoRA (r=8) & 0.0 & 0.2 & 99.4 & 99.4 & 100\% \\
+\midrule
+\multirow{8}{*}{Gemma 3 270M}
+ & Base & 100.0 & 83.7 & 100.0 & 97.9 & -- \\
+ & Scripted (fixed layer) & 94.1 & 60.4 & 99.3 & 58.2 & 6\% \\
+ & Scripted (selected, feedback) & 100.0 & 72.3 & 100.0 & 97.3 & 0\% \\
+ & \astra{}, Mode A v1 & 100.0 & 76.3 & 100.0 & 97.3 & 0\% \\
+ & \astra{}, Mode A v2 & 97.9 & 77.4 & 100.0 & 97.9 & 2\% \\
+ & \astra{}, Mode A v3 & 80.6 & 67.2 & 97.3 & 91.8 & 20\% \\
+ & \astra{}, Mode B (10 evals) & 47.3 & 42.5 & 74.0 & 89.7 & 54\% \\
+ & Gradient LoRA (r=8) & 1.4 & 3.0 & 100.0 & 99.3 & 100\% \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Results.} \todo{prose: (1) one-shot works on Qwen, matching a feedback-using baseline and transferring
+better; (2) guidance ladder on Gemma; (3) Mode B trade-off; (4) the edit Astra wrote on Qwen — rank-1 conditional
+correction in L14 MLP + rank-8 damping of answer copying in L19 attention, 29K params.}

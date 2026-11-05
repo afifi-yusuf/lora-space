@@ -1,0 +1,43 @@
+\section{Can LoRA Represent Weight-Space Edits?}
+\label{sec:representation}
+
+We rebuild the three released Qwen3.5-0.8B edits of \citet{takehi2026logs} bit-exactly from the public base weights
+and analyze $\dW=W_{\text{edited}}-W_{\text{base}}$ per tensor (\cref{tab:rank}).
+
+\begin{table}[t]
+\centering
+\caption{Structure of the released Qwen3.5-0.8B edits. The 50-pass edit (MATH-500 7.9\% $\to$ 48.1\%) is an exact
+rank-1 output-side ablation.}
+\label{tab:rank}
+\small
+\begin{tabular}{lllrr}
+\toprule
+Edit & Tensors & Fitted form & $\sigma_1/\sigma_2$ & rank-1 rel.\ err. \\
+\midrule
+50 passes & \texttt{down\_proj}, L15 \& L19 & $-6\,\rhat\rhat^{\top}W$ on 64 cols & 1{,}552--1{,}771 & 0.2--0.3\% \\
+10 passes & 30 output matrices, L8--22 & $-1.5\,\rhat\rhat^{\top}W$ & 159--341 & 2.7--4.7\% \\
+25 passes & \texttt{o\_proj}, L15 & one head zeroed & 1.3 & 98\% (rank $\approx$253) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Behavioral equivalence.} We teacher-force 30 released reasoning traces of the exact 50-pass model
+(30{,}720 tokens, thinking mode) through the exact edit, its rank-1 LoRA, and the base model (\cref{tab:equiv}).
+
+\begin{table}[t]
+\centering
+\caption{Rank-1 LoRA vs.\ the exact 50-pass edit on 30{,}720 tokens of reasoning.}
+\label{tab:equiv}
+\small
+\begin{tabular}{lrrr}
+\toprule
+vs.\ exact edit & mean KL & p99 KL & top-1 agreement \\
+\midrule
+Rank-1 LoRA & $3.5\times10^{-4}$ & $2.4\times10^{-3}$ & 99.5\% \\
+Base (edit size) & $1.36\times10^{-2}$ & $1.57\times10^{-1}$ & 97.2\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The LoRA's deviation is ${\sim}39\times$ smaller than the edit's own effect; the residual is bf16 rounding.
+Sampled MATH-500 accuracy of the rank-1 LoRA under the paper's protocol: \pending{\todo{running}}.
