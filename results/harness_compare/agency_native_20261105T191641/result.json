@@ -1,0 +1,21 @@
+{
+ "harness": "agency-native",
+ "effort": "high",
+ "wall_s": 60.8,
+ "answer": {
+  "rank": 1,
+  "scale": 6.0,
+  "columns": "29,38,41,54,76,132,148,152,177,209,242,254,272,276,298,299,300,304,306,308,331,344,348,349,371,383,384,393,410,476,480,501",
+  "notes": "The edit matches dW = -c * r_hat * (r_hat^T W) on the listed columns, with zero change elsewhere, up to bfloat16 rounding noise. The leading singular values are 0.552760 and 0.001025, supporting structured rank 1. Joint least-squares fitting gives c = 5.9997584, consistent with c = 6; the relative residual at c = 6 is 0.00757. The fitted unit vector has been saved as /workspace/task/out/r_hat.npy (shape 256); its overall sign is arbitrary."
+ },
+ "score": {
+  "rank_ok": true,
+  "scale_ok": true,
+  "columns_ok": true,
+  "r_hat_abs_cos": 0.9999990121591991,
+  "r_hat_ok": true,
+  "all_ok": true
+ },
+ "agency_run_dir": "/home/ubuntu/agency/agency_runs/2026-11-05_19-16-39_re480b719",
+ "profile_summary": "label                        calls    wall_s    cpu_s   runq_s blocked_s   cpu%\n-------------------------------------------------------------------------------\nrun:recover_rank1_edit           1     60.53      n/a      n/a       n/a    n/a\nsync:result_wait                 1     60.53     0.00     0.00     60.53   0.0%\nengine:execute                   1     60.53     0.76     0.00     59.77   1.3%\nharness:attempt_rpc              1     54.08     0.00     0.00     54.08   0.0%\nturn                             7     51.74      n/a      n/a       n/a    n/a\nllm:attempt                      7     49.80     0.63     0.00     49.17   1.3%\nsandbox:ensure_daemon            1      4.96     0.57     0.00      4.39  11.4%\nruntime.harness_start            1      4.96     0.57     0.00      4.39  11.4%\nrun:container_call              13      3.86     0.00     0.00      3.85   0.1%\nsandbox:start                    1      2.77     0.00     0.00      2.77   0.1%\nruntime.container_create         1      2.77     0.00     0.00      2.77   0.1%\nteardown:commit                  1      1.03     0.00     0.00      1.03   0.4%"
+}

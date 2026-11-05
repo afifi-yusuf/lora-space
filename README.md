@@ -16,8 +16,9 @@ The full research brief is in [`LSO_CLAUDE_CODE.md`](LSO_CLAUDE_CODE.md).
 
 | Milestone | What it tests | Status |
 |---|---|---|
-| **0** — representation | Can LoRA represent the paper's released Qwen3.5-0.8B edits (the 7.9% → 48.1% MATH-500 fix)? | in progress |
-| **0.5** — Mode A pilot | Astra writes a one-shot LoRA that removes sycophancy from Gemma 3 270M IT | in progress |
+| **0** — representation | Can LoRA represent the paper's released Qwen3.5-0.8B edits (the 7.9% → 48.1% MATH-500 fix)? | ✅ representation: the winning edit is **exactly rank 1** per tensor ([results](results/m0/)) · ⏳ behavioral eval waiting on GPU capacity |
+| **0.5** — Mode A pilot | Astra writes a one-shot LoRA that removes sycophancy from Gemma 3 270M IT | ⏳ needs Hugging Face access to Gemma (gated) |
+| harness choice | API-only loop vs Agency (native / Codex) on the same task | ✅ all correct; API-only 7–58× lighter, Agency adds sandbox + profiler ([results](results/harness_compare/)) |
 | 1 — 8B dense | One-shot discovery on an 8B target vs. a scripted ablation baseline | planned |
 | 2 — scaling | Fixed LoRA budget, 8B → 30B-A3B MoE → 32B → ~100B MoE | planned |
 | 3 — compositional | Astra composes a library of LoRAs vs. TIES / DARE / LoraHub | planned |
@@ -44,6 +45,8 @@ src/lso/
 scripts/
   smoke_azure_astra.py    checks the Azure Astra endpoint: Responses API, effort levels, reasoning round-trip
   m0_representation.py    Milestone 0: rebuild the paper's edits, SVD, LoRA fit, bf16 fidelity
+experiments/
+  harness_compare/        same task via API-only loop, Agency native, Agency Codex (+ sandbox Dockerfile)
 infra/
   user-data.sh            EC2 boot script: idle auto-stop after 60 min
   launch_retry.sh         retries GPU launches across us-east-1 zones when capacity is short

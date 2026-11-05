@@ -1,0 +1,27 @@
+{
+ "harness": "api-only",
+ "effort": "high",
+ "turns": 3,
+ "wall_s": 18.3,
+ "tokens": {
+  "input": 3181,
+  "cached": 1093,
+  "output": 761,
+  "reasoning": 119,
+  "tool_s": 1.180882453918457
+ },
+ "answer": {
+  "rank": 1,
+  "scale": 6.0,
+  "columns": "29,38,41,54,76,132,148,152,177,209,242,254,272,276,298,299,300,304,306,308,331,344,348,349,371,383,384,393,410,476,480,501",
+  "notes": "The edit matches -c * r_hat (r_hat^T W) on the listed columns, within bfloat16 rounding noise. Least-squares scale estimate: 5.99912346, consistent with c = 6. The leading singular values are 0.5527601 and 0.0010247, indicating rank 1 after ignoring rounding noise. Saved the estimated unit vector to /workspace/task/out/r_hat.npy."
+ },
+ "score": {
+  "rank_ok": true,
+  "scale_ok": true,
+  "columns_ok": true,
+  "r_hat_abs_cos": 0.9999990792663703,
+  "r_hat_ok": true,
+  "all_ok": true
+ }
+}

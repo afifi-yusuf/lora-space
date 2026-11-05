@@ -1,0 +1,2789 @@
+{
+ "p10c": {
+  "label": "10 passes",
+  "tensors": [
+   {
+    "name": "model.language_model.layers.10.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.9281361722259046,
+    "relative_change": 0.054937374352889784,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.9277367264754993,
+     0.0030212288032508898,
+     0.0024533896874895603,
+     0.00233634449328839,
+     0.002298747862248325
+    ],
+    "sigma1_over_sigma2": 307.0726472213028,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 547
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991394370636354,
+      "relative_error": 0.029335353012444713,
+      "bf16_bitmatch": 0.9479794502258301,
+      "bf16_bitmatch_changed_entries": 0.9407114559996866
+     },
+     "2": {
+      "energy": 0.9991500331096448,
+      "relative_error": 0.029154191642976342,
+      "bf16_bitmatch": 0.9161472320556641,
+      "bf16_bitmatch_changed_entries": 0.9045625320295558
+     },
+     "4": {
+      "energy": 0.9991633569276663,
+      "relative_error": 0.028924783012734823,
+      "bf16_bitmatch": 0.8972344398498535,
+      "bf16_bitmatch_changed_entries": 0.882995692398754
+     },
+     "8": {
+      "energy": 0.9991851272312372,
+      "relative_error": 0.028545976402339784,
+      "bf16_bitmatch": 0.8626799583435059,
+      "bf16_bitmatch_changed_entries": 0.8436185156130144
+     },
+     "16": {
+      "energy": 0.9992163661501328,
+      "relative_error": 0.027993460841192218,
+      "bf16_bitmatch": 0.8355193138122559,
+      "bf16_bitmatch_changed_entries": 0.8125856161588906
+     },
+     "32": {
+      "energy": 0.9992620189560389,
+      "relative_error": 0.027165806521456875,
+      "bf16_bitmatch": 0.818962574005127,
+      "bf16_bitmatch_changed_entries": 0.7937982075417296
+     },
+     "64": {
+      "energy": 0.9993398273163744,
+      "relative_error": 0.025693825788033295,
+      "bf16_bitmatch": 0.8054714202880859,
+      "bf16_bitmatch_changed_entries": 0.7786584961151073
+     },
+     "128": {
+      "energy": 0.9994682118971346,
+      "relative_error": 0.023060531278898174,
+      "bf16_bitmatch": 0.7970175743103027,
+      "bf16_bitmatch_changed_entries": 0.7694307198666482
+     },
+     "256": {
+      "energy": 0.9996589834411154,
+      "relative_error": 0.01846663366411105,
+      "bf16_bitmatch": 0.804405689239502,
+      "bf16_bitmatch_changed_entries": 0.7782608127972425
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4997681043730582,
+     "relative_error": 0.029421640024332237,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.10.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7824609361640982,
+    "relative_change": 0.05133624942996455,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.782071617021842,
+     0.002622734270624919,
+     0.0024598823914203367,
+     0.0021022603654262503,
+     0.0019841691382375525
+    ],
+    "sigma1_over_sigma2": 298.1894223067813,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 665
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9990051329849717,
+      "relative_error": 0.03154151256722386,
+      "bf16_bitmatch": 0.9512476239885602,
+      "bf16_bitmatch_changed_entries": 0.9442838223905965
+     },
+     "2": {
+      "energy": 0.9990163682482145,
+      "relative_error": 0.0313629040713013,
+      "bf16_bitmatch": 0.9182079860142299,
+      "bf16_bitmatch_changed_entries": 0.9066284291267052
+     },
+     "4": {
+      "energy": 0.9990334700914786,
+      "relative_error": 0.03108906413068106,
+      "bf16_bitmatch": 0.9013116019112724,
+      "bf16_bitmatch_changed_entries": 0.8873574197828453
+     },
+     "8": {
+      "energy": 0.9990572380784414,
+      "relative_error": 0.030704428370497194,
+      "bf16_bitmatch": 0.8630458286830357,
+      "bf16_bitmatch_changed_entries": 0.8436655539164277
+     },
+     "16": {
+      "energy": 0.999090232192333,
+      "relative_error": 0.030162357462032545,
+      "bf16_bitmatch": 0.8348113468715123,
+      "bf16_bitmatch_changed_entries": 0.8112747329212375
+     },
+     "32": {
+      "energy": 0.999134373120733,
+      "relative_error": 0.029421537676802258,
+      "bf16_bitmatch": 0.8184776306152344,
+      "bf16_bitmatch_changed_entries": 0.7926197474302203
+     },
+     "64": {
+      "energy": 0.9992077465236271,
+      "relative_error": 0.02814699764403514,
+      "bf16_bitmatch": 0.8053907666887555,
+      "bf16_bitmatch_changed_entries": 0.7778563741634109
+     },
+     "128": {
+      "energy": 0.9993329188426014,
+      "relative_error": 0.025827914306002533,
+      "bf16_bitmatch": 0.7968886239188058,
+      "bf16_bitmatch_changed_entries": 0.7685262315177257
+     },
+     "256": {
+      "energy": 0.9995320703789707,
+      "relative_error": 0.021631680957035212,
+      "bf16_bitmatch": 0.8006463732038226,
+      "bf16_bitmatch_changed_entries": 0.7732602002451625
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4998273470918557,
+     "relative_error": 0.03163544751610172,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.11.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.8521508808496615,
+    "relative_change": 0.054968192030518975,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.8517808444663064,
+     0.002659696976485016,
+     0.0023732897800544306,
+     0.002159110195993475,
+     0.0020821686774579995
+    ],
+    "sigma1_over_sigma2": 320.2548455696622,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 630
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991317123534742,
+      "relative_error": 0.029466721000581862,
+      "bf16_bitmatch": 0.9522590637207031,
+      "bf16_bitmatch_changed_entries": 0.9453090693149765
+     },
+     "2": {
+      "energy": 0.9991414539766147,
+      "relative_error": 0.029300956014874036,
+      "bf16_bitmatch": 0.9201134272984096,
+      "bf16_bitmatch_changed_entries": 0.9085920566334065
+     },
+     "4": {
+      "energy": 0.9991556302535898,
+      "relative_error": 0.029058040994026566,
+      "bf16_bitmatch": 0.9005287715366909,
+      "bf16_bitmatch_changed_entries": 0.8862027957274908
+     },
+     "8": {
+      "energy": 0.9991775512182482,
+      "relative_error": 0.028678367836265255,
+      "bf16_bitmatch": 0.8635894230433873,
+      "bf16_bitmatch_changed_entries": 0.8438590103218446
+     },
+     "16": {
+      "energy": 0.9992067195265829,
+      "relative_error": 0.028165235191943257,
+      "bf16_bitmatch": 0.8361257825578962,
+      "bf16_bitmatch_changed_entries": 0.8122977629491878
+     },
+     "32": {
+      "energy": 0.9992453700297497,
+      "relative_error": 0.027470529122143827,
+      "bf16_bitmatch": 0.8207394736153739,
+      "bf16_bitmatch_changed_entries": 0.7946498308342644
+     },
+     "64": {
+      "energy": 0.9993104988822741,
+      "relative_error": 0.02625835329424917,
+      "bf16_bitmatch": 0.8088714054652623,
+      "bf16_bitmatch_changed_entries": 0.7812072104453005
+     },
+     "128": {
+      "energy": 0.9994215237104558,
+      "relative_error": 0.024051534037227044,
+      "bf16_bitmatch": 0.800161634172712,
+      "bf16_bitmatch_changed_entries": 0.7715467139653542
+     },
+     "256": {
+      "energy": 0.9995968469879238,
+      "relative_error": 0.020078670575404568,
+      "bf16_bitmatch": 0.8038932255336216,
+      "bf16_bitmatch_changed_entries": 0.7762202201889343
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.499778825462693,
+     "relative_error": 0.029546252242146378,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.11.self_attn.o_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 1.0104883204816122,
+    "relative_change": 0.05992673651448081,
+    "changed_columns": 2047,
+    "sigma_top5": [
+     1.0101192928167118,
+     0.0029657576565552653,
+     0.0024187625095419855,
+     0.002317098876750501,
+     0.0022854705987083264
+    ],
+    "sigma1_over_sigma2": 340.59400996033094,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 509
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9992697386531671,
+      "relative_error": 0.027023348179544954,
+      "bf16_bitmatch": 0.9498538970947266,
+      "bf16_bitmatch_changed_entries": 0.9433511230608038
+     },
+     "2": {
+      "energy": 0.9992783527296643,
+      "relative_error": 0.026863493263828246,
+      "bf16_bitmatch": 0.9176292419433594,
+      "bf16_bitmatch_changed_entries": 0.9070868256256198
+     },
+     "4": {
+      "energy": 0.9992893403959195,
+      "relative_error": 0.026658199565618906,
+      "bf16_bitmatch": 0.8901844024658203,
+      "bf16_bitmatch_changed_entries": 0.8761783200436142
+     },
+     "8": {
+      "energy": 0.9993076080733679,
+      "relative_error": 0.026313341228962873,
+      "bf16_bitmatch": 0.8594241142272949,
+      "bf16_bitmatch_changed_entries": 0.8412901785497624
+     },
+     "16": {
+      "energy": 0.9993342182927292,
+      "relative_error": 0.025802746118789948,
+      "bf16_bitmatch": 0.8368821144104004,
+      "bf16_bitmatch_changed_entries": 0.8157708980765632
+     },
+     "32": {
+      "energy": 0.999374014966368,
+      "relative_error": 0.025019692916413018,
+      "bf16_bitmatch": 0.8208026885986328,
+      "bf16_bitmatch_changed_entries": 0.797681349797594
+     },
+     "64": {
+      "energy": 0.9994416074211522,
+      "relative_error": 0.02363033175490801,
+      "bf16_bitmatch": 0.806154727935791,
+      "bf16_bitmatch_changed_entries": 0.7812985152938271
+     },
+     "128": {
+      "energy": 0.9995523162602452,
+      "relative_error": 0.021158538223457764,
+      "bf16_bitmatch": 0.7965173721313477,
+      "bf16_bitmatch_changed_entries": 0.7707416952062643
+     },
+     "256": {
+      "energy": 0.9997146180603068,
+      "relative_error": 0.016893251306141055,
+      "bf16_bitmatch": 0.8036618232727051,
+      "bf16_bitmatch_changed_entries": 0.7792267319370096
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4998377423811855,
+     "relative_error": 0.02708738146384689,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.12.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.9120795732354988,
+    "relative_change": 0.05624631847332071,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.9117065598539217,
+     0.0029714345894017702,
+     0.002335265028719653,
+     0.002276536444308216,
+     0.0022192405921254697
+    ],
+    "sigma1_over_sigma2": 306.8237016240269,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 538
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991822268213475,
+      "relative_error": 0.02859673370601123,
+      "bf16_bitmatch": 0.9484968185424805,
+      "bf16_bitmatch_changed_entries": 0.9402899320834924
+     },
+     "2": {
+      "energy": 0.9991928405233549,
+      "relative_error": 0.028410552205917764,
+      "bf16_bitmatch": 0.9140996932983398,
+      "bf16_bitmatch_changed_entries": 0.9005457675340275
+     },
+     "4": {
+      "energy": 0.9992056259779594,
+      "relative_error": 0.02818464159858482,
+      "bf16_bitmatch": 0.8921651840209961,
+      "bf16_bitmatch_changed_entries": 0.8750856567199703
+     },
+     "8": {
+      "energy": 0.9992274406091222,
+      "relative_error": 0.027794952615143118,
+      "bf16_bitmatch": 0.8603630065917969,
+      "bf16_bitmatch_changed_entries": 0.8383266081045925
+     },
+     "16": {
+      "energy": 0.9992579408082494,
+      "relative_error": 0.027240763420846244,
+      "bf16_bitmatch": 0.8326458930969238,
+      "bf16_bitmatch_changed_entries": 0.8060289046456662
+     },
+     "32": {
+      "energy": 0.9993015591385092,
+      "relative_error": 0.0264280317369737,
+      "bf16_bitmatch": 0.8181214332580566,
+      "bf16_bitmatch_changed_entries": 0.7892357593973309
+     },
+     "64": {
+      "energy": 0.9993761805648383,
+      "relative_error": 0.024976377542820685,
+      "bf16_bitmatch": 0.8049345016479492,
+      "bf16_bitmatch_changed_entries": 0.7741491063471768
+     },
+     "128": {
+      "energy": 0.9994985109732965,
+      "relative_error": 0.022393950672068896,
+      "bf16_bitmatch": 0.7964034080505371,
+      "bf16_bitmatch_changed_entries": 0.7647155200566801
+     },
+     "256": {
+      "energy": 0.9996782316815286,
+      "relative_error": 0.017937901729881016,
+      "bf16_bitmatch": 0.8036856651306152,
+      "bf16_bitmatch_changed_entries": 0.7737029718315316
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.500004444376918,
+     "relative_error": 0.028683530561505532,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.12.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7245425523707206,
+    "relative_change": 0.04760040128458879,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.7241305192547384,
+     0.0027531164318482034,
+     0.0021432189364511017,
+     0.0021091559704074087,
+     0.002011714927083833
+    ],
+    "sigma1_over_sigma2": 263.0221195434949,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 28,
+     "0.9999": 683
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9988629626871057,
+      "relative_error": 0.03371998388040193,
+      "bf16_bitmatch": 0.9490737915039062,
+      "bf16_bitmatch_changed_entries": 0.9403004310649469
+     },
+     "2": {
+      "energy": 0.998877401163384,
+      "relative_error": 0.03350520611213105,
+      "bf16_bitmatch": 0.9138913835797992,
+      "bf16_bitmatch_changed_entries": 0.8992179812191409
+     },
+     "4": {
+      "energy": 0.9988946251298116,
+      "relative_error": 0.03324717837935456,
+      "bf16_bitmatch": 0.8845045907156808,
+      "bf16_bitmatch_changed_entries": 0.8647845938494493
+     },
+     "8": {
+      "energy": 0.9989234914746269,
+      "relative_error": 0.0328101893529039,
+      "bf16_bitmatch": 0.8590812683105469,
+      "bf16_bitmatch_changed_entries": 0.8350053263496484
+     },
+     "16": {
+      "energy": 0.9989624095147116,
+      "relative_error": 0.03221165139027592,
+      "bf16_bitmatch": 0.831657954624721,
+      "bf16_bitmatch_changed_entries": 0.8026743360131913
+     },
+     "32": {
+      "energy": 0.9990117353620719,
+      "relative_error": 0.031436676636185934,
+      "bf16_bitmatch": 0.8161332266671317,
+      "bf16_bitmatch_changed_entries": 0.7844947099482013
+     },
+     "64": {
+      "energy": 0.999095554244193,
+      "relative_error": 0.030074004651971246,
+      "bf16_bitmatch": 0.8055689675467355,
+      "bf16_bitmatch_changed_entries": 0.7722775253629225
+     },
+     "128": {
+      "energy": 0.999239753188123,
+      "relative_error": 0.027572573544672428,
+      "bf16_bitmatch": 0.7982711791992188,
+      "bf16_bitmatch_changed_entries": 0.7641541625638371
+     },
+     "256": {
+      "energy": 0.9994689261971408,
+      "relative_error": 0.023045038573567815,
+      "bf16_bitmatch": 0.803356443132673,
+      "bf16_bitmatch_changed_entries": 0.7706535563737584
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4997692554799413,
+     "relative_error": 0.03385557436914821,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.13.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.8459770491402869,
+    "relative_change": 0.0504621947282265,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.845542896689935,
+     0.0031110834909267456,
+     0.0024451579855978324,
+     0.0023440029377625503,
+     0.002300954495411613
+    ],
+    "sigma1_over_sigma2": 271.7840582407707,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 4,
+     "0.9999": 587
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9989738703950936,
+      "relative_error": 0.03203325779414657,
+      "bf16_bitmatch": 0.9507350921630859,
+      "bf16_bitmatch_changed_entries": 0.9433578248140085
+     },
+     "2": {
+      "energy": 0.9989873944264931,
+      "relative_error": 0.03182146403776439,
+      "bf16_bitmatch": 0.9157977104187012,
+      "bf16_bitmatch_changed_entries": 0.9032795091604285
+     },
+     "4": {
+      "energy": 0.999003425603489,
+      "relative_error": 0.031568566589425265,
+      "bf16_bitmatch": 0.8844785690307617,
+      "bf16_bitmatch_changed_entries": 0.8673826390421208
+     },
+     "8": {
+      "energy": 0.9990307827713941,
+      "relative_error": 0.031132253831126232,
+      "bf16_bitmatch": 0.8580832481384277,
+      "bf16_bitmatch_changed_entries": 0.8369318574773665
+     },
+     "16": {
+      "energy": 0.9990685390549744,
+      "relative_error": 0.03051984510159513,
+      "bf16_bitmatch": 0.8301372528076172,
+      "bf16_bitmatch_changed_entries": 0.8047076116799443
+     },
+     "32": {
+      "energy": 0.999122097998096,
+      "relative_error": 0.029629411096135965,
+      "bf16_bitmatch": 0.8144021034240723,
+      "bf16_bitmatch_changed_entries": 0.7866974264734135
+     },
+     "64": {
+      "energy": 0.9992131118045835,
+      "relative_error": 0.02805152750592963,
+      "bf16_bitmatch": 0.802034854888916,
+      "bf16_bitmatch_changed_entries": 0.7726655974285592
+     },
+     "128": {
+      "energy": 0.9993637162044205,
+      "relative_error": 0.02522466641164901,
+      "bf16_bitmatch": 0.7947258949279785,
+      "bf16_bitmatch_changed_entries": 0.7646216115635796
+     },
+     "256": {
+      "energy": 0.9995890953328099,
+      "relative_error": 0.02027078358597343,
+      "bf16_bitmatch": 0.8030176162719727,
+      "bf16_bitmatch_changed_entries": 0.7745779308815506
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4999672127715256,
+     "relative_error": 0.03212820957552668,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.13.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7571677231508784,
+    "relative_change": 0.049337372072270035,
+    "changed_columns": 3583,
+    "sigma_top5": [
+     0.7567628535802036,
+     0.0027796913636794016,
+     0.002128293623656474,
+     0.002081163906924921,
+     0.0020615625811858606
+    ],
+    "sigma1_over_sigma2": 272.24707874707974,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 11,
+     "0.9999": 674
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9989308542527274,
+      "relative_error": 0.0326977942264077,
+      "bf16_bitmatch": 0.9518459865025112,
+      "bf16_bitmatch_changed_entries": 0.9438447102553751
+     },
+     "2": {
+      "energy": 0.9989443317412513,
+      "relative_error": 0.03249104890194615,
+      "bf16_bitmatch": 0.9157567705426898,
+      "bf16_bitmatch_changed_entries": 0.9018590752439207
+     },
+     "4": {
+      "energy": 0.9989597875779713,
+      "relative_error": 0.032252324288781484,
+      "bf16_bitmatch": 0.8911023821149554,
+      "bf16_bitmatch_changed_entries": 0.8731526400128271
+     },
+     "8": {
+      "energy": 0.9989870416426122,
+      "relative_error": 0.03182700672994239,
+      "bf16_bitmatch": 0.8587251390729632,
+      "bf16_bitmatch_changed_entries": 0.835451623545296
+     },
+     "16": {
+      "energy": 0.9990236550117276,
+      "relative_error": 0.031246519618545403,
+      "bf16_bitmatch": 0.8312184470040458,
+      "bf16_bitmatch_changed_entries": 0.8032212263591209
+     },
+     "32": {
+      "energy": 0.9990698446390854,
+      "relative_error": 0.03049844850011281,
+      "bf16_bitmatch": 0.8159661974225726,
+      "bf16_bitmatch_changed_entries": 0.7854382142290184
+     },
+     "64": {
+      "energy": 0.9991485275918898,
+      "relative_error": 0.029180000138965125,
+      "bf16_bitmatch": 0.8047752380371094,
+      "bf16_bitmatch_changed_entries": 0.7725665431355276
+     },
+     "128": {
+      "energy": 0.9992840524719846,
+      "relative_error": 0.02675719581747385,
+      "bf16_bitmatch": 0.7974123273577008,
+      "bf16_bitmatch_changed_entries": 0.7643571147477983
+     },
+     "256": {
+      "energy": 0.9994994743174173,
+      "relative_error": 0.022372431306880033,
+      "bf16_bitmatch": 0.8024447304861886,
+      "bf16_bitmatch_changed_entries": 0.7707286873790498
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.499998125532392,
+     "relative_error": 0.03280657596146833,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.14.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.9201008163062194,
+    "relative_change": 0.05435380403525304,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.9197003716095168,
+     0.003220468576224209,
+     0.0024723804593761918,
+     0.002362310822076521,
+     0.0022660962384621255
+    ],
+    "sigma1_over_sigma2": 285.5796757029084,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 550
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991297528505996,
+      "relative_error": 0.029499951684712974,
+      "bf16_bitmatch": 0.9495224952697754,
+      "bf16_bitmatch_changed_entries": 0.9408210018094197
+     },
+     "2": {
+      "energy": 0.9991420037309907,
+      "relative_error": 0.02929157334472227,
+      "bf16_bitmatch": 0.9118294715881348,
+      "bf16_bitmatch_changed_entries": 0.8967460676472169
+     },
+     "4": {
+      "energy": 0.999155815894544,
+      "relative_error": 0.029054846505459836,
+      "bf16_bitmatch": 0.882481575012207,
+      "bf16_bitmatch_changed_entries": 0.8622859151901682
+     },
+     "8": {
+      "energy": 0.9991780966483219,
+      "relative_error": 0.02866885682544568,
+      "bf16_bitmatch": 0.8543472290039062,
+      "bf16_bitmatch_changed_entries": 0.8294285995807879
+     },
+     "16": {
+      "energy": 0.9992116244319297,
+      "relative_error": 0.028078026427622214,
+      "bf16_bitmatch": 0.8323068618774414,
+      "bf16_bitmatch_changed_entries": 0.8033655654884537
+     },
+     "32": {
+      "energy": 0.9992596556289274,
+      "relative_error": 0.027209269947439052,
+      "bf16_bitmatch": 0.8156032562255859,
+      "bf16_bitmatch_changed_entries": 0.7838840717318476
+     },
+     "64": {
+      "energy": 0.9993382185427104,
+      "relative_error": 0.025725113358150954,
+      "bf16_bitmatch": 0.8016757965087891,
+      "bf16_bitmatch_changed_entries": 0.7677790044608467
+     },
+     "128": {
+      "energy": 0.9994666430073483,
+      "relative_error": 0.023094523001176447,
+      "bf16_bitmatch": 0.792694091796875,
+      "bf16_bitmatch_changed_entries": 0.7577600145111879
+     },
+     "256": {
+      "energy": 0.9996572001539882,
+      "relative_error": 0.01851485473913875,
+      "bf16_bitmatch": 0.8013796806335449,
+      "bf16_bitmatch_changed_entries": 0.7685431931779502
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4997829000280885,
+     "relative_error": 0.029588311766300373,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.14.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7234119715098645,
+    "relative_change": 0.04777500635786092,
+    "changed_columns": 3583,
+    "sigma_top5": [
+     0.7230097331833213,
+     0.00271177654559811,
+     0.0022078899402052676,
+     0.0020585469037424755,
+     0.002035767778470341
+    ],
+    "sigma1_over_sigma2": 266.6184772329219,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 22,
+     "0.9999": 706
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9988882503629631,
+      "relative_error": 0.033342909846573836,
+      "bf16_bitmatch": 0.949695314679827,
+      "bf16_bitmatch_changed_entries": 0.9400848819706549
+     },
+     "2": {
+      "energy": 0.9989023023071893,
+      "relative_error": 0.03313152113638371,
+      "bf16_bitmatch": 0.9119287218366351,
+      "bf16_bitmatch_changed_entries": 0.8952793135366373
+     },
+     "4": {
+      "energy": 0.9989197148050126,
+      "relative_error": 0.032867692267444036,
+      "bf16_bitmatch": 0.8912320818219867,
+      "bf16_bitmatch_changed_entries": 0.8706899884694896
+     },
+     "8": {
+      "energy": 0.998947474167602,
+      "relative_error": 0.03244265452144618,
+      "bf16_bitmatch": 0.8569886343819755,
+      "bf16_bitmatch_changed_entries": 0.8298851724914317
+     },
+     "16": {
+      "energy": 0.9989836979593563,
+      "relative_error": 0.03187949247782709,
+      "bf16_bitmatch": 0.8299241747174945,
+      "bf16_bitmatch_changed_entries": 0.7974642624030961
+     },
+     "32": {
+      "energy": 0.9990301943208838,
+      "relative_error": 0.031141703214760296,
+      "bf16_bitmatch": 0.8140196119035993,
+      "bf16_bitmatch_changed_entries": 0.7785498718128243
+     },
+     "64": {
+      "energy": 0.9991095072209323,
+      "relative_error": 0.02984112563338063,
+      "bf16_bitmatch": 0.801903315952846,
+      "bf16_bitmatch_changed_entries": 0.7642957697744679
+     },
+     "128": {
+      "energy": 0.9992460419142357,
+      "relative_error": 0.027458297211658544,
+      "bf16_bitmatch": 0.7927445002964565,
+      "bf16_bitmatch_changed_entries": 0.7538786732992823
+     },
+     "256": {
+      "energy": 0.9994643295856177,
+      "relative_error": 0.023144554745818988,
+      "bf16_bitmatch": 0.7967126028878349,
+      "bf16_bitmatch_changed_entries": 0.7592368355133221
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4996788992456502,
+     "relative_error": 0.03346742048761316,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.15.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7936831943373905,
+    "relative_change": 0.048269300178346415,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.7932530900167903,
+     0.003276269160085023,
+     0.0024665556205012945,
+     0.0023469527668012126,
+     0.002280151187785175
+    ],
+    "sigma1_over_sigma2": 242.12085492884367,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 12,
+     "0.9999": 694
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9989164750245505,
+      "relative_error": 0.032916940554208594,
+      "bf16_bitmatch": 0.951315198625837,
+      "bf16_bitmatch_changed_entries": 0.9412074692418282
+     },
+     "2": {
+      "energy": 0.9989335148357499,
+      "relative_error": 0.0326570844419695,
+      "bf16_bitmatch": 0.909132548740932,
+      "bf16_bitmatch_changed_entries": 0.8905142473202391
+     },
+     "4": {
+      "energy": 0.9989519169256228,
+      "relative_error": 0.03237411117508966,
+      "bf16_bitmatch": 0.8811272212437221,
+      "bf16_bitmatch_changed_entries": 0.8566925269705239
+     },
+     "8": {
+      "energy": 0.9989800383462941,
+      "relative_error": 0.031936838505178394,
+      "bf16_bitmatch": 0.8523461478097099,
+      "bf16_bitmatch_changed_entries": 0.821971651925031
+     },
+     "16": {
+      "energy": 0.9990172132465561,
+      "relative_error": 0.031349429874301886,
+      "bf16_bitmatch": 0.8276241847446987,
+      "bf16_bitmatch_changed_entries": 0.791912877509111
+     },
+     "32": {
+      "energy": 0.9990643047934427,
+      "relative_error": 0.03058913543331149,
+      "bf16_bitmatch": 0.815086909702846,
+      "bf16_bitmatch_changed_entries": 0.7767962097171286
+     },
+     "64": {
+      "energy": 0.9991445193575642,
+      "relative_error": 0.029248600691929163,
+      "bf16_bitmatch": 0.805060795375279,
+      "bf16_bitmatch_changed_entries": 0.7648967371882807
+     },
+     "128": {
+      "energy": 0.9992807016620936,
+      "relative_error": 0.02681973784185951,
+      "bf16_bitmatch": 0.7973779950823102,
+      "bf16_bitmatch_changed_entries": 0.7560372638689672
+     },
+     "256": {
+      "energy": 0.9994947981268627,
+      "relative_error": 0.02247669622379406,
+      "bf16_bitmatch": 0.8020480019705636,
+      "bf16_bitmatch_changed_entries": 0.7623086208514962
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4999635290687838,
+     "relative_error": 0.033029639560491576,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.15.self_attn.o_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.9054619163695855,
+    "relative_change": 0.04519260447931903,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.904892776782675,
+     0.0040005613136288466,
+     0.0030873542550781245,
+     0.0029177347816535617,
+     0.002769747021520858
+    ],
+    "sigma1_over_sigma2": 226.19145310932902,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 51,
+     "0.9999": 625
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9987432696910442,
+      "relative_error": 0.03545039222569335,
+      "bf16_bitmatch": 0.9466009140014648,
+      "bf16_bitmatch_changed_entries": 0.9371040253266343
+     },
+     "2": {
+      "energy": 0.9987627906651109,
+      "relative_error": 0.03517398662205963,
+      "bf16_bitmatch": 0.9099044799804688,
+      "bf16_bitmatch_changed_entries": 0.8939863301403255
+     },
+     "4": {
+      "energy": 0.9987848004037687,
+      "relative_error": 0.03485971308302715,
+      "bf16_bitmatch": 0.8820676803588867,
+      "bf16_bitmatch_changed_entries": 0.8613507350853171
+     },
+     "8": {
+      "energy": 0.9988184392364002,
+      "relative_error": 0.034373838359999805,
+      "bf16_bitmatch": 0.8500561714172363,
+      "bf16_bitmatch_changed_entries": 0.8235081099774231
+     },
+     "16": {
+      "energy": 0.9988645213421942,
+      "relative_error": 0.03369686421324272,
+      "bf16_bitmatch": 0.8282523155212402,
+      "bf16_bitmatch_changed_entries": 0.7977484937006745
+     },
+     "32": {
+      "energy": 0.9989329354841634,
+      "relative_error": 0.03266595346590496,
+      "bf16_bitmatch": 0.8144869804382324,
+      "bf16_bitmatch_changed_entries": 0.7815780225094399
+     },
+     "64": {
+      "energy": 0.9990471012258207,
+      "relative_error": 0.030869058524344926,
+      "bf16_bitmatch": 0.8018417358398438,
+      "bf16_bitmatch_changed_entries": 0.7669162404793167
+     },
+     "128": {
+      "energy": 0.9992328784595215,
+      "relative_error": 0.02769695904750863,
+      "bf16_bitmatch": 0.7937583923339844,
+      "bf16_bitmatch_changed_entries": 0.7578787256834227
+     },
+     "256": {
+      "energy": 0.9995056703330831,
+      "relative_error": 0.02223352574195524,
+      "bf16_bitmatch": 0.8027691841125488,
+      "bf16_bitmatch_changed_entries": 0.7689878062152595
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.500017534979112,
+     "relative_error": 0.03559216174340278,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.16.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.8571174952041299,
+    "relative_change": 0.05342215613178543,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.856734124545251,
+     0.0030306841361995712,
+     0.0023600318917314914,
+     0.0022674920934969765,
+     0.0022619082549932765
+    ],
+    "sigma1_over_sigma2": 282.68670902127786,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 567
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991056420521106,
+      "relative_error": 0.029905817960542504,
+      "bf16_bitmatch": 0.9507403373718262,
+      "bf16_bitmatch_changed_entries": 0.9411439876414468
+     },
+     "2": {
+      "energy": 0.9991181446605978,
+      "relative_error": 0.029696049222110308,
+      "bf16_bitmatch": 0.9112949371337891,
+      "bf16_bitmatch_changed_entries": 0.8942397869655598
+     },
+     "4": {
+      "energy": 0.9991327247532725,
+      "relative_error": 0.02944953729224387,
+      "bf16_bitmatch": 0.8908200263977051,
+      "bf16_bitmatch_changed_entries": 0.8696304984266576
+     },
+     "8": {
+      "energy": 0.999157620315368,
+      "relative_error": 0.02902377791797541,
+      "bf16_bitmatch": 0.8524088859558105,
+      "bf16_bitmatch_changed_entries": 0.8238974623436071
+     },
+     "16": {
+      "energy": 0.9991920257204923,
+      "relative_error": 0.028424888381623763,
+      "bf16_bitmatch": 0.8269748687744141,
+      "bf16_bitmatch_changed_entries": 0.7933456401643851
+     },
+     "32": {
+      "energy": 0.999239073711197,
+      "relative_error": 0.027584892401504756,
+      "bf16_bitmatch": 0.8114356994628906,
+      "bf16_bitmatch_changed_entries": 0.7748323403439675
+     },
+     "64": {
+      "energy": 0.9993177035940759,
+      "relative_error": 0.02612080408263563,
+      "bf16_bitmatch": 0.799652099609375,
+      "bf16_bitmatch_changed_entries": 0.7610305107487011
+     },
+     "128": {
+      "energy": 0.999448230457959,
+      "relative_error": 0.023489775265850433,
+      "bf16_bitmatch": 0.7929964065551758,
+      "bf16_bitmatch_changed_entries": 0.7535751039957649
+     },
+     "256": {
+      "energy": 0.9996427004686286,
+      "relative_error": 0.01890236840637326,
+      "bf16_bitmatch": 0.8027853965759277,
+      "bf16_bitmatch_changed_entries": 0.7659941264926216
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4998122205527569,
+     "relative_error": 0.02999399637150869,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.16.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.6454503759378171,
+    "relative_change": 0.039428996036092,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.6449254995455872,
+     0.0034125684071299794,
+     0.002483652852226059,
+     0.002435690417135971,
+     0.0023005953708871373
+    ],
+    "sigma1_over_sigma2": 188.98536896670714,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 159,
+     "0.9999": 758
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9983742732249785,
+      "relative_error": 0.040320302268478284,
+      "bf16_bitmatch": 0.9479045867919922,
+      "bf16_bitmatch_changed_entries": 0.9364326123039496
+     },
+     "2": {
+      "energy": 0.9984022267779367,
+      "relative_error": 0.03997215558439691,
+      "bf16_bitmatch": 0.905217034476144,
+      "bf16_bitmatch_changed_entries": 0.8844909329262244
+     },
+     "4": {
+      "energy": 0.9984312736803902,
+      "relative_error": 0.03960714985466309,
+      "bf16_bitmatch": 0.8757171630859375,
+      "bf16_bitmatch_changed_entries": 0.8485272371740371
+     },
+     "8": {
+      "energy": 0.998473996064117,
+      "relative_error": 0.039064100346517944,
+      "bf16_bitmatch": 0.8434843335832868,
+      "bf16_bitmatch_changed_entries": 0.8091553576529006
+     },
+     "16": {
+      "energy": 0.9985294633298232,
+      "relative_error": 0.03834757710959832,
+      "bf16_bitmatch": 0.823150634765625,
+      "bf16_bitmatch_changed_entries": 0.7841752148673777
+     },
+     "32": {
+      "energy": 0.9985980423291761,
+      "relative_error": 0.03744272520561705,
+      "bf16_bitmatch": 0.8110414232526507,
+      "bf16_bitmatch_changed_entries": 0.7694362681619443
+     },
+     "64": {
+      "energy": 0.9987144167045683,
+      "relative_error": 0.035855031661277514,
+      "bf16_bitmatch": 0.8020545414515904,
+      "bf16_bitmatch_changed_entries": 0.7586477919376713
+     },
+     "128": {
+      "energy": 0.9989153467185863,
+      "relative_error": 0.03293407477694324,
+      "bf16_bitmatch": 0.796858378819057,
+      "bf16_bitmatch_changed_entries": 0.7526746486121921
+     },
+     "256": {
+      "energy": 0.9992369540596583,
+      "relative_error": 0.027623286197373167,
+      "bf16_bitmatch": 0.8036954062325614,
+      "bf16_bitmatch_changed_entries": 0.76156195883681
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.5001282946790062,
+     "relative_error": 0.04053206848503584,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.17.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.8438095750906651,
+    "relative_change": 0.05443116862148164,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.8434444995630717,
+     0.0031347074799409256,
+     0.0023347890103053446,
+     0.0022175536632432218,
+     0.002207451722002334
+    ],
+    "sigma1_over_sigma2": 269.0664136798393,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 550
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991348840707177,
+      "relative_error": 0.029412853130597418,
+      "bf16_bitmatch": 0.9504318237304688,
+      "bf16_bitmatch_changed_entries": 0.9409731660023086
+     },
+     "2": {
+      "energy": 0.999148684898676,
+      "relative_error": 0.029177304558916962,
+      "bf16_bitmatch": 0.9087157249450684,
+      "bf16_bitmatch_changed_entries": 0.8914175561102929
+     },
+     "4": {
+      "energy": 0.999163247498918,
+      "relative_error": 0.028926674559680628,
+      "bf16_bitmatch": 0.8869738578796387,
+      "bf16_bitmatch_changed_entries": 0.8656270080007279
+     },
+     "8": {
+      "energy": 0.9991876717576947,
+      "relative_error": 0.028501372638963247,
+      "bf16_bitmatch": 0.8528347015380859,
+      "bf16_bitmatch_changed_entries": 0.8249410038724205
+     },
+     "16": {
+      "energy": 0.9992214048713658,
+      "relative_error": 0.02790331752021491,
+      "bf16_bitmatch": 0.8273200988769531,
+      "bf16_bitmatch_changed_entries": 0.7944148437100177
+     },
+     "32": {
+      "energy": 0.9992681154748286,
+      "relative_error": 0.027053364396524206,
+      "bf16_bitmatch": 0.811553955078125,
+      "bf16_bitmatch_changed_entries": 0.7756850658766398
+     },
+     "64": {
+      "energy": 0.999346794111729,
+      "relative_error": 0.02555789287619426,
+      "bf16_bitmatch": 0.8002228736877441,
+      "bf16_bitmatch_changed_entries": 0.762436952331129
+     },
+     "128": {
+      "energy": 0.999475393754563,
+      "relative_error": 0.022904284434075578,
+      "bf16_bitmatch": 0.7938308715820312,
+      "bf16_bitmatch_changed_entries": 0.7553648093074565
+     },
+     "256": {
+      "energy": 0.999664422166427,
+      "relative_error": 0.01831878362697457,
+      "bf16_bitmatch": 0.8033814430236816,
+      "bf16_bitmatch_changed_entries": 0.7673892152235597
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.5000749478868758,
+     "relative_error": 0.029505395247958147,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.17.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.6497799792655713,
+    "relative_change": 0.03965223017302565,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.6492536616299847,
+     0.0034284779496995418,
+     0.002445080579566917,
+     0.0023211241888970568,
+     0.002291493806403958
+    ],
+    "sigma1_over_sigma2": 189.37081444169203,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 158,
+     "0.9999": 756
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9983806688558868,
+      "relative_error": 0.04024091380813031,
+      "bf16_bitmatch": 0.9479947771344867,
+      "bf16_bitmatch_changed_entries": 0.9367203537814273
+     },
+     "2": {
+      "energy": 0.9984085089096374,
+      "relative_error": 0.03989349684300316,
+      "bf16_bitmatch": 0.9046192169189453,
+      "bf16_bitmatch_changed_entries": 0.8840526902295291
+     },
+     "4": {
+      "energy": 0.9984354289927312,
+      "relative_error": 0.039554658477466934,
+      "bf16_bitmatch": 0.8754970005580357,
+      "bf16_bitmatch_changed_entries": 0.8489207821367724
+     },
+     "8": {
+      "energy": 0.9984777409220726,
+      "relative_error": 0.039016138685517864,
+      "bf16_bitmatch": 0.8437219347272601,
+      "bf16_bitmatch_changed_entries": 0.8100246699228044
+     },
+     "16": {
+      "energy": 0.9985314191188551,
+      "relative_error": 0.03832206780884081,
+      "bf16_bitmatch": 0.823805400303432,
+      "bf16_bitmatch_changed_entries": 0.7856796308206118
+     },
+     "32": {
+      "energy": 0.9985997162850985,
+      "relative_error": 0.037420364975535206,
+      "bf16_bitmatch": 0.8105313437325614,
+      "bf16_bitmatch_changed_entries": 0.7695681867507183
+     },
+     "64": {
+      "energy": 0.9987156664354,
+      "relative_error": 0.03583759987220831,
+      "bf16_bitmatch": 0.8017621721540179,
+      "bf16_bitmatch_changed_entries": 0.759095250326377
+     },
+     "128": {
+      "energy": 0.9989165193546493,
+      "relative_error": 0.03291626718434836,
+      "bf16_bitmatch": 0.7963788168770927,
+      "bf16_bitmatch_changed_entries": 0.7529954675570936
+     },
+     "256": {
+      "energy": 0.9992378442549904,
+      "relative_error": 0.02760716836277355,
+      "bf16_bitmatch": 0.8032071249825614,
+      "bf16_bitmatch_changed_entries": 0.7618340298919555
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4995835118527454,
+     "relative_error": 0.040477074332251145,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.18.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.634821974498963,
+    "relative_change": 0.04336140307209445,
+    "changed_columns": 2047,
+    "sigma_top5": [
+     0.6343967818880271,
+     0.002982953828855588,
+     0.0022183517925894337,
+     0.002154616825550561,
+     0.0021089643462359167
+    ],
+    "sigma1_over_sigma2": 212.67401987626934,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 68,
+     "0.9999": 634
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9986608837288593,
+      "relative_error": 0.036593937628256246,
+      "bf16_bitmatch": 0.9468798637390137,
+      "bf16_bitmatch_changed_entries": 0.9349850193743193
+     },
+     "2": {
+      "energy": 0.9986829632250495,
+      "relative_error": 0.03629100129440484,
+      "bf16_bitmatch": 0.9047846794128418,
+      "bf16_bitmatch_changed_entries": 0.8836331406028709
+     },
+     "4": {
+      "energy": 0.9987066939533663,
+      "relative_error": 0.035962564516921425,
+      "bf16_bitmatch": 0.8813176155090332,
+      "bf16_bitmatch_changed_entries": 0.8549374132362358
+     },
+     "8": {
+      "energy": 0.9987452860728662,
+      "relative_error": 0.03542194132361842,
+      "bf16_bitmatch": 0.8481230735778809,
+      "bf16_bitmatch_changed_entries": 0.8144014994648108
+     },
+     "16": {
+      "energy": 0.9987956092170716,
+      "relative_error": 0.03470433377733045,
+      "bf16_bitmatch": 0.8239226341247559,
+      "bf16_bitmatch_changed_entries": 0.7845424949636118
+     },
+     "32": {
+      "energy": 0.9988668746610928,
+      "relative_error": 0.03366192714190472,
+      "bf16_bitmatch": 0.8108210563659668,
+      "bf16_bitmatch_changed_entries": 0.7685890634421317
+     },
+     "64": {
+      "energy": 0.9989880519921467,
+      "relative_error": 0.03181113025110779,
+      "bf16_bitmatch": 0.8006429672241211,
+      "bf16_bitmatch_changed_entries": 0.7564526532768073
+     },
+     "128": {
+      "energy": 0.9991874373651276,
+      "relative_error": 0.028505484294650125,
+      "bf16_bitmatch": 0.7949309349060059,
+      "bf16_bitmatch_changed_entries": 0.7500222021753458
+     },
+     "256": {
+      "energy": 0.9994791120901392,
+      "relative_error": 0.022822968909861855,
+      "bf16_bitmatch": 0.8050518035888672,
+      "bf16_bitmatch_changed_entries": 0.763089935169648
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.499778469091531,
+     "relative_error": 0.03676084472633572,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.18.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.55701976626067,
+    "relative_change": 0.03389813648466631,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.5564111767849753,
+     0.003500445942151046,
+     0.002497754411789129,
+     0.002393594067177618,
+     0.0023408472833201183
+    ],
+    "sigma1_over_sigma2": 158.95436923761125,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 264,
+     "0.9999": 794
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9978160307919173,
+      "relative_error": 0.046732956337924854,
+      "bf16_bitmatch": 0.9444065093994141,
+      "bf16_bitmatch_changed_entries": 0.9309977607885815
+     },
+     "2": {
+      "energy": 0.9978555224653379,
+      "relative_error": 0.046308503913015546,
+      "bf16_bitmatch": 0.901235852922712,
+      "bf16_bitmatch_changed_entries": 0.8775034569836146
+     },
+     "4": {
+      "energy": 0.9978940954189441,
+      "relative_error": 0.045890135988635554,
+      "bf16_bitmatch": 0.8731329781668526,
+      "bf16_bitmatch_changed_entries": 0.8427393188938329
+     },
+     "8": {
+      "energy": 0.9979534605948258,
+      "relative_error": 0.04523869367227567,
+      "bf16_bitmatch": 0.8460431780133929,
+      "bf16_bitmatch_changed_entries": 0.8091677343682564
+     },
+     "16": {
+      "energy": 0.9980294428926624,
+      "relative_error": 0.0443909574951639,
+      "bf16_bitmatch": 0.8227800641741071,
+      "bf16_bitmatch_changed_entries": 0.7801283949948632
+     },
+     "32": {
+      "energy": 0.9981207948482967,
+      "relative_error": 0.043349799903837326,
+      "bf16_bitmatch": 0.810546875,
+      "bf16_bitmatch_changed_entries": 0.764929514769825
+     },
+     "64": {
+      "energy": 0.998276879927406,
+      "relative_error": 0.041510481478695065,
+      "bf16_bitmatch": 0.8023392813546317,
+      "bf16_bitmatch_changed_entries": 0.7549453060340231
+     },
+     "128": {
+      "energy": 0.9985464770370412,
+      "relative_error": 0.03812509623538615,
+      "bf16_bitmatch": 0.797825677054269,
+      "bf16_bitmatch_changed_entries": 0.7497678701088125
+     },
+     "256": {
+      "energy": 0.9989785151757926,
+      "relative_error": 0.031960676216341556,
+      "bf16_bitmatch": 0.8051468985421317,
+      "bf16_bitmatch_changed_entries": 0.7594122196965979
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4998915547586726,
+     "relative_error": 0.047124538274897786,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.19.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7521015235458575,
+    "relative_change": 0.04358666972843264,
+    "changed_columns": 3582,
+    "sigma_top5": [
+     0.7515985886804107,
+     0.0032816030262192188,
+     0.002468701957958042,
+     0.002387792136347321,
+     0.002352024241742836
+    ],
+    "sigma1_over_sigma2": 229.0339759792147,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 90,
+     "0.9999": 741
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.998663034997526,
+      "relative_error": 0.036564532028654124,
+      "bf16_bitmatch": 0.9493252890450614,
+      "bf16_bitmatch_changed_entries": 0.9389699434602065
+     },
+     "2": {
+      "energy": 0.9986820729022992,
+      "relative_error": 0.03630326566166234,
+      "bf16_bitmatch": 0.9107734135219029,
+      "bf16_bitmatch_changed_entries": 0.8926979262390442
+     },
+     "4": {
+      "energy": 0.9987029266119922,
+      "relative_error": 0.036014905081203905,
+      "bf16_bitmatch": 0.8816501072474888,
+      "bf16_bitmatch_changed_entries": 0.8577210543625072
+     },
+     "8": {
+      "energy": 0.9987370697770984,
+      "relative_error": 0.03553772956875683,
+      "bf16_bitmatch": 0.8484562465122768,
+      "bf16_bitmatch_changed_entries": 0.8176651618081563
+     },
+     "16": {
+      "energy": 0.9987817317765719,
+      "relative_error": 0.03490369927999704,
+      "bf16_bitmatch": 0.8272596086774554,
+      "bf16_bitmatch_changed_entries": 0.7919559667075927
+     },
+     "32": {
+      "energy": 0.9988374402316162,
+      "relative_error": 0.03409633071730884,
+      "bf16_bitmatch": 0.812629154750279,
+      "bf16_bitmatch_changed_entries": 0.7743385757517913
+     },
+     "64": {
+      "energy": 0.9989312516522847,
+      "relative_error": 0.03269171680587123,
+      "bf16_bitmatch": 0.8028022221156529,
+      "bf16_bitmatch_changed_entries": 0.7626895844100119
+     },
+     "128": {
+      "energy": 0.9990939518340007,
+      "relative_error": 0.030100633980020837,
+      "bf16_bitmatch": 0.7966150556291852,
+      "bf16_bitmatch_changed_entries": 0.7556067506062528
+     },
+     "256": {
+      "energy": 0.9993557368171537,
+      "relative_error": 0.025382339979717856,
+      "bf16_bitmatch": 0.8027242933000837,
+      "bf16_bitmatch_changed_entries": 0.7634895983404393
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.5003175983858026,
+     "relative_error": 0.03673930070407137,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.19.self_attn.o_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 1.0170249089439194,
+    "relative_change": 0.042006950673278275,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     1.0163048286441552,
+     0.0049824768545328815,
+     0.0037361347074413823,
+     0.0035998381707835776,
+     0.003346006590062783
+    ],
+    "sigma1_over_sigma2": 203.97582534067507,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 85,
+     "0.9999": 654
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9985844488653745,
+      "relative_error": 0.03762381074035104,
+      "bf16_bitmatch": 0.9436664581298828,
+      "bf16_bitmatch_changed_entries": 0.931697591240031
+     },
+     "2": {
+      "energy": 0.9986084497583461,
+      "relative_error": 0.037303488330906076,
+      "bf16_bitmatch": 0.9056944847106934,
+      "bf16_bitmatch_changed_entries": 0.8857534753973123
+     },
+     "4": {
+      "energy": 0.9986344736442203,
+      "relative_error": 0.03695302904742346,
+      "bf16_bitmatch": 0.8779239654541016,
+      "bf16_bitmatch_changed_entries": 0.8522918523491486
+     },
+     "8": {
+      "energy": 0.9986736284647869,
+      "relative_error": 0.03641938405867286,
+      "bf16_bitmatch": 0.8474369049072266,
+      "bf16_bitmatch_changed_entries": 0.8152350306159064
+     },
+     "16": {
+      "energy": 0.9987248537042496,
+      "relative_error": 0.035709190634211206,
+      "bf16_bitmatch": 0.8260726928710938,
+      "bf16_bitmatch_changed_entries": 0.7891623163913744
+     },
+     "32": {
+      "energy": 0.9987997398059532,
+      "relative_error": 0.034644771525394975,
+      "bf16_bitmatch": 0.8142929077148438,
+      "bf16_bitmatch_changed_entries": 0.7749424143159747
+     },
+     "64": {
+      "energy": 0.9989263723938805,
+      "relative_error": 0.03276625712710656,
+      "bf16_bitmatch": 0.8042645454406738,
+      "bf16_bitmatch_changed_entries": 0.7630056833308254
+     },
+     "128": {
+      "energy": 0.9991341060677709,
+      "relative_error": 0.029426075719152376,
+      "bf16_bitmatch": 0.7987890243530273,
+      "bf16_bitmatch_changed_entries": 0.7568489345201579
+     },
+     "256": {
+      "energy": 0.9994397604149365,
+      "relative_error": 0.0236693807494737,
+      "bf16_bitmatch": 0.8084936141967773,
+      "bf16_bitmatch_changed_entries": 0.769128285856493
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.5001615654659113,
+     "relative_error": 0.037808849717067036,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.20.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.719611965737715,
+    "relative_change": 0.04720090462775637,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.7191979572431484,
+     0.002964299548864121,
+     0.002297226336472894,
+     0.0022231241805697162,
+     0.002133261311706984
+    ],
+    "sigma1_over_sigma2": 242.61986529625025,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 27,
+     "0.9999": 625
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9988496872753532,
+      "relative_error": 0.033916260475570066,
+      "bf16_bitmatch": 0.9478387832641602,
+      "bf16_bitmatch_changed_entries": 0.9378611220764683
+     },
+     "2": {
+      "energy": 0.9988666559304932,
+      "relative_error": 0.03366517591676377,
+      "bf16_bitmatch": 0.9081988334655762,
+      "bf16_bitmatch_changed_entries": 0.8907649445810216
+     },
+     "4": {
+      "energy": 0.9988863907959049,
+      "relative_error": 0.033370783690153165,
+      "bf16_bitmatch": 0.8862290382385254,
+      "bf16_bitmatch_changed_entries": 0.8645121730632935
+     },
+     "8": {
+      "energy": 0.9989189099148611,
+      "relative_error": 0.03287993438464837,
+      "bf16_bitmatch": 0.8510880470275879,
+      "bf16_bitmatch_changed_entries": 0.822712168285305
+     },
+     "16": {
+      "energy": 0.9989616629520481,
+      "relative_error": 0.032223237701256784,
+      "bf16_bitmatch": 0.8249125480651855,
+      "bf16_bitmatch_changed_entries": 0.791394728968603
+     },
+     "32": {
+      "energy": 0.999020608522409,
+      "relative_error": 0.03129523090809217,
+      "bf16_bitmatch": 0.8107304573059082,
+      "bf16_bitmatch_changed_entries": 0.7746046498928935
+     },
+     "64": {
+      "energy": 0.9991217124736498,
+      "relative_error": 0.029635916155074264,
+      "bf16_bitmatch": 0.7992434501647949,
+      "bf16_bitmatch_changed_entries": 0.7611915848246535
+     },
+     "128": {
+      "energy": 0.999289087751898,
+      "relative_error": 0.0266629377245332,
+      "bf16_bitmatch": 0.793004035949707,
+      "bf16_bitmatch_changed_entries": 0.754297061195794
+     },
+     "256": {
+      "energy": 0.9995372398347423,
+      "relative_error": 0.021511861036604542,
+      "bf16_bitmatch": 0.802793025970459,
+      "bf16_bitmatch_changed_entries": 0.7665708035325262
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.499224109790811,
+     "relative_error": 0.03404685555230149,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.20.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.6480709762138753,
+    "relative_change": 0.03701902392773955,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.6474788006341939,
+     0.0035716138609341074,
+     0.0025987585935777252,
+     0.0025000398015622596,
+     0.0024157734235608235
+    ],
+    "sigma1_over_sigma2": 181.2846589370259,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 210,
+     "0.9999": 792
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.998173332703188,
+      "relative_error": 0.0427395285047927,
+      "bf16_bitmatch": 0.9457699911934989,
+      "bf16_bitmatch_changed_entries": 0.9333460295831562
+     },
+     "2": {
+      "energy": 0.9982037054349973,
+      "relative_error": 0.0423827154038386,
+      "bf16_bitmatch": 0.9042622702462333,
+      "bf16_bitmatch_changed_entries": 0.8824388735922921
+     },
+     "4": {
+      "energy": 0.9982346670287748,
+      "relative_error": 0.042015865708387695,
+      "bf16_bitmatch": 0.8746738433837891,
+      "bf16_bitmatch_changed_entries": 0.8461425753091023
+     },
+     "8": {
+      "energy": 0.9982810908782387,
+      "relative_error": 0.04145972891567776,
+      "bf16_bitmatch": 0.8442663465227399,
+      "bf16_bitmatch_changed_entries": 0.8087297670282863
+     },
+     "16": {
+      "energy": 0.9983410572281057,
+      "relative_error": 0.04073012118683763,
+      "bf16_bitmatch": 0.8245291028703962,
+      "bf16_bitmatch_changed_entries": 0.7843734199539448
+     },
+     "32": {
+      "energy": 0.9984158533104466,
+      "relative_error": 0.039801340298457805,
+      "bf16_bitmatch": 0.8115599496023995,
+      "bf16_bitmatch_changed_entries": 0.7684391793752104
+     },
+     "64": {
+      "energy": 0.9985429587937419,
+      "relative_error": 0.03817120912753968,
+      "bf16_bitmatch": 0.8023275647844587,
+      "bf16_bitmatch_changed_entries": 0.7573267196600981
+     },
+     "128": {
+      "energy": 0.9987635892534241,
+      "relative_error": 0.03516263281633922,
+      "bf16_bitmatch": 0.7968932560511998,
+      "bf16_bitmatch_changed_entries": 0.7510766106914046
+     },
+     "256": {
+      "energy": 0.9991193000563039,
+      "relative_error": 0.029676589152006157,
+      "bf16_bitmatch": 0.8040602547781808,
+      "bf16_bitmatch_changed_entries": 0.7605250346352801
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.499822032558509,
+     "relative_error": 0.04301088216272498,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.21.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.7548665485129894,
+    "relative_change": 0.04498654771796923,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.7543856468360501,
+     0.003327083851288371,
+     0.0025513260143942354,
+     0.002352405840263104,
+     0.002288710633059755
+    ],
+    "sigma1_over_sigma2": 226.74079781425522,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 58,
+     "0.9999": 647
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9987262689167019,
+      "relative_error": 0.03568936933174714,
+      "bf16_bitmatch": 0.9460697174072266,
+      "bf16_bitmatch_changed_entries": 0.9361864978831451
+     },
+     "2": {
+      "energy": 0.9987456950843411,
+      "relative_error": 0.03541616743323227,
+      "bf16_bitmatch": 0.9078969955444336,
+      "bf16_bitmatch_changed_entries": 0.8911318042269314
+     },
+     "4": {
+      "energy": 0.99876682983491,
+      "relative_error": 0.035116522679355874,
+      "bf16_bitmatch": 0.8781499862670898,
+      "bf16_bitmatch_changed_entries": 0.8559098239578832
+     },
+     "8": {
+      "energy": 0.9987998914691614,
+      "relative_error": 0.03464258262367738,
+      "bf16_bitmatch": 0.8500471115112305,
+      "bf16_bitmatch_changed_entries": 0.8228095000042366
+     },
+     "16": {
+      "energy": 0.9988468610635524,
+      "relative_error": 0.033957899470485206,
+      "bf16_bitmatch": 0.8255581855773926,
+      "bf16_bitmatch_changed_entries": 0.7936480230919356
+     },
+     "32": {
+      "energy": 0.9989116376400451,
+      "relative_error": 0.03299033737255221,
+      "bf16_bitmatch": 0.8109397888183594,
+      "bf16_bitmatch_changed_entries": 0.7764262292303912
+     },
+     "64": {
+      "energy": 0.9990223576135321,
+      "relative_error": 0.03126727340955087,
+      "bf16_bitmatch": 0.7998471260070801,
+      "bf16_bitmatch_changed_entries": 0.763555638403335
+     },
+     "128": {
+      "energy": 0.9992065545575934,
+      "relative_error": 0.02816816363212396,
+      "bf16_bitmatch": 0.7936992645263672,
+      "bf16_bitmatch_changed_entries": 0.756842708783465
+     },
+     "256": {
+      "energy": 0.9994815653071198,
+      "relative_error": 0.02276916100519779,
+      "bf16_bitmatch": 0.8037757873535156,
+      "bf16_bitmatch_changed_entries": 0.7693721173915377
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.500232704650948,
+     "relative_error": 0.035838596839688014,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.21.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7337369074373981,
+    "relative_change": 0.04144618370469163,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.7331907058533016,
+     0.0034663086663541502,
+     0.002626143053542895,
+     0.0024707510028442567,
+     0.0024335178788983244
+    ],
+    "sigma1_over_sigma2": 211.51916243641068,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 133,
+     "0.9999": 767
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9985117328039023,
+      "relative_error": 0.03857806625658604,
+      "bf16_bitmatch": 0.9483029501778739,
+      "bf16_bitmatch_changed_entries": 0.938113582214587
+     },
+     "2": {
+      "energy": 0.9985340507249101,
+      "relative_error": 0.03828771702634896,
+      "bf16_bitmatch": 0.9096080235072544,
+      "bf16_bitmatch_changed_entries": 0.8918854216507421
+     },
+     "4": {
+      "energy": 0.9985581999930605,
+      "relative_error": 0.037971041688888665,
+      "bf16_bitmatch": 0.8803250449044364,
+      "bf16_bitmatch_changed_entries": 0.8568574074043833
+     },
+     "8": {
+      "energy": 0.9985954857186827,
+      "relative_error": 0.037476849938557225,
+      "bf16_bitmatch": 0.8469818660191127,
+      "bf16_bitmatch_changed_entries": 0.8169022824548025
+     },
+     "16": {
+      "energy": 0.9986434501898475,
+      "relative_error": 0.03683136991956741,
+      "bf16_bitmatch": 0.8259255545479911,
+      "bf16_bitmatch_changed_entries": 0.7916246303278917
+     },
+     "32": {
+      "energy": 0.9987051060819184,
+      "relative_error": 0.03598463447196363,
+      "bf16_bitmatch": 0.8115858350481305,
+      "bf16_bitmatch_changed_entries": 0.7744649858663187
+     },
+     "64": {
+      "energy": 0.9988088362390286,
+      "relative_error": 0.034513240371928676,
+      "bf16_bitmatch": 0.8018640790666852,
+      "bf16_bitmatch_changed_entries": 0.763011070158908
+     },
+     "128": {
+      "energy": 0.9989885509931157,
+      "relative_error": 0.03180328610196274,
+      "bf16_bitmatch": 0.7954131535121373,
+      "bf16_bitmatch_changed_entries": 0.7557232835864768
+     },
+     "256": {
+      "energy": 0.9992778333335761,
+      "relative_error": 0.026873158847121804,
+      "bf16_bitmatch": 0.8021275656563895,
+      "bf16_bitmatch_changed_entries": 0.7643530758515726
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.50017243376615,
+     "relative_error": 0.03877381468060217,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.22.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.9292340744885872,
+    "relative_change": 0.05249362779480032,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.9287953654994462,
+     0.0033355712095269104,
+     0.0025434247062083143,
+     0.002469307768524067,
+     0.00244705473772522
+    ],
+    "sigma1_over_sigma2": 278.4516675424773,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 608
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9990559850531201,
+      "relative_error": 0.030724826230258104,
+      "bf16_bitmatch": 0.9498662948608398,
+      "bf16_bitmatch_changed_entries": 0.941512448905823
+     },
+     "2": {
+      "energy": 0.9990688702239209,
+      "relative_error": 0.03051441915027722,
+      "bf16_bitmatch": 0.9124507904052734,
+      "bf16_bitmatch_changed_entries": 0.8979843037351452
+     },
+     "4": {
+      "energy": 0.9990834235995775,
+      "relative_error": 0.030275012806309922,
+      "bf16_bitmatch": 0.8813729286193848,
+      "bf16_bitmatch_changed_entries": 0.861778520144431
+     },
+     "8": {
+      "energy": 0.9991080857195441,
+      "relative_error": 0.029864933960342392,
+      "bf16_bitmatch": 0.8512625694274902,
+      "bf16_bitmatch_changed_entries": 0.8266588098085225
+     },
+     "16": {
+      "energy": 0.9991411877811173,
+      "relative_error": 0.02930549809988773,
+      "bf16_bitmatch": 0.8256740570068359,
+      "bf16_bitmatch_changed_entries": 0.7966698209204442
+     },
+     "32": {
+      "energy": 0.9991871885037308,
+      "relative_error": 0.02850984910989503,
+      "bf16_bitmatch": 0.8090543746948242,
+      "bf16_bitmatch_changed_entries": 0.7773521979616355
+     },
+     "64": {
+      "energy": 0.9992662323203797,
+      "relative_error": 0.02708814647812453,
+      "bf16_bitmatch": 0.7958488464355469,
+      "bf16_bitmatch_changed_entries": 0.7622268177663761
+     },
+     "128": {
+      "energy": 0.9993989306629497,
+      "relative_error": 0.02451671546211996,
+      "bf16_bitmatch": 0.7887868881225586,
+      "bf16_bitmatch_changed_entries": 0.7544199004265761
+     },
+     "256": {
+      "energy": 0.9996000607108587,
+      "relative_error": 0.019998482170952476,
+      "bf16_bitmatch": 0.79815673828125,
+      "bf16_bitmatch_changed_entries": 0.7658921757611842
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.500019394042084,
+     "relative_error": 0.030815778838569563,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.22.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7673737184529926,
+    "relative_change": 0.04380043966663889,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.7668566966240612,
+     0.0032703641251429004,
+     0.0024549317199653218,
+     0.0024051423309778028,
+     0.0023689586585249737
+    ],
+    "sigma1_over_sigma2": 234.48664041058515,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 96,
+     "0.9999": 755
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9986529440779671,
+      "relative_error": 0.03670226044854376,
+      "bf16_bitmatch": 0.9500737871442523,
+      "bf16_bitmatch_changed_entries": 0.9410393893389488
+     },
+     "2": {
+      "energy": 0.9986711066930012,
+      "relative_error": 0.036453988903803705,
+      "bf16_bitmatch": 0.9126758575439453,
+      "bf16_bitmatch_changed_entries": 0.8969667347985556
+     },
+     "4": {
+      "energy": 0.998691164687713,
+      "relative_error": 0.03617782901566829,
+      "bf16_bitmatch": 0.8811670030866351,
+      "bf16_bitmatch_changed_entries": 0.8599457951970885
+     },
+     "8": {
+      "energy": 0.9987249672382433,
+      "relative_error": 0.03570760089612142,
+      "bf16_bitmatch": 0.8482818603515625,
+      "bf16_bitmatch_changed_entries": 0.8209775551391463
+     },
+     "16": {
+      "energy": 0.9987689507826465,
+      "relative_error": 0.03508631096814792,
+      "bf16_bitmatch": 0.8263160160609654,
+      "bf16_bitmatch_changed_entries": 0.7949116304485105
+     },
+     "32": {
+      "energy": 0.998824585766934,
+      "relative_error": 0.03428431467983529,
+      "bf16_bitmatch": 0.8113220759800502,
+      "bf16_bitmatch_changed_entries": 0.7772357870264168
+     },
+     "64": {
+      "energy": 0.9989180383988205,
+      "relative_error": 0.03289318472236152,
+      "bf16_bitmatch": 0.8004777090890067,
+      "bf16_bitmatch_changed_entries": 0.7645883218677588
+     },
+     "128": {
+      "energy": 0.9990798755567851,
+      "relative_error": 0.030333553092484335,
+      "bf16_bitmatch": 0.7938254220145089,
+      "bf16_bitmatch_changed_entries": 0.7571367724042652
+     },
+     "256": {
+      "energy": 0.9993412147560327,
+      "relative_error": 0.025666812111501753,
+      "bf16_bitmatch": 0.7992638179234096,
+      "bf16_bitmatch_changed_entries": 0.7641250164315558
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.500170946547991,
+     "relative_error": 0.03685430255369677,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.8.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.8991142461766354,
+    "relative_change": 0.0541182976051335,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.8987289410770638,
+     0.003244129484262343,
+     0.002589924559411868,
+     0.0025579201954109877,
+     0.0023953736390106427
+    ],
+    "sigma1_over_sigma2": 277.0323889465277,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 535
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991431065803523,
+      "relative_error": 0.02927274192226806,
+      "bf16_bitmatch": 0.9463953971862793,
+      "bf16_bitmatch_changed_entries": 0.9365504677771418
+     },
+     "2": {
+      "energy": 0.9991561252498611,
+      "relative_error": 0.029049522373680983,
+      "bf16_bitmatch": 0.9086813926696777,
+      "bf16_bitmatch_changed_entries": 0.8922103819007511
+     },
+     "4": {
+      "energy": 0.9991725163428755,
+      "relative_error": 0.028766015663010302,
+      "bf16_bitmatch": 0.8937363624572754,
+      "bf16_bitmatch_changed_entries": 0.8743530876907681
+     },
+     "8": {
+      "energy": 0.999197140182008,
+      "relative_error": 0.028334781064833274,
+      "bf16_bitmatch": 0.8578519821166992,
+      "bf16_bitmatch_changed_entries": 0.8318912300191044
+     },
+     "16": {
+      "energy": 0.9992293483368755,
+      "relative_error": 0.027760613522119722,
+      "bf16_bitmatch": 0.8319978713989258,
+      "bf16_bitmatch_changed_entries": 0.8011564325643183
+     },
+     "32": {
+      "energy": 0.9992747509869476,
+      "relative_error": 0.026930447694988258,
+      "bf16_bitmatch": 0.8179268836975098,
+      "bf16_bitmatch_changed_entries": 0.7845885838306249
+     },
+     "64": {
+      "energy": 0.9993521498401892,
+      "relative_error": 0.025452900813286328,
+      "bf16_bitmatch": 0.8067741394042969,
+      "bf16_bitmatch_changed_entries": 0.7716257579447527
+     },
+     "128": {
+      "energy": 0.99947974232396,
+      "relative_error": 0.022809157723154998,
+      "bf16_bitmatch": 0.7999744415283203,
+      "bf16_bitmatch_changed_entries": 0.7640552099643284
+     },
+     "256": {
+      "energy": 0.9996694516710196,
+      "relative_error": 0.01818098811890102,
+      "bf16_bitmatch": 0.8090958595275879,
+      "bf16_bitmatch_changed_entries": 0.7753799541517941
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.5001283101152465,
+     "relative_error": 0.029374677334394604,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.8.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.7127506710479011,
+    "relative_change": 0.04628821866705798,
+    "changed_columns": 3583,
+    "sigma_top5": [
+     0.7123301352822723,
+     0.002974080163985634,
+     0.00226584387911126,
+     0.002239430120696897,
+     0.0021330978288460517
+    ],
+    "sigma1_over_sigma2": 239.51275554309944,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 39,
+     "0.9999": 676
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.99882031200851,
+      "relative_error": 0.03434658631494211,
+      "bf16_bitmatch": 0.9471549987792969,
+      "bf16_bitmatch_changed_entries": 0.9368748945330494
+     },
+     "2": {
+      "energy": 0.9988377232633086,
+      "relative_error": 0.0340921799932358,
+      "bf16_bitmatch": 0.9103009360177177,
+      "bf16_bitmatch_changed_entries": 0.8930530914928647
+     },
+     "4": {
+      "energy": 0.9988577012665876,
+      "relative_error": 0.03379791019297037,
+      "bf16_bitmatch": 0.8954745701381138,
+      "bf16_bitmatch_changed_entries": 0.8752857787875096
+     },
+     "8": {
+      "energy": 0.9988893727864524,
+      "relative_error": 0.03332607407942403,
+      "bf16_bitmatch": 0.8568894522530692,
+      "bf16_bitmatch_changed_entries": 0.829257232508123
+     },
+     "16": {
+      "energy": 0.9989300692741889,
+      "relative_error": 0.032709795563570544,
+      "bf16_bitmatch": 0.8312944684709821,
+      "bf16_bitmatch_changed_entries": 0.7985534006454089
+     },
+     "32": {
+      "energy": 0.998980688578261,
+      "relative_error": 0.03192665691453846,
+      "bf16_bitmatch": 0.8166528429303851,
+      "bf16_bitmatch_changed_entries": 0.7810893766846208
+     },
+     "64": {
+      "energy": 0.9990671797225278,
+      "relative_error": 0.030542106631208696,
+      "bf16_bitmatch": 0.8065131051199776,
+      "bf16_bitmatch_changed_entries": 0.7691643629535567
+     },
+     "128": {
+      "energy": 0.999216521838281,
+      "relative_error": 0.027990679908104298,
+      "bf16_bitmatch": 0.7997158595493862,
+      "bf16_bitmatch_changed_entries": 0.7614925585125756
+     },
+     "256": {
+      "energy": 0.9994553930256346,
+      "relative_error": 0.02333681585743037,
+      "bf16_bitmatch": 0.8051926749093192,
+      "bf16_bitmatch_changed_entries": 0.7685831952625711
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4997874403264764,
+     "relative_error": 0.03449092478301011,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.9.linear_attn.out_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 0.886621912097121,
+    "relative_change": 0.05436920017094607,
+    "changed_columns": 2048,
+    "sigma_top5": [
+     0.8862318405670618,
+     0.003076078978656589,
+     0.002741594653873123,
+     0.002383420710219813,
+     0.002362891872154832
+    ],
+    "sigma1_over_sigma2": 288.10438441801796,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 539
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9991202885508146,
+      "relative_error": 0.029659930026644785,
+      "bf16_bitmatch": 0.9457178115844727,
+      "bf16_bitmatch_changed_entries": 0.9383428095340571
+     },
+     "2": {
+      "energy": 0.9991323255447867,
+      "relative_error": 0.029456314352162276,
+      "bf16_bitmatch": 0.9137821197509766,
+      "bf16_bitmatch_changed_entries": 0.9022201358740284
+     },
+     "4": {
+      "energy": 0.9991491135642967,
+      "relative_error": 0.0291699577597108,
+      "bf16_bitmatch": 0.8989067077636719,
+      "bf16_bitmatch_changed_entries": 0.8852811447546803
+     },
+     "8": {
+      "energy": 0.9991740155672149,
+      "relative_error": 0.02873994489878494,
+      "bf16_bitmatch": 0.8627738952636719,
+      "bf16_bitmatch_changed_entries": 0.844260913260375
+     },
+     "16": {
+      "energy": 0.9992076057789679,
+      "relative_error": 0.028149497704786402,
+      "bf16_bitmatch": 0.8365921974182129,
+      "bf16_bitmatch_changed_entries": 0.8144695595233513
+     },
+     "32": {
+      "energy": 0.9992559311456278,
+      "relative_error": 0.027277625526646566,
+      "bf16_bitmatch": 0.8211021423339844,
+      "bf16_bitmatch_changed_entries": 0.79695652150345
+     },
+     "64": {
+      "energy": 0.9993377088601542,
+      "relative_error": 0.025735017774340403,
+      "bf16_bitmatch": 0.8083024024963379,
+      "bf16_bitmatch_changed_entries": 0.782648172129508
+     },
+     "128": {
+      "energy": 0.9994709801454452,
+      "relative_error": 0.023000431616703735,
+      "bf16_bitmatch": 0.7999677658081055,
+      "bf16_bitmatch_changed_entries": 0.773515459966598
+     },
+     "256": {
+      "energy": 0.9996651659003464,
+      "relative_error": 0.018298472604386138,
+      "bf16_bitmatch": 0.8065953254699707,
+      "bf16_bitmatch_changed_entries": 0.7814035907473831
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.499614908452996,
+     "relative_error": 0.029752241033898237,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.9.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 0.8164329801234038,
+    "relative_change": 0.052513150510085205,
+    "changed_columns": 3584,
+    "sigma_top5": [
+     0.8160482712873556,
+     0.0028269024324567055,
+     0.0023518270333588286,
+     0.0021505851164840568,
+     0.0021240315365002025
+    ],
+    "sigma1_over_sigma2": 288.67224489887076,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 648
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9990578082789744,
+      "relative_error": 0.030695141651822352,
+      "bf16_bitmatch": 0.9497958592006138,
+      "bf16_bitmatch_changed_entries": 0.9422560716208432
+     },
+     "2": {
+      "energy": 0.9990697972126958,
+      "relative_error": 0.030499226011557013,
+      "bf16_bitmatch": 0.9162687574114118,
+      "bf16_bitmatch_changed_entries": 0.9038492187490196
+     },
+     "4": {
+      "energy": 0.9990850337464027,
+      "relative_error": 0.030248409108532052,
+      "bf16_bitmatch": 0.8987691061837333,
+      "bf16_bitmatch_changed_entries": 0.8836656991226848
+     },
+     "8": {
+      "energy": 0.9991089543866475,
+      "relative_error": 0.029850387155819055,
+      "bf16_bitmatch": 0.8624591827392578,
+      "bf16_bitmatch_changed_entries": 0.8419540121702225
+     },
+     "16": {
+      "energy": 0.9991407297279536,
+      "relative_error": 0.029313312198489712,
+      "bf16_bitmatch": 0.8350023542131696,
+      "bf16_bitmatch_changed_entries": 0.8102873392289516
+     },
+     "32": {
+      "energy": 0.9991812050928112,
+      "relative_error": 0.0286145925567514,
+      "bf16_bitmatch": 0.8193304879324776,
+      "bf16_bitmatch_changed_entries": 0.7922729503063889
+     },
+     "64": {
+      "energy": 0.9992504872128517,
+      "relative_error": 0.02737723118118986,
+      "bf16_bitmatch": 0.8073267255510602,
+      "bf16_bitmatch_changed_entries": 0.7786018424748044
+     },
+     "128": {
+      "energy": 0.9993697698269882,
+      "relative_error": 0.025104385533442374,
+      "bf16_bitmatch": 0.7983943394252232,
+      "bf16_bitmatch_changed_entries": 0.7687196544449925
+     },
+     "256": {
+      "energy": 0.9995602741692841,
+      "relative_error": 0.020969640691141433,
+      "bf16_bitmatch": 0.8020452771868024,
+      "bf16_bitmatch_changed_entries": 0.7733167432795851
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.4999168111268988,
+     "relative_error": 0.03078704176980062,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   }
+  ]
+ },
+ "p25c": {
+  "label": "25 passes",
+  "tensors": [
+   {
+    "name": "model.language_model.layers.15.self_attn.o_proj.weight",
+    "shape": [
+     1024,
+     2048
+    ],
+    "delta_fro": 6.477597491659416,
+    "relative_change": 0.32330404639271937,
+    "changed_columns": 256,
+    "sigma_top5": [
+     1.1546449159960277,
+     0.8979029677612719,
+     0.8274255937022953,
+     0.7989394377550301,
+     0.7658388920741357
+    ],
+    "sigma1_over_sigma2": 1.2859350703282413,
+    "rank_for_energy": {
+     "0.99": 237,
+     "0.999": 253,
+     "0.9999": 256
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.031773786946781846,
+      "relative_error": 0.9839848642399018,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "2": {
+      "energy": 0.050988367030213845,
+      "relative_error": 0.9741722809492096,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "4": {
+      "energy": 0.08251745134271089,
+      "relative_error": 0.9578530934633394,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "8": {
+      "energy": 0.1366148260096885,
+      "relative_error": 0.9291852204971359,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "16": {
+      "energy": 0.22931239901747558,
+      "relative_error": 0.8778881483324195,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "32": {
+      "energy": 0.36938366270139217,
+      "relative_error": 0.7941135544105815,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "64": {
+      "energy": 0.5652011270600229,
+      "relative_error": 0.6593928062543424,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "128": {
+      "energy": 0.811471402270079,
+      "relative_error": 0.43419879977945625,
+      "bf16_bitmatch": 0.875,
+      "bf16_bitmatch_changed_entries": 0.0
+     },
+     "256": {
+      "energy": 1.0000000000000002,
+      "relative_error": 4.400321814738321e-15,
+      "bf16_bitmatch": 0.8764095306396484,
+      "bf16_bitmatch_changed_entries": 0.0112762451171875
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 1.0000000000000002,
+     "relative_error": 0.9839848642399018,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   }
+  ]
+ },
+ "p50c": {
+  "label": "50 passes",
+  "tensors": [
+   {
+    "name": "model.language_model.layers.15.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 1.748887620355205,
+    "relative_change": 0.10636181051508302,
+    "changed_columns": 64,
+    "sigma_top5": [
+     1.7488828458330967,
+     0.000987411728957725,
+     0.0009485556688928399,
+     0.0008693150271350602,
+     0.0008093058803349737
+    ],
+    "sigma1_over_sigma2": 1771.1789262207287,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 1
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9999945399400907,
+      "relative_error": 0.002336677108446956,
+      "bf16_bitmatch": 0.9983956473214286,
+      "bf16_bitmatch_changed_entries": 0.909776279497395
+     },
+     "2": {
+      "energy": 0.9999948587066511,
+      "relative_error": 0.0022674420276588047,
+      "bf16_bitmatch": 0.9982013702392578,
+      "bf16_bitmatch_changed_entries": 0.8988507508427828
+     },
+     "4": {
+      "energy": 0.9999953999549978,
+      "relative_error": 0.0021447715501215544,
+      "bf16_bitmatch": 0.9979956490652901,
+      "bf16_bitmatch_changed_entries": 0.887296965982225
+     },
+     "8": {
+      "energy": 0.9999961090296277,
+      "relative_error": 0.0019725542761641645,
+      "bf16_bitmatch": 0.9976365225655692,
+      "bf16_bitmatch_changed_entries": 0.867085504137297
+     },
+     "16": {
+      "energy": 0.9999971212165554,
+      "relative_error": 0.0016966978059821379,
+      "bf16_bitmatch": 0.9973038264683315,
+      "bf16_bitmatch_changed_entries": 0.8484370211461845
+     },
+     "32": {
+      "energy": 0.9999984838036502,
+      "relative_error": 0.0012313392506170156,
+      "bf16_bitmatch": 0.997288567679269,
+      "bf16_bitmatch_changed_entries": 0.8476402083971805
+     },
+     "64": {
+      "energy": 0.9999999999999999,
+      "relative_error": 7.878464582680328e-16,
+      "bf16_bitmatch": 1.0,
+      "bf16_bitmatch_changed_entries": 1.0
+     },
+     "128": {
+      "energy": 0.9999999999999999,
+      "relative_error": 1.2026827470693852e-15,
+      "bf16_bitmatch": 1.0,
+      "bf16_bitmatch_changed_entries": 1.0
+     },
+     "256": {
+      "energy": 0.9999999999999999,
+      "relative_error": 1.6505733819241354e-15,
+      "bf16_bitmatch": 1.0,
+      "bf16_bitmatch_changed_entries": 1.0
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 6.0003211053057015,
+     "relative_error": 0.002347392024670923,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   },
+   {
+    "name": "model.language_model.layers.19.mlp.down_proj.weight",
+    "shape": [
+     1024,
+     3584
+    ],
+    "delta_fro": 1.3987631914068717,
+    "relative_change": 0.08106276525634826,
+    "changed_columns": 64,
+    "sigma_top5": [
+     1.3987571638936867,
+     0.000901257498801078,
+     0.0008135843416199338,
+     0.000744347852724347,
+     0.0007053113736132183
+    ],
+    "sigma1_over_sigma2": 1552.0061311605407,
+    "rank_for_energy": {
+     "0.99": 1,
+     "0.999": 1,
+     "0.9999": 1
+    },
+    "by_rank": {
+     "1": {
+      "energy": 0.9999913816717005,
+      "relative_error": 0.0029356989456286904,
+      "bf16_bitmatch": 0.9983226231166294,
+      "bf16_bitmatch_changed_entries": 0.9052026860522425
+     },
+     "2": {
+      "energy": 0.9999917968258585,
+      "relative_error": 0.0028641183881680044,
+      "bf16_bitmatch": 0.9982010977608817,
+      "bf16_bitmatch_changed_entries": 0.8983951453918186
+     },
+     "4": {
+      "energy": 0.999992418317962,
+      "relative_error": 0.002753485434470398,
+      "bf16_bitmatch": 0.9978790283203125,
+      "bf16_bitmatch_changed_entries": 0.8802057663873829
+     },
+     "8": {
+      "energy": 0.999993352892222,
+      "relative_error": 0.00257819855283897,
+      "bf16_bitmatch": 0.997420174734933,
+      "bf16_bitmatch_changed_entries": 0.8543309512074914
+     },
+     "16": {
+      "energy": 0.9999948664701599,
+      "relative_error": 0.0022657294277928256,
+      "bf16_bitmatch": 0.996873038155692,
+      "bf16_bitmatch_changed_entries": 0.8233581813701331
+     },
+     "32": {
+      "energy": 0.9999972332037264,
+      "relative_error": 0.0016633689529173066,
+      "bf16_bitmatch": 0.9971542358398438,
+      "bf16_bitmatch_changed_entries": 0.8392065056678166
+     },
+     "64": {
+      "energy": 0.9999999999999999,
+      "relative_error": 7.991238775391198e-16,
+      "bf16_bitmatch": 1.0,
+      "bf16_bitmatch_changed_entries": 1.0
+     },
+     "128": {
+      "energy": 0.9999999999999999,
+      "relative_error": 1.1445508847151069e-15,
+      "bf16_bitmatch": 1.0,
+      "bf16_bitmatch_changed_entries": 1.0
+     },
+     "256": {
+      "energy": 0.9999999999999999,
+      "relative_error": 1.6087073824704885e-15,
+      "bf16_bitmatch": 1.0,
+      "bf16_bitmatch_changed_entries": 1.0
+     }
+    },
+    "output_side_ablation_fit": {
+     "scale_c": 6.000173248683299,
+     "relative_error": 0.002943758546737255,
+     "note": "\u0394W \u2248 -c \u00b7 r\u0302 (r\u0302\u1d40 W) on the changed columns, r\u0302 = top left singular vector of \u0394W"
+    }
+   }
+  ]
+ }
+}
