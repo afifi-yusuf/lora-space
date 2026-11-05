@@ -2,7 +2,7 @@
 
 ## Project brief for Claude Code
 
-*Last revised 2026-11-05: added background on the Weight-Space Programming paper, the north-star goal and edit tiers, the read/write asymmetry, the output-side rank-1 primitive, Mode C (compositional), and the MoE scaling ladder. Then updated from the authors' released logs: Mode B confirmed, structure of the Qwen edits, the evaluation's decoding settings, the Gemma follow-up, and a sycophancy pilot (Milestone 0.5). Renamed from WOrA to LSO (LoRA-Space Optimization).*
+*Last revised 2026-11-05: added background on the Weight-Space Programming paper, the north-star goal and edit tiers, the read/write asymmetry, the output-side rank-1 primitive, Mode C (compositional), and the MoE scaling ladder. Then updated from the authors' released logs: Mode B confirmed, structure of the Qwen edits, the evaluation's decoding settings, the Gemma follow-up, and a sycophancy pilot (Milestone 0.5). Renamed from WOrA to LSO (LoRA-Space Optimization). Added "Findings so far" and the norm-placement target-selection rule.*
 
 **Name:** *LoRA-Space Optimization* (LSO) extends the paper's "Weight-Space Programming" from base weights to LoRA space. "Optimization" is meant in the general sense of selecting a good point in LoRA space. In the strict setting (Mode A), that selection is made by reasoning, with no gradients and no candidate evaluations. Say this early in any write-up so "optimization" isn't misread as gradient training.
 
@@ -13,6 +13,29 @@
 **Central insight:** A frontier model may be able to reason about, diagnose, and program a small adapter parameter space even when the frozen target model is much larger than any network the editor could feasibly program directly. This is a hypothesis to test, **not an established capability**.
 
 **Research question:** Can an LLM generate a useful LoRA update for a pretrained model **without task-specific gradient descent, training an adapter generator, or iteratively searching over candidate rewards**? If not, does limited feedback-guided weight-space programming work? Can it compose existing adapters better than standard merging methods?
+
+## Findings so far (2026-11-05) — details in [`results/`](results/)
+
+1. **LoRA represents the paper's fix.** The winning 50-pass Qwen edit is exactly rank 1 per tensor
+   (ΔW = −6·r̂(r̂ᵀW) on 64 columns, layers 15 & 19). Its rank-1 LoRA matches the exact edit with mean KL 0.00035 and
+   99.5% top-1 agreement on 30K tokens of reasoning (39× below the edit's own effect). Sampled MATH-500 confirmation
+   running.
+2. **Strict one-shot (Mode A) discovery works on a pre-norm model.** Qwen3.5-0.8B sycophancy: Astra recovers 56% of a
+   gradient LoRA's gain (37% on held-out phrasings) with no feedback, no damage, and a 29K-parameter edit; it matches
+   the best scripted baseline even though that baseline used feedback. One run so far.
+3. **Norm placement matters.** On Gemma 3 270M (post-sublayer "sandwich" norms) the same harness reaches only 15–20%,
+   needing edits larger than the weights. In such models no LoRA-writable module writes linearly into the residual
+   stream, so one-shot sizing undershoots or damages knowledge.
+4. **Guidance and feedback both help, in steps.** Gemma Mode A: 0% (minimal prompt) → 2% (success criterion) →
+   15–20% (method hints + module-input tool). Mode B with 10 scored candidates: 54%, but with a right-guess
+   agreement trade-off.
+5. **Harness:** all three harnesses solve a calibration task; Agency native costs ~3× API-only tokens with caching
+   and adds a sandbox + profiler. Strict Mode A uses the API-only loop with an isolated Unix user so the tool surface
+   is controlled.
+
+**Target-selection rule (from finding 3):** prefer **pre-norm** targets (Llama, Qwen, Mistral, DeepSeek) for one-shot
+LoRA editing; treat models with norms on sublayer outputs (Gemma 2/3, OLMo 2) as a deliberate stress test. Check
+norm placement before choosing a target.
 
 ## 0. Background: what the Weight-Space Programming paper shows and doesn't show
 
