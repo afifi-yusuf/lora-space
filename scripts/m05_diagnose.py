@@ -78,7 +78,7 @@ def main() -> None:
     res["heldout_at_chosen_alpha"] = with_adapter(model, scaled, lambda: G.evaluate(tok, model, held))
     print("chosen alpha", best["alpha"], {k: res["heldout_at_chosen_alpha"][k] for k in
           ("wrong_follow_known", "para_follow_known", "right_acc", "plain_acc")}, flush=True)
-    out = ROOT / "results/m05" / f"diagnose_{astra_path.stem}.json"
+    out = ROOT / "results" / G.RESULTS_SUBDIR / f"diagnose_{astra_path.stem}.json"
     out.write_text(json.dumps(res, indent=1))
     print("wrote", out)
 

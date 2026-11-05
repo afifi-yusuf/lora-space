@@ -1,4 +1,4 @@
-"""Milestone 0.5 baselines and gradient references on Gemma 3 270M IT (pair 100 of the paper's sycophancy splits).
+"""Milestone 0.5 baselines and gradient references on the sycophancy target (LSO_TARGET=gemma|qwen; pair 100 split).
 
   python scripts/m05_baselines.py download
   python scripts/m05_baselines.py base                 # unedited model
@@ -8,8 +8,8 @@
   python scripts/m05_baselines.py honest_ft            # the paper's honest full fine-tune (train.py), then evaluate
   python scripts/m05_baselines.py lora_grad [--rank 8] # gradient-trained LoRA, same modules and rank budget as the editor
 
-All adapters are saved to checkpoints/m05/<name>.npz and scored on the HELD-OUT facts (+ held-out paraphrases).
-Results: results/m05/<name>.json.
+All adapters are saved to checkpoints/<subdir>/<name>.npz and scored on the HELD-OUT facts (+ held-out paraphrases).
+Results: results/<subdir>/<name>.json (subdir m05 for gemma, m05_qwen for qwen).
 """
 from __future__ import annotations
 
@@ -30,10 +30,10 @@ sys.path.insert(0, str(ROOT / "src"))
 from lso import gemma_syco as G  # noqa: E402
 from lso.primitives import output_side_ablation  # noqa: E402
 
-OUT = ROOT / "results/m05"
-ADAPTERS = ROOT / "checkpoints/m05"
+OUT = ROOT / "results" / G.RESULTS_SUBDIR
+ADAPTERS = ROOT / "checkpoints" / G.RESULTS_SUBDIR
 PAIR = 100
-FIXED_LAYER = 9  # middle of 18 layers: the scripted baseline's a-priori choice (no tuning)
+FIXED_LAYER = G.N_LAYERS // 2  # middle layer: the scripted baseline's a-priori choice (no tuning)
 
 
 def save(name: str, res: dict, adapter: dict | None = None) -> None:
@@ -61,7 +61,7 @@ def diff_of_means(tok, model, rows) -> np.ndarray:
     """Per-layer mean(residual | wrong-guess prompt) - mean(residual | plain prompt) at the answer position."""
     wrong = G.residual_activations(tok, model, [G.TEMPLATE.format(question=r["question"], guess=r["swap"]) for r in rows])
     plain = G.residual_activations(tok, model, [r["question"] for r in rows])
-    return wrong.mean(0) - plain.mean(0)  # (19, 640): index i+1 = after layer i
+    return wrong.mean(0) - plain.mean(0)  # (N_LAYERS + 1, HIDDEN): index i+1 = after layer i
 
 
 def ablation_adapter(model, direction: np.ndarray, scale: float = 1.0) -> dict:
@@ -92,7 +92,7 @@ def main() -> None:
             res["layer"] = FIXED_LAYER
         elif a.cmd == "random":
             rng = np.random.default_rng(0)
-            adapter = ablation_adapter(model, rng.standard_normal(640))
+            adapter = ablation_adapter(model, rng.standard_normal(G.HIDDEN))
             res = eval_adapter(tok, model, adapter, split)
         else:
             sweep = []
@@ -111,7 +111,9 @@ def main() -> None:
         res["seconds"] = round(time.time() - t0)
         save(a.cmd, res, adapter)
     elif a.cmd == "honest_ft":
-        out = ROOT / "checkpoints/m05/honest_ft"
+        if G.TARGET != "gemma":
+            raise SystemExit("honest_ft uses the paper's Gemma-specific train.py; use lora_grad as the reference")
+        out = ADAPTERS / "honest_ft"
         env = dict(os.environ, SYCMID_BASE=str(G.MODEL_DIR))
         subprocess.run([sys.executable, str(G.PAPER7 / "code/train.py"), str(PAIR), "honest",
                         str(G.PAPER7 / f"dataset/splits/pair{PAIR}.json"), str(out)], check=True, env=env)
@@ -147,7 +149,7 @@ def train_lora(tok, model, split, rank: int, lr: float = 2e-4, epochs: int = 3, 
         for guess in (r["correct"], r["swap"], None):
             user = r["question"] if guess is None else G.TEMPLATE.format(question=r["question"], guess=guess)
             p = tok(G.chat(tok, user), add_special_tokens=False)["input_ids"]
-            t = tok(f"The answer is {r['correct']}.<end_of_turn>\n", add_special_tokens=False)["input_ids"]
+            t = tok(f"The answer is {r['correct']}.{G.ANSWER_END}\n", add_special_tokens=False)["input_ids"]
             ex.append((p + t, [-100] * len(p) + t))
     flat = [x for BA in params.values() for x in BA]
     opt = torch.optim.AdamW(flat, lr=lr, betas=(0.9, 0.95), weight_decay=0.0)
