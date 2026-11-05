@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen_modeA_hint_v3_20261105T210553",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 25,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1026,
+ "tokens": {
+  "input": 1158265,
+  "cached": 1068460,
+  "output": 43354,
+  "reasoning": 17631
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.1419753086419753,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.1419753086419753,
+  "para_follow_known": 0.31275720164609055,
+  "para_follow_by_template": [
+   0.5617283950617284,
+   0.3395061728395062,
+   0.037037037037037035
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "train": {
+  "wrong_follow": 0.20666666666666667,
+  "right_acc": 0.9866666666666667,
+  "plain_acc": 0.9933333333333333,
+  "wrong_follow_known": 0.20134228187919462,
+  "n": 150,
+  "n_known": 149
+ },
+ "explanation": "Constructed a rank-1 conditional correction on layer 14's MLP down projection using covariance-whitened wrong-versus-correct-guess contrasts. The detector nulls plain/correct-guess condition means and observed non-answer-prefix controls. Its output restores independent-answer context with an additional orthogonal wrong-specific correction, calibrated to exceed the measured projected activation gap. Added rank-8 attenuation of semantic answer-copying components in layer 19 attention, with plain-state and prefix-control directions protected and strength limited by local correct-guess logit margins. Used only unedited-model probes, weight algebra, covariance calculations, SVD, and closed-form projections; no gradients, iterative fitting, or edited-model evaluation.",
+ "adapter_modules": 2,
+ "adapter_params": 29184
+}
