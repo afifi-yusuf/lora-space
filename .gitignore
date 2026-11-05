@@ -16,6 +16,7 @@ checkpoints/
 results/**/generations/
 results/**/*.jsonl.gz
 infra/instance_*.txt
+infra/gpu_ip.txt
 infra/*.log
 
 # python
