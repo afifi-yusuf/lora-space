@@ -1,0 +1,28 @@
+# secrets — never commit
+secrets.env
+*.env
+.env*
+*.pem
+
+# large / external artifacts
+models/
+ext/
+checkpoints/
+*.safetensors
+*.npy
+*.npz
+
+# run outputs (small summaries in results/ are committed; bulky generations are not)
+results/**/generations/
+results/**/*.jsonl.gz
+infra/instance_*.txt
+infra/*.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.DS_Store
