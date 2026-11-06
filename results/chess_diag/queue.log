@@ -1,0 +1,10 @@
+2026-11-06T16:24:09Z QUEUE START
+2026-11-06T16:24:09Z START gen q08_nothink (try 1)
+2026-11-06T16:26:54Z END q08_nothink :: q08_nothink mate1 {'n': 300, 'format_ok': 0.9967, 'move_found': 0.1467, 'legal': 0.1033, 'solved_puzzle_move': 0.0, 'truncated': 0.0, 'mate_in_1': 0.0} q08_nothink puzzles {'n': 300, 'format_ok': 1.0, 'move_found': 0.16, 'legal': 0.1133, 'solved_puzzle_move': 0.0, 'truncated': 0.0, 'mean_cp_loss_legal': 792.2, 'blunder_rate_legal': 0.9706} 
+2026-11-06T16:26:54Z START gen q2b_nothink (try 1)
+2026-11-06T16:29:46Z END q2b_nothink :: q2b_nothink mate1 {'n': 300, 'format_ok': 1.0, 'move_found': 0.53, 'legal': 0.1333, 'solved_puzzle_move': 0.0033, 'truncated': 0.0, 'mate_in_1': 0.0033} q2b_nothink puzzles {'n': 300, 'format_ok': 1.0, 'move_found': 0.5533, 'legal': 0.1333, 'solved_puzzle_move': 0.0033, 'truncated': 0.0, 'mean_cp_loss_legal': 834.5, 'blunder_rate_legal': 0.95} 
+2026-11-06T16:29:46Z START gen q08_think4k (try 1)
+2026-11-06T17:13:14Z END q08_think4k :: q08_think4k mate1 {'n': 300, 'format_ok': 0.0, 'move_found': 0.78, 'legal': 0.0433, 'solved_puzzle_move': 0.0, 'truncated': 0.0, 'mate_in_1': 0.0} q08_think4k puzzles {'n': 300, 'format_ok': 0.0, 'move_found': 0.73, 'legal': 0.0433, 'solved_puzzle_move': 0.0033, 'truncated': 0.0, 'mean_cp_loss_legal': 766.5, 'blunder_rate_legal': 0.8462} 
+2026-11-06T17:13:14Z START gen q2b_think4k (try 1)
+2026-11-06T18:23:15Z END q2b_think4k :: q2b_think4k mate1 {'n': 300, 'format_ok': 0.0, 'move_found': 0.2967, 'legal': 0.22, 'solved_puzzle_move': 0.0033, 'truncated': 0.0, 'mate_in_1': 0.0033} q2b_think4k puzzles {'n': 300, 'format_ok': 0.0, 'move_found': 0.3, 'legal': 0.1567, 'solved_puzzle_move': 0.01, 'truncated': 0.0, 'mean_cp_loss_legal': 745.5, 'blunder_rate_legal': 0.9149} 
+2026-11-06T18:23:15Z QUEUE DONE

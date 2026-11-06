@@ -1,0 +1,26 @@
+{
+ "_protocol": {
+  "name": "think35",
+  "sampling": {
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": 20,
+   "presence_penalty": 1.5,
+   "max_tokens": 32768,
+   "seed": 0
+  },
+  "samples": 1,
+  "limit": 200,
+  "ckpt": "base"
+ },
+ "math500": {
+  "acc": 0.08,
+  "cut_share": 0.93,
+  "mean_tokens": 30900.625,
+  "problems": 200,
+  "samples": 1,
+  "ok": 16,
+  "total": 200,
+  "seconds": 12149
+ }
+}

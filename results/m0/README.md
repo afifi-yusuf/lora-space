@@ -28,7 +28,9 @@ All three edits were rebuilt bit-exactly from the public base weights (every ten
 | Rank-1 LoRA, same subset as below | 200 × 2 | 53.5% | |
 | Exact 50-pass edit | 200 × 2 | 56.8% | 27.8% |
 | Paper's reported number for the exact edit | 500 | 48.1% | |
+| Base model (no edit) | 200 × 1 | 8.0% | 93.0% |
 
 The rank-1 LoRA matches or beats the paper's own headline. On the same 200 problems it is 3.3 points below the exact edit
 (paired bootstrap 95% CI −7.8 to +1.0, so not significant). Per-problem results: `eval/<model>/math500_per_problem.json`.
-The base-model run (200 × 1) is still going.
+The unedited base scores 8.0% on 200 × 1: 93% of its samples hit the 32K-token cap before answering. Most of the edit's
+gain is that the model stops reasoning and answers; the rank-1 LoRA keeps that behaviour.

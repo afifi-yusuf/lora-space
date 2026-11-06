@@ -1,0 +1,15 @@
+{
+ "model": "models/Qwen3.5-2B",
+ "think": true,
+ "max_tokens": 4096,
+ "sets": {
+  "mate1": {
+   "n": 300,
+   "seconds": 2487
+  },
+  "puzzles": {
+   "n": 300,
+   "seconds": 1553
+  }
+ }
+}

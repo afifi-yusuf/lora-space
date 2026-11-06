@@ -1,0 +1,27 @@
+{
+ "mate1": {
+  "n": 300,
+  "format_ok": 0.9967,
+  "uci_format": 0.0433,
+  "move_found": 0.1467,
+  "legal": 0.1033,
+  "solved_puzzle_move": 0.0,
+  "truncated": 0.0,
+  "mate_in_1": 0.0
+ },
+ "puzzles": {
+  "n": 300,
+  "format_ok": 1.0,
+  "uci_format": 0.0467,
+  "move_found": 0.16,
+  "legal": 0.1133,
+  "solved_puzzle_move": 0.0,
+  "truncated": 0.0,
+  "mean_cp_loss_legal": 792.2,
+  "blunder_rate_legal": 0.9706
+ },
+ "random_legal_move_reference": {
+  "mate1": 0.0533,
+  "puzzles": 0.06
+ }
+}
