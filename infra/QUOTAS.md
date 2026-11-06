@@ -6,7 +6,7 @@ Accounts: AWS `173796169264` (Warply, IAM user `warply-cli`); Azure "Azure subsc
 
 | Region | G (L4/L40S/A10G) On-Demand | P (H100) On-Demand | Open requests |
 |---|---:|---:|---|
-| us-east-1 | 8 | 16 | G → 24: case 179391130400463 |
+| us-east-1 | 24 (approved 2026-11-06) | 16 | — |
 | us-east-2 | 0 | 16 (approved 2026-11-06) | — |
 | us-west-2 | 0 | 16 (approved 2026-11-06) | — |
 | eu-north-1 | 0 | 16 (approved 2026-11-06) | — |
