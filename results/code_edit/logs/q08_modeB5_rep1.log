@@ -1,0 +1,93 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  69%|██████▉   | 220/320 [00:00<00:00, 2166.86it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 2294.26it/s]
+turn 1: 22.3s in=1268 cached=0 out=948 tools=['run_python', 'generate']
+turn 2: 5.4s in=8201 cached=1265 out=170 tools=['run_python']
+turn 3: 16.5s in=8555 cached=8198 out=1082 tools=['generate', 'generate']
+turn 4: 32.9s in=20210 cached=8552 out=2285 tools=['run_python']
+turn 5: 15.8s in=23542 cached=20207 out=903 tools=['run_python', 'generate']
+turn 6: 12.2s in=26076 cached=23539 out=563 tools=['run_python']
+turn 7: 35.7s in=29059 cached=26073 out=2113 tools=['generate']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 8: 42.0s in=34267 cached=29056 out=1800 tools=['inspect', 'inspect_module_inputs']
+turn 9: 24.2s in=37150 cached=34264 out=1266 tools=['inspect_module_inputs', 'inspect_module_inputs', 'run_python']
+turn 10: 17.4s in=39339 cached=37147 out=765 tools=['run_python']
+[transformers] `causal_conv1d_update` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `fused_recurrent_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 11: 11.1s in=40309 cached=39336 out=732 tools=['generate']
+turn 12: 8.8s in=46789 cached=40306 out=372 tools=['run_python']
+turn 13: 10.1s in=47685 cached=46786 out=720 tools=['generate']
+turn 14: 60.8s in=52267 cached=47682 out=2247 tools=['run_python']
+turn 15: 12.7s in=54770 cached=52264 out=715 tools=['generate']
+turn 16: 26.1s in=60907 cached=54767 out=1061 tools=['generate']
+turn 17: 54.4s in=64516 cached=60904 out=2357 tools=['generate', 'generate']
+turn 18: 39.4s in=70602 cached=64513 out=1829 tools=['inspect']
+turn 19: 14.0s in=73304 cached=70599 out=690 tools=['run_python']
+turn 20: 14.3s in=74427 cached=73301 out=780 tools=['generate']
+turn 21: 46.1s in=83190 cached=74424 out=2072 tools=['generate', 'generate']
+turn 22: 30.8s in=91593 cached=83187 out=1229 tools=['generate']
+turn 23: 21.2s in=93746 cached=91590 out=1061 tools=['inspect']
+turn 24: 18.8s in=95674 cached=93743 out=1230 tools=['run_python']
+turn 25: 16.2s in=98007 cached=95671 out=1138 tools=['generate']
+turn 26: 40.8s in=99161 cached=98004 out=1848 tools=['run_python']
+turn 27: 13.7s in=101296 cached=99158 out=364 tools=['commit_adapter']
+{
+ "run": "req_code_qwen_modeB5_20261106T161750",
+ "request": "Make this model better at Python coding tasks. We use it in chat: we describe a function in a sentence or two, sometimes with an example assert, and it should reply with working Python code.",
+ "target": "qwen",
+ "mode": "B (5 candidates)",
+ "effort": "xhigh",
+ "turns": 27,
+ "generate_calls": 15,
+ "inspect_calls": 6,
+ "candidates_tried": 5,
+ "wall_s": 1745,
+ "tokens": {
+  "input": 1475910,
+  "cached": 1374536,
+  "output": 32340,
+  "reasoning": 11207
+ },
+ "committed": true,
+ "explanation": "Rank-1 update to model.layers.12.mlp.down_proj, constructed without gradients or training from the mean residual contrast between simplest/concise implementation prompts and ordinary coding requests. The input gate uses coding activations projected off the sampled general-chat input span. Update Frobenius norm is 0.1933, about 1.27% of the original weight norm. Executed self-written coding tests exposed algorithmic errors and rejected broader attention/MLP amplification and expert-style steering. Important limitation: this final adapter was not evaluated end-to-end; the tool exhausted its five edited-model feedback slots, counting a repeat evaluation of candidate 4. No validated improvement is claimed.",
+ "adapter_modules": 1,
+ "adapter_params": 4608,
+ "heldout": {
+  "humaneval": {
+   "n": 164,
+   "pass@1_base": 0.3171,
+   "pass@1_plus": 0.2927,
+   "buckets": {
+    "wrong_output": 87,
+    "pass": 48,
+    "exception:TypeError": 9,
+    "exception:ValueError": 5,
+    "plus_only": 4,
+    "exception:NameError": 4,
+    "syntax_error": 4,
+    "exception:UnboundLocalError": 1,
+    "exception:IndexError": 1,
+    "timeout": 1
+   }
+  },
+  "mbpp": {
+   "n": 378,
+   "pass@1_base": 0.2884,
+   "pass@1_plus": 0.2354,
+   "buckets": {
+    "no_code": 107,
+    "wrong_output": 94,
+    "pass": 89,
+    "exception:TypeError": 21,
+    "plus_only": 20,
+    "syntax_error": 14,
+    "exception:AssertionError": 13,
+    "truncated": 8,
+    "exception:NameError": 5,
+    "exception:IndexError": 3,
+    "exception:RecursionError": 2,
+    "exception:ValueError": 1,
+    "exception:AttributeError": 1
+   }
+  }
+ }
+}

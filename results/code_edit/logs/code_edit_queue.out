@@ -1,0 +1,10 @@
+2026-11-06T15:30:32Z QUEUE START
+2026-11-06T15:30:32Z START base_score_q08
+2026-11-06T15:36:27Z END   base_score_q08 rc=0 :: {"humaneval": {"n": 164, "pass@1_base": 0.3232, "pass@1_plus": 0.2988, "buckets": {"wrong_output": 82, "pass": 49, "exception:TypeError": 9, "exception:ValueError": 7, "syntax_error": 6, "plus_only": 4, "exception:IndexError": 2, "exception:NameError": 2, "exception:UnboundLocalError": 1, "exception
+2026-11-06T15:36:27Z START q08_modeA_rep1
+2026-11-06T16:00:19Z END   q08_modeA_rep1 rc=0 ::    "pass@1_base": 0.2513,    "pass@1_plus": 0.2037, 
+2026-11-06T16:00:19Z START q08_modeA_rep2
+2026-11-06T16:17:49Z END   q08_modeA_rep2 rc=0 ::    "pass@1_base": 0.2566,    "pass@1_plus": 0.209, 
+2026-11-06T16:17:49Z START q08_modeB5_rep1
+2026-11-06T16:52:23Z END   q08_modeB5_rep1 rc=0 ::    "pass@1_base": 0.2884,    "pass@1_plus": 0.2354, 
+2026-11-06T16:52:23Z QUEUE DONE

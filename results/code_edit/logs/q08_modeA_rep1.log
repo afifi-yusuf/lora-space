@@ -1,0 +1,80 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  69%|██████▉   | 220/320 [00:00<00:00, 2099.49it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 2255.09it/s]
+turn 1: 23.6s in=1287 cached=0 out=1023 tools=['run_python', 'generate']
+turn 2: 14.2s in=8206 cached=1284 out=946 tools=['run_python', 'generate', 'generate']
+turn 3: 36.1s in=14371 cached=8203 out=2326 tools=['run_python', 'generate']
+turn 4: 25.8s in=21100 cached=14368 out=1586 tools=['run_python', 'generate']
+turn 5: 22.2s in=25322 cached=21097 out=1169 tools=['run_python', 'generate']
+turn 6: 29.2s in=29632 cached=25319 out=1519 tools=['run_python', 'generate']
+turn 7: 30.7s in=37967 cached=29629 out=1362 tools=['generate']
+turn 8: 20.0s in=40488 cached=37964 out=1050 tools=['generate']
+turn 9: 37.6s in=42316 cached=40485 out=1701 tools=['generate']
+turn 10: 46.6s in=51411 cached=42313 out=2515 tools=['generate']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 11: 220.0s in=54892 cached=51408 out=7983 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 12: 45.3s in=63075 cached=54889 out=2299 tools=['inspect', 'inspect_module_inputs', 'run_python']
+turn 13: 82.3s in=66798 cached=63072 out=3716 tools=['inspect_module_inputs', 'inspect_module_inputs', 'inspect_module_inputs']
+turn 14: 175.4s in=70813 cached=70810 out=3606 tools=['inspect_module_inputs', 'inspect_module_inputs', 'inspect_module_inputs', 'inspect_module_inputs']
+turn 15: 45.9s in=74817 cached=70810 out=2295 tools=['run_python']
+turn 16: 66.4s in=79295 cached=74814 out=2100 tools=['inspect_module_inputs']
+turn 17: 44.3s in=81448 cached=79292 out=1951 tools=['run_python']
+turn 18: 22.2s in=83938 cached=81445 out=756 tools=['commit_adapter']
+{
+ "run": "req_code_qwen_modeA_20261106T153629",
+ "request": "Make this model better at Python coding tasks. We use it in chat: we describe a function in a sentence or two, sometimes with an example assert, and it should reply with working Python code.",
+ "target": "qwen",
+ "mode": "A (strict one-shot)",
+ "effort": "xhigh",
+ "turns": 18,
+ "generate_calls": 11,
+ "inspect_calls": 12,
+ "candidates_tried": 0,
+ "wall_s": 1080,
+ "tokens": {
+  "input": 847176,
+  "cached": 767202,
+  "output": 39903,
+  "reasoning": 16888
+ },
+ "committed": true,
+ "explanation": "Constructed a conservative, training-free adapter for full-attention output projections in layers 7 and 11. Executable diagnostics showed frequent loss of requirements such as distinctness, ordering, nonnegative results, and nonmutation. Independent tests rejected generic concision and few-shot style steering. Using only unedited activations, I extracted rank-eight specification-sensitive input subspaces from paired underspecified/detailed coding requests, projected away general-purpose, other-language, and underspecified-code control states, and formed dW = alpha W U U^T. Fixed local-effect caps set alpha to approximately 0.462 and 0.434; update Frobenius norms are 2.29% and 1.96% of the original weights. All structural and norm constraints were checked. No gradients, optimizers, iterative loss fitting, edited-model generation, or edited-network simulation were used. Behavioral improvement is not claimed as measured.",
+ "adapter_modules": 2,
+ "adapter_params": 49152,
+ "heldout": {
+  "humaneval": {
+   "n": 164,
+   "pass@1_base": 0.3415,
+   "pass@1_plus": 0.311,
+   "buckets": {
+    "wrong_output": 84,
+    "pass": 51,
+    "exception:TypeError": 7,
+    "syntax_error": 6,
+    "plus_only": 5,
+    "exception:ValueError": 4,
+    "exception:IndexError": 3,
+    "exception:NameError": 2,
+    "exception:UnboundLocalError": 1,
+    "timeout": 1
+   }
+  },
+  "mbpp": {
+   "n": 378,
+   "pass@1_base": 0.2513,
+   "pass@1_plus": 0.2037,
+   "buckets": {
+    "no_code": 105,
+    "wrong_output": 94,
+    "pass": 77,
+    "syntax_error": 31,
+    "truncated": 22,
+    "exception:TypeError": 20,
+    "plus_only": 18,
+    "exception:AssertionError": 5,
+    "exception:IndexError": 2,
+    "exception:ValueError": 2,
+    "exception:NameError": 2
+   }
+  }
+ }
+}

@@ -1,0 +1,67 @@
+  data 40/240
+  data 80/240
+  data 120/240
+  data 160/240
+  data 200/240
+  data 240/240
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  54%|█████▍    | 172/320 [00:00<00:00, 1713.93it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 2039.52it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+  epoch 0: mean loss 0.5124
+  epoch 1: mean loss 0.3911
+  epoch 2: mean loss 0.3479
+{
+ "run": "data_code_qwen_r8_20261106T165244",
+ "method": "Astra writes data (blind) + gradient LoRA",
+ "target": "qwen",
+ "n_examples": 240,
+ "rank": 8,
+ "astra_tokens": {
+  "input": 7975,
+  "output": 117687
+ },
+ "data_s": 2310,
+ "train_s": 125,
+ "adapter_params": 1474560,
+ "heldout": {
+  "humaneval": {
+   "n": 164,
+   "pass@1_base": 0.25,
+   "pass@1_plus": 0.2134,
+   "buckets": {
+    "wrong_output": 105,
+    "pass": 35,
+    "exception:TypeError": 7,
+    "plus_only": 6,
+    "syntax_error": 5,
+    "exception:NameError": 2,
+    "exception:AttributeError": 2,
+    "exception:IndexError": 1,
+    "timeout": 1
+   }
+  },
+  "mbpp": {
+   "n": 378,
+   "pass@1_base": 0.2698,
+   "pass@1_plus": 0.2434,
+   "buckets": {
+    "wrong_output": 142,
+    "pass": 92,
+    "no_code": 80,
+    "exception:TypeError": 29,
+    "plus_only": 10,
+    "exception:IndexError": 5,
+    "syntax_error": 4,
+    "exception:ValueError": 4,
+    "exception:NameError": 3,
+    "exception:AttributeError": 3,
+    "truncated": 1,
+    "exception:RecursionError": 1,
+    "exception:StopIteration": 1,
+    "exception:KeyError": 1,
+    "exception:ZeroDivisionError": 1,
+    "timeout": 1
+   }
+  }
+ }
+}

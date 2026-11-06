@@ -1,0 +1,6 @@
+{"batch": 40, "total": 40, "tokens": {"input": 203, "output": 16667}}
+{"batch": 40, "total": 80, "tokens": {"input": 948, "output": 36085}}
+{"batch": 40, "total": 120, "tokens": {"input": 2265, "output": 55375}}
+{"batch": 40, "total": 160, "tokens": {"input": 4164, "output": 75965}}
+{"batch": 40, "total": 200, "tokens": {"input": 6086, "output": 97939}}
+{"batch": 40, "total": 240, "tokens": {"input": 7975, "output": 117687}}

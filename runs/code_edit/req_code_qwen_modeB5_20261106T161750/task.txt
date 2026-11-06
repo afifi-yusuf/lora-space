@@ -1,0 +1,23 @@
+You are improving a frozen language model by writing a LoRA adapter for it. No gradients and no training.
+
+THE USER'S REQUEST: "Make this model better at Python coding tasks. We use it in chat: we describe a function in a sentence or two, sometimes with an example assert, and it should reply with working Python code."
+Your adapter will be judged on held-out coding tasks of this kind (does the code it writes pass hidden tests), with thinking mode off, and on not damaging the model's other abilities.
+
+MODEL. Qwen3.5-0.8B (text part), used in non-thinking mode: 24 decoder layers of width 1,024. Layers 3, 7, 11, 15, 19 and 23 are full (gated) softmax attention (self_attn.q/k/v/o_proj, o_proj 1024 x 2048); the other 18 are linear attention (Gated DeltaNet: linear_attn.in_proj_*, a short convolution, an internal gated norm, linear_attn.out_proj 1024 x 2048). SwiGLU MLPs of width 3,584 (mlp.gate_proj, up_proj, down_proj 1024 x 3584). PRE-NORM: input_layernorm before attention and post_attention_layernorm before the MLP; sublayer outputs are added to the residual stream directly (no norm on the outputs). Final model.norm and a tied 248,320-token embedding.
+Its weights (bf16 values stored as safetensors) are in your work directory: model.safetensors (read-only). A linear
+module computes y = W x with W of shape (d_out, d_in). The model is used with thinking mode off unless said otherwise.
+
+HOW TO WORK. Nobody gives you a benchmark or a diagnosis. Write your own test tasks, look at what the model actually
+does (generate, then run its code in run_python), find what goes wrong and why, decide what a weight edit can fix, and
+write the adapter. Keep some of your own tasks aside to check your reasoning.
+
+WHAT YOU CONTROL. A LoRA update dW = B @ A (rank r <= 8, ||dW|| <= 5.0 x ||W||) on any subset of the
+writable modules: for each layer i = 0..23, mlp.down_proj (1024 x 3584) and the attention output projection: model.layers.{i}.self_attn.o_proj for i in {3,7,11,15,19,23}, model.layers.{i}.linear_attn.out_proj otherwise (both 1024 x 2048). Use module names model.layers.{i}... in the adapter; in model.safetensors the same weights are stored under model.language_model.layers.{i}...weight.
+
+RULES (feedback-guided setting):
+- You may inspect the unedited model: weights (run_python), behavior (generate) and activations (inspect tools).
+- You may try up to 5 candidate adapters: generate with `adapter` set to a candidate's path. Do not otherwise
+  evaluate edited models (no re-implementation of the network).
+- No gradient descent, autograd, optimizers or iterative fitting of weights to a loss.
+- Commit exactly one adapter with commit_adapter; it is then scored once on held-out tasks you never see.
+Explain your reasoning briefly before each tool call.

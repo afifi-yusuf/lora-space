@@ -1,0 +1,63 @@
+{
+ "run": "req_code_qwen_modeA_20261106T153629",
+ "request": "Make this model better at Python coding tasks. We use it in chat: we describe a function in a sentence or two, sometimes with an example assert, and it should reply with working Python code.",
+ "target": "qwen",
+ "mode": "A (strict one-shot)",
+ "effort": "xhigh",
+ "turns": 18,
+ "generate_calls": 11,
+ "inspect_calls": 12,
+ "candidates_tried": 0,
+ "wall_s": 1080,
+ "tokens": {
+  "input": 847176,
+  "cached": 767202,
+  "output": 39903,
+  "reasoning": 16888
+ },
+ "committed": true,
+ "explanation": "Constructed a conservative, training-free adapter for full-attention output projections in layers 7 and 11. Executable diagnostics showed frequent loss of requirements such as distinctness, ordering, nonnegative results, and nonmutation. Independent tests rejected generic concision and few-shot style steering. Using only unedited activations, I extracted rank-eight specification-sensitive input subspaces from paired underspecified/detailed coding requests, projected away general-purpose, other-language, and underspecified-code control states, and formed dW = alpha W U U^T. Fixed local-effect caps set alpha to approximately 0.462 and 0.434; update Frobenius norms are 2.29% and 1.96% of the original weights. All structural and norm constraints were checked. No gradients, optimizers, iterative loss fitting, edited-model generation, or edited-network simulation were used. Behavioral improvement is not claimed as measured.",
+ "adapter_modules": 2,
+ "adapter_params": 49152,
+ "rel_norms": {
+  "model.layers.7.self_attn.o_proj": 0.0229,
+  "model.layers.11.self_attn.o_proj": 0.0196
+ },
+ "heldout": {
+  "humaneval": {
+   "n": 164,
+   "pass@1_base": 0.3415,
+   "pass@1_plus": 0.311,
+   "buckets": {
+    "wrong_output": 84,
+    "pass": 51,
+    "exception:TypeError": 7,
+    "syntax_error": 6,
+    "plus_only": 5,
+    "exception:ValueError": 4,
+    "exception:IndexError": 3,
+    "exception:NameError": 2,
+    "exception:UnboundLocalError": 1,
+    "timeout": 1
+   }
+  },
+  "mbpp": {
+   "n": 378,
+   "pass@1_base": 0.2513,
+   "pass@1_plus": 0.2037,
+   "buckets": {
+    "no_code": 105,
+    "wrong_output": 94,
+    "pass": 77,
+    "syntax_error": 31,
+    "truncated": 22,
+    "exception:TypeError": 20,
+    "plus_only": 18,
+    "exception:AssertionError": 5,
+    "exception:IndexError": 2,
+    "exception:ValueError": 2,
+    "exception:NameError": 2
+   }
+  }
+ }
+}

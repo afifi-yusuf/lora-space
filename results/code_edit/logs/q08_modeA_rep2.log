@@ -1,0 +1,84 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  75%|███████▌  | 240/320 [00:00<00:00, 2388.33it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 2441.10it/s]
+turn 1: 18.7s in=1287 cached=1284 out=899 tools=['run_python', 'generate']
+turn 2: 13.2s in=8839 cached=1284 out=974 tools=['run_python', 'generate', 'generate']
+turn 3: 17.5s in=18720 cached=8836 out=970 tools=['run_python', 'generate']
+turn 4: 7.4s in=22104 cached=18717 out=378 tools=['run_python']
+turn 5: 43.4s in=25099 cached=22101 out=2748 tools=['run_python', 'generate', 'run_python']
+turn 6: 38.7s in=36150 cached=25096 out=2309 tools=['generate']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 7: 17.3s in=40439 cached=36147 out=899 tools=['inspect']
+turn 8: 32.6s in=42626 cached=40436 out=1750 tools=['run_python', 'generate']
+turn 9: 18.3s in=48683 cached=42623 out=1204 tools=['inspect_module_inputs']
+turn 10: 11.7s in=50652 cached=48680 out=602 tools=['run_python']
+turn 11: 48.2s in=52956 cached=50649 out=1740 tools=['generate']
+turn 12: 18.7s in=56866 cached=52953 out=904 tools=['generate']
+turn 13: 100.9s in=61129 cached=56863 out=3974 tools=['inspect_module_inputs']
+turn 14: 17.7s in=65204 cached=61126 out=931 tools=['inspect_module_inputs']
+turn 15: 26.6s in=66236 cached=65201 out=1278 tools=['inspect_module_inputs']
+turn 16: 17.5s in=67615 cached=66233 out=840 tools=['inspect_module_inputs']
+turn 17: 27.9s in=68556 cached=67612 out=1299 tools=['inspect_module_inputs']
+turn 18: 24.5s in=69956 cached=68553 out=1131 tools=['run_python']
+turn 19: 62.8s in=71950 cached=69953 out=2321 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 20: 42.5s in=74407 cached=71947 out=1852 tools=['run_python']
+turn 21: 13.6s in=77622 cached=74404 out=514 tools=['commit_adapter']
+{
+ "run": "req_code_qwen_modeA_20261106T160020",
+ "request": "Make this model better at Python coding tasks. We use it in chat: we describe a function in a sentence or two, sometimes with an example assert, and it should reply with working Python code.",
+ "target": "qwen",
+ "mode": "A (strict one-shot)",
+ "effort": "xhigh",
+ "turns": 21,
+ "generate_calls": 9,
+ "inspect_calls": 9,
+ "candidates_tried": 0,
+ "wall_s": 714,
+ "tokens": {
+  "input": 1027096,
+  "cached": 950698,
+  "output": 29517,
+  "reasoning": 10770
+ },
+ "committed": true,
+ "explanation": "Tested unedited Python replies with executable edge-case tests and a separate reserved task set. Observed algorithmic errors, ignored constraints, and repetitive continuations; thinking, hints, and style changes did not yield a reliably superior mode. Constructed a conservative, analytic context-amplification adapter: at full-attention output projections in layers 11, 15, and 19, identify eight principal input directions varying across coding tasks under identical code prefixes, after projecting away sampled ordinary-chat inputs and shared code-prefix means. Apply dW = gain * W * Q * Q.T with gains 0.25, 0.25, and 0.20. This strengthens existing task-dependent attention rather than introducing task-specific answers or globally changing output style. Each update has about 1% of its original weight's Frobenius norm. Verified shapes, rank, norm bounds, and exact local effects on saved unedited inputs, including reserved coding and prose examples. No gradients, optimizer, iterative loss fitting, or edited-model evaluation were used. Behavioral improvement is not claimed as verified.",
+ "adapter_modules": 3,
+ "adapter_params": 73728,
+ "heldout": {
+  "humaneval": {
+   "n": 164,
+   "pass@1_base": 0.3415,
+   "pass@1_plus": 0.3049,
+   "buckets": {
+    "wrong_output": 79,
+    "pass": 50,
+    "exception:TypeError": 11,
+    "exception:ValueError": 7,
+    "plus_only": 6,
+    "syntax_error": 4,
+    "exception:NameError": 3,
+    "exception:IndexError": 2,
+    "exception:AttributeError": 1,
+    "exception:KeyError": 1
+   }
+  },
+  "mbpp": {
+   "n": 378,
+   "pass@1_base": 0.2566,
+   "pass@1_plus": 0.209,
+   "buckets": {
+    "no_code": 105,
+    "wrong_output": 86,
+    "pass": 79,
+    "syntax_error": 38,
+    "plus_only": 18,
+    "exception:TypeError": 15,
+    "truncated": 13,
+    "exception:AssertionError": 11,
+    "exception:IndexError": 5,
+    "exception:ValueError": 4,
+    "exception:ZeroDivisionError": 2,
+    "exception:NameError": 2
+   }
+  }
+ }
+}

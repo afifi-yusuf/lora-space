@@ -1,0 +1,38 @@
+{
+ "humaneval": {
+  "n": 164,
+  "pass@1_base": 0.3415,
+  "pass@1_plus": 0.3049,
+  "buckets": {
+   "wrong_output": 79,
+   "pass": 50,
+   "exception:TypeError": 11,
+   "exception:ValueError": 7,
+   "plus_only": 6,
+   "syntax_error": 4,
+   "exception:NameError": 3,
+   "exception:IndexError": 2,
+   "exception:AttributeError": 1,
+   "exception:KeyError": 1
+  }
+ },
+ "mbpp": {
+  "n": 378,
+  "pass@1_base": 0.2566,
+  "pass@1_plus": 0.209,
+  "buckets": {
+   "no_code": 105,
+   "wrong_output": 86,
+   "pass": 79,
+   "syntax_error": 38,
+   "plus_only": 18,
+   "exception:TypeError": 15,
+   "truncated": 13,
+   "exception:AssertionError": 11,
+   "exception:IndexError": 5,
+   "exception:ValueError": 4,
+   "exception:ZeroDivisionError": 2,
+   "exception:NameError": 2
+  }
+ }
+}
