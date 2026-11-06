@@ -1,0 +1,11 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  94%|█████████▍| 300/320 [00:00<00:00, 2960.96it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 2774.70it/s]
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+  0/501 kept 1
+  100/501 kept 73
+  200/501 kept 173
+  300/501 kept 273
+  400/501 kept 337
+  500/501 kept 411
+pool 501 known 411 {'capital': 60, 'sum': 81, 'product': 64, 'difference': 111, 'colour': 1, 'opposite': 24, 'legs': 14, 'day': 7, 'month': 12, 'continent': 16, 'language': 10, 'word_number': 11}
+{'heldout': 136, 'train': 273}

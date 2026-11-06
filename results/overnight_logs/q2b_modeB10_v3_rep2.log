@@ -1,0 +1,76 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 5398.60it/s]
+turn 1: 11.0s in=1646 cached=0 out=391 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 2: 15.7s in=5931 cached=1643 out=861 tools=['inspect']
+turn 3: 16.9s in=10149 cached=5928 out=1404 tools=['inspect']
+turn 4: 16.6s in=14931 cached=10146 out=1376 tools=['inspect']
+turn 5: 17.8s in=19687 cached=14928 out=1001 tools=['run_python']
+turn 6: 29.3s in=21973 cached=19684 out=1439 tools=['inspect_module_inputs']
+turn 7: 5.7s in=23898 cached=21970 out=171 tools=['run_python']
+turn 8: 3.9s in=24080 cached=23895 out=55 tools=['evaluate_candidate']
+turn 9: 32.8s in=24184 cached=23895 out=2170 tools=['inspect_module_inputs']
+turn 10: 22.2s in=26840 cached=24181 out=1667 tools=['inspect_module_inputs']
+turn 11: 35.9s in=28993 cached=26837 out=1326 tools=['run_python']
+turn 12: 10.6s in=31518 cached=28990 out=103 tools=['evaluate_candidate']
+turn 13: 9.2s in=31670 cached=31515 out=231 tools=['run_python']
+turn 14: 4.4s in=31939 cached=31667 out=73 tools=['evaluate_candidate']
+turn 15: 5.1s in=32060 cached=31936 out=167 tools=['run_python']
+turn 16: 4.7s in=32238 cached=32057 out=56 tools=['evaluate_candidate']
+turn 17: 25.3s in=32343 cached=32057 out=1583 tools=['inspect']
+turn 18: 31.6s in=37266 cached=32340 out=1310 tools=['run_python']
+turn 19: 7.1s in=39820 cached=37263 out=108 tools=['evaluate_candidate']
+turn 20: 13.7s in=39976 cached=39817 out=404 tools=['run_python']
+turn 21: 15.4s in=41673 cached=39973 out=1099 tools=['inspect']
+turn 22: 13.4s in=46096 cached=41670 out=607 tools=['run_python']
+turn 23: 3.6s in=47251 cached=46093 out=87 tools=['evaluate_candidate']
+turn 24: 25.3s in=47387 cached=47248 out=1627 tools=['inspect_module_inputs']
+turn 25: 14.4s in=49126 cached=47384 out=1066 tools=['inspect_module_inputs']
+turn 26: 18.3s in=50304 cached=50301 out=520 tools=['run_python']
+turn 27: 24.4s in=51679 cached=50301 out=1066 tools=['run_python']
+turn 28: 4.0s in=52923 cached=51676 out=77 tools=['evaluate_candidate']
+turn 29: 12.9s in=53048 cached=52920 out=401 tools=['run_python']
+turn 30: 4.1s in=54148 cached=53045 out=112 tools=['evaluate_candidate']
+turn 31: 29.1s in=54308 cached=54145 out=1061 tools=['run_python']
+turn 32: 36.7s in=55847 cached=54305 out=1384 tools=['run_python']
+turn 33: 14.3s in=57585 cached=55844 out=404 tools=['run_python']
+turn 34: 3.8s in=58078 cached=57582 out=60 tools=['evaluate_candidate']
+turn 35: 44.0s in=58187 cached=58075 out=1334 tools=['run_python']
+turn 36: 7.1s in=59532 cached=58184 out=63 tools=['evaluate_candidate']
+turn 37: 16.8s in=59643 cached=58184 out=618 tools=['run_python']
+turn 38: 9.3s in=60345 cached=59640 out=278 tools=['commit_adapter']
+{
+ "run": "astra_qwen2b_modeB10_hint_v3_20261106T053838",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 38,
+ "inspect_calls": 10,
+ "feedback_calls": 10,
+ "wall_s": 1033,
+ "tokens": {
+  "input": 1468302,
+  "cached": 1407319,
+  "output": 27760,
+  "reasoning": 8569
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.051470588235294115,
+  "right_acc": 0.9779411764705882,
+  "plain_acc": 0.9926470588235294,
+  "wrong_follow_known": 0.05185185185185185,
+  "para_follow_known": 0.09876543209876543,
+  "para_follow_by_template": [
+   0.13333333333333333,
+   0.15555555555555556,
+   0.007407407407407408
+  ],
+  "n": 136,
+  "n_known": 135
+ },
+ "explanation": "Rank-one update to layer 13 mlp.down_proj, constructed analytically from matched plain/correct-guess/wrong-guess activations. The output direction strengthens the wrong-versus-correct distinction after removing its component parallel to the correct-guess-versus-plain shift. The input readout has zero mean response on plain prompts and equal mean response on both guess conditions. Exact module inputs calibrated the local correction to one measured contrast unit. Alternate phrasings showed consistent direction and gate responses. Selected the smallest simple candidate among feedback ties: wrong_follow improved from 0.0574 to 0.0410, with right_acc and plain_acc unchanged at 0.9919. No gradients, training, or edited-model evaluation outside the authorized feedback tool.",
+ "adapter_modules": 1,
+ "adapter_params": 8192
+}

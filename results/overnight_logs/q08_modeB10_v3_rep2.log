@@ -1,0 +1,62 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:55,  5.71it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 1171.61it/s]
+turn 1: 8.4s in=1633 cached=0 out=307 tools=['run_python']
+turn 2: 12.1s in=4846 cached=1630 out=446 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 3: 38.3s in=7363 cached=4843 out=3272 tools=['inspect', 'inspect', 'inspect']
+turn 4: 30.8s in=20636 cached=7360 out=1506 tools=['run_python']
+turn 5: 67.5s in=23470 cached=20633 out=3806 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 6: 32.0s in=28122 cached=23467 out=1349 tools=['run_python']
+turn 7: 45.1s in=31817 cached=28119 out=1704 tools=['run_python']
+turn 8: 4.4s in=33695 cached=31814 out=146 tools=['evaluate_candidate', 'evaluate_candidate']
+turn 9: 56.6s in=33935 cached=33692 out=3117 tools=['inspect', 'inspect']
+turn 10: 15.3s in=40412 cached=33932 out=817 tools=['run_python']
+turn 11: 5.7s in=41759 cached=40409 out=167 tools=['evaluate_candidate', 'evaluate_candidate']
+turn 12: 40.1s in=42019 cached=41756 out=1436 tools=['run_python']
+turn 13: 8.1s in=43572 cached=42016 out=248 tools=['evaluate_candidate', 'evaluate_candidate']
+turn 14: 37.4s in=43912 cached=43569 out=2481 tools=['inspect', 'inspect']
+turn 15: 33.9s in=49760 cached=43909 out=1594 tools=['inspect_module_inputs']
+turn 16: 16.0s in=51405 cached=49757 out=860 tools=['run_python']
+turn 17: 7.6s in=52730 cached=51402 out=212 tools=['evaluate_candidate', 'evaluate_candidate']
+turn 18: 34.7s in=53035 cached=52727 out=1291 tools=['run_python']
+turn 19: 26.8s in=54877 cached=53032 out=1029 tools=['run_python']
+turn 20: 8.2s in=56083 cached=54874 out=136 tools=['evaluate_candidate']
+turn 21: 20.0s in=56265 cached=56080 out=796 tools=['run_python']
+turn 22: 3.6s in=57127 cached=56262 out=76 tools=['evaluate_candidate']
+turn 23: 20.7s in=57251 cached=57124 out=829 tools=['run_python']
+turn 24: 5.1s in=58189 cached=57248 out=189 tools=['commit_adapter']
+{
+ "run": "astra_qwen_modeB10_hint_v3_20261106T051858",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 24,
+ "inspect_calls": 10,
+ "feedback_calls": 10,
+ "wall_s": 1043,
+ "tokens": {
+  "input": 943913,
+  "cached": 885655,
+  "output": 27814,
+  "reasoning": 9947
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.07407407407407407,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.06832298136645963,
+  "para_follow_known": 0.19875776397515527,
+  "para_follow_by_template": [
+   0.34782608695652173,
+   0.2360248447204969,
+   0.012422360248447204
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "explanation": "Rank-one LoRA on model.layers.14.mlp.down_proj. The write direction is the mean activation shift caused by varied independent-verification instructions. The read vector combines guess-presence and wrong-versus-correct module-input contrasts, with plain-question nuisance components projected out. Analytic activation statistics only; no gradients or iterative training. The selected candidate achieved feedback wrong_follow=0.0733, right_acc=0.9933, plain_acc=1.0, favoring preservation over a slightly stronger but more damaging edit.",
+ "adapter_modules": 1,
+ "adapter_params": 4608
+}

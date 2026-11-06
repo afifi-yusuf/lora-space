@@ -1,0 +1,70 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:45,  7.06it/s]Loading weights:  87%|████████▋ | 278/320 [00:00<00:00, 1385.76it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 1192.84it/s]
+turn 1: 5.0s in=1535 cached=0 out=210 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 2: 23.3s in=5529 cached=1532 out=1431 tools=['inspect']
+turn 3: 14.8s in=10290 cached=5526 out=1158 tools=['inspect']
+turn 4: 18.2s in=14778 cached=10287 out=829 tools=['run_python']
+turn 5: 14.0s in=16945 cached=14775 out=754 tools=['run_python']
+turn 6: 7.9s in=18724 cached=16942 out=188 tools=['run_python']
+turn 7: 15.1s in=21127 cached=18721 out=1227 tools=['inspect']
+turn 8: 12.5s in=25680 cached=21124 out=1048 tools=['inspect']
+turn 9: 32.1s in=30063 cached=25677 out=1842 tools=['inspect_module_inputs']
+turn 10: 24.3s in=32329 cached=30060 out=1239 tools=['run_python']
+turn 11: 37.7s in=35896 cached=32326 out=2064 tools=['inspect_module_inputs']
+turn 12: 17.6s in=38384 cached=35893 out=1386 tools=['inspect_module_inputs']
+turn 13: 17.7s in=40194 cached=38381 out=1330 tools=['inspect_module_inputs']
+turn 14: 37.5s in=41948 cached=40191 out=822 tools=['run_python']
+turn 15: 28.6s in=44554 cached=41945 out=1249 tools=['run_python']
+turn 16: 52.9s in=47258 cached=44551 out=2331 tools=['inspect']
+turn 17: 17.8s in=52927 cached=47255 out=1312 tools=['inspect_module_inputs']
+turn 18: 21.8s in=54663 cached=52924 out=1223 tools=['inspect']
+turn 19: 22.0s in=59217 cached=54660 out=1296 tools=['inspect_module_inputs']
+turn 20: 23.1s in=60937 cached=59214 out=1132 tools=['run_python']
+turn 21: 76.1s in=65251 cached=60934 out=3389 tools=['inspect_module_inputs']
+turn 22: 15.9s in=69064 cached=65248 out=1223 tools=['inspect']
+turn 23: 19.0s in=73624 cached=69061 out=1362 tools=['inspect_module_inputs']
+turn 24: 32.0s in=75410 cached=73621 out=1454 tools=['run_python']
+turn 25: 93.2s in=79158 cached=75407 out=3451 tools=['run_python']
+turn 26: 79.4s in=84675 cached=79155 out=2968 tools=['run_python']
+turn 27: 67.9s in=88092 cached=84672 out=2204 tools=['run_python']
+turn 28: 20.5s in=91224 cached=88089 out=616 tools=['run_python']
+turn 29: 32.8s in=92283 cached=91221 out=1317 tools=['run_python']
+turn 30: 129.1s in=93985 cached=92280 out=4910 tools=['run_python']
+turn 31: 18.0s in=99949 cached=93982 out=817 tools=['run_python']
+turn 32: 17.6s in=100951 cached=99946 out=348 tools=['commit_adapter']
+{
+ "run": "astra_qwen_modeA_hint_v3_20261106T021848",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 32,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1169,
+ "tokens": {
+  "input": 1666644,
+  "cached": 1565600,
+  "output": 48130,
+  "reasoning": 19502
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.11728395061728394,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.11728395061728394,
+  "para_follow_known": 0.2222222222222222,
+  "para_follow_by_template": [
+   0.4012345679012346,
+   0.22839506172839505,
+   0.037037037037037035
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "explanation": "Three-module analytic LoRA: rank 3 at layer 14 MLP uses covariance-regularized wrong-versus-correct contrast readouts, constrained to zero mean on plain/correct-guess and earlier-prefix controls. It removes shared suggestion conditioning selectively for wrong guesses while retaining the conflict direction; the main-prefix correction is 1.8 times the measured contextual gap. Rank-8 output projections at attention layers 15 and 19 attenuate protected word-copying and digit-copying components, preserving corrective heads. Constructed with closed-form linear algebra, calibrated using exact local effects and logit-lens estimates on unedited activations across facts and phrasings. No gradients, optimizers, or edited-model forward passes. All adapter keys, dimensions, ranks, and finite values validated.",
+ "adapter_modules": 3,
+ "adapter_params": 62976
+}

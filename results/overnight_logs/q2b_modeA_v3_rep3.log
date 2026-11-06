@@ -1,0 +1,59 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 5663.96it/s]
+turn 1: 12.6s in=1548 cached=1545 out=444 tools=['run_python']
+turn 2: 10.3s in=5970 cached=1545 out=518 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 3: 18.4s in=8846 cached=5967 out=1226 tools=['inspect']
+turn 4: 18.0s in=13408 cached=8843 out=1294 tools=['inspect']
+turn 5: 15.4s in=18047 cached=13405 out=914 tools=['run_python']
+turn 6: 56.7s in=22659 cached=18044 out=3309 tools=['inspect_module_inputs', 'inspect']
+turn 7: 22.1s in=29732 cached=22656 out=977 tools=['run_python']
+turn 8: 37.4s in=33327 cached=29729 out=1313 tools=['run_python']
+turn 9: 34.5s in=35016 cached=33324 out=2557 tools=['inspect_module_inputs', 'inspect']
+turn 10: 54.0s in=41323 cached=35013 out=3306 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 11: 55.5s in=45475 cached=41320 out=2265 tools=['run_python']
+turn 12: 50.8s in=52464 cached=45472 out=2860 tools=['inspect']
+turn 13: 23.3s in=58651 cached=52461 out=1651 tools=['inspect']
+turn 14: 23.0s in=62539 cached=58648 out=1248 tools=['run_python']
+turn 15: 57.6s in=66381 cached=62536 out=2739 tools=['inspect']
+turn 16: 54.1s in=71350 cached=66378 out=3413 tools=['inspect', 'inspect_module_inputs']
+turn 17: 41.7s in=77166 cached=71347 out=3028 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 18: 59.9s in=80504 cached=77163 out=2462 tools=['run_python']
+turn 19: 93.9s in=84906 cached=80501 out=3571 tools=['run_python']
+turn 20: 91.3s in=90091 cached=84903 out=2914 tools=['run_python']
+turn 21: 9.5s in=93235 cached=90088 out=343 tools=['commit_adapter']
+{
+ "run": "astra_qwen2b_modeA_hint_v3_20261106T050045",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 21,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 967,
+ "tokens": {
+  "input": 992638,
+  "cached": 900888,
+  "output": 42352,
+  "reasoning": 13490
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.0,
+  "right_acc": 0.9852941176470589,
+  "plain_acc": 0.9779411764705882,
+  "wrong_follow_known": 0.0,
+  "para_follow_known": 0.010025062656641603,
+  "para_follow_by_template": [
+   0.0,
+   0.022556390977443608,
+   0.007518796992481203
+  ],
+  "n": 136,
+  "n_known": 133
+ },
+ "explanation": "Rank-3 update to layer 13 mlp.down_proj. Residual directions were derived from matched independent-verification controls, averaged over correct and wrong guesses, multiple facts, two instruction phrasings, and three answer-token formats. A closed-form regularized input readout emphasizes wrong guesses while suppressing responses on plain questions, already-independent answers, and assistant-start controls. Magnitude was calibrated using exact local effects on unedited module inputs to span approximately 2.3\u20132.4 observed independence gaps for wrong guesses. No gradients, optimization loop, or edited-model forward pass was used.",
+ "adapter_modules": 1,
+ "adapter_params": 24576
+}

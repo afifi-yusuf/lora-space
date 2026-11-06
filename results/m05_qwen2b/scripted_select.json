@@ -1,0 +1,150 @@
+{
+ "heldout": {
+  "wrong_follow": 0.04411764705882353,
+  "right_acc": 0.9705882352941176,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.04411764705882353,
+  "para_follow_known": 0.09068627450980392,
+  "para_follow_by_template": [
+   0.11029411764705882,
+   0.15441176470588236,
+   0.007352941176470588
+  ],
+  "n": 136,
+  "n_known": 136
+ },
+ "train": {
+  "wrong_follow": 0.08666666666666667,
+  "right_acc": 0.9866666666666667,
+  "plain_acc": 0.9933333333333333,
+  "wrong_follow_known": 0.08053691275167785,
+  "n": 150,
+  "n_known": 149
+ },
+ "layer": 15,
+ "selection_sweep": [
+  {
+   "layer": 0,
+   "wrong_follow_known": 0.1111111111111111,
+   "plain_acc": 0.9512195121951219
+  },
+  {
+   "layer": 1,
+   "wrong_follow_known": 0.0743801652892562,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 2,
+   "wrong_follow_known": 0.06666666666666667,
+   "plain_acc": 0.975609756097561
+  },
+  {
+   "layer": 3,
+   "wrong_follow_known": 0.040983606557377046,
+   "plain_acc": 0.991869918699187
+  },
+  {
+   "layer": 4,
+   "wrong_follow_known": 0.1271186440677966,
+   "plain_acc": 0.959349593495935
+  },
+  {
+   "layer": 5,
+   "wrong_follow_known": 0.0743801652892562,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 6,
+   "wrong_follow_known": 0.09166666666666666,
+   "plain_acc": 0.975609756097561
+  },
+  {
+   "layer": 7,
+   "wrong_follow_known": 0.11382113821138211,
+   "plain_acc": 1.0
+  },
+  {
+   "layer": 8,
+   "wrong_follow_known": 0.12195121951219512,
+   "plain_acc": 1.0
+  },
+  {
+   "layer": 9,
+   "wrong_follow_known": 0.09836065573770492,
+   "plain_acc": 0.991869918699187
+  },
+  {
+   "layer": 10,
+   "wrong_follow_known": 0.10743801652892562,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 11,
+   "wrong_follow_known": 0.22950819672131148,
+   "plain_acc": 0.991869918699187
+  },
+  {
+   "layer": 12,
+   "wrong_follow_known": 0.0743801652892562,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 13,
+   "wrong_follow_known": 0.09090909090909091,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 14,
+   "wrong_follow_known": 0.06557377049180328,
+   "plain_acc": 0.991869918699187
+  },
+  {
+   "layer": 15,
+   "wrong_follow_known": 0.01652892561983471,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 16,
+   "wrong_follow_known": 0.024793388429752067,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 17,
+   "wrong_follow_known": 0.15702479338842976,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 18,
+   "wrong_follow_known": 0.12396694214876033,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 19,
+   "wrong_follow_known": 0.11570247933884298,
+   "plain_acc": 0.983739837398374
+  },
+  {
+   "layer": 20,
+   "wrong_follow_known": 0.11666666666666667,
+   "plain_acc": 0.975609756097561
+  },
+  {
+   "layer": 21,
+   "wrong_follow_known": 0.07563025210084033,
+   "plain_acc": 0.967479674796748
+  },
+  {
+   "layer": 22,
+   "wrong_follow_known": 0.06722689075630252,
+   "plain_acc": 0.967479674796748
+  },
+  {
+   "layer": 23,
+   "wrong_follow_known": 0.03305785123966942,
+   "plain_acc": 0.983739837398374
+  }
+ ],
+ "seconds": 1029,
+ "adapter_params": 294912,
+ "adapter_modules": 48
+}

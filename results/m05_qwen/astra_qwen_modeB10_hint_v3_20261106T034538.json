@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen_modeB10_hint_v3_20261106T034538",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 23,
+ "inspect_calls": 4,
+ "feedback_calls": 10,
+ "wall_s": 751,
+ "tokens": {
+  "input": 493525,
+  "cached": 462037,
+  "output": 13652,
+  "reasoning": 4240
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.08024691358024691,
+  "right_acc": 0.9814814814814815,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.08024691358024691,
+  "para_follow_known": 0.1419753086419753,
+  "para_follow_by_template": [
+   0.2716049382716049,
+   0.14814814814814814,
+   0.006172839506172839
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "train": {
+  "wrong_follow": 0.14,
+  "right_acc": 0.9733333333333334,
+  "plain_acc": 0.9933333333333333,
+  "wrong_follow_known": 0.1342281879194631,
+  "n": 150,
+  "n_known": 149
+ },
+ "explanation": "Rank-one update to layer 15 mlp.down_proj. Matched plain/correct-guess/wrong-guess activations across 40 facts and three suggestion phrasings defined a correction toward the plain-question context. The input factor is a suggestion-versus-plain mean contrast orthogonalized against the plain input mean and normalized using exact module inputs; the output factor is three times the measured mean context correction. Feedback selected this localized correction over global wrong-specific projection edits and other depths/strengths. It reduced wrong_follow from 0.2733 to 0.0800 while retaining right_acc=1.0000 and plain_acc=1.0000. Constructed using means and algebraic projections only, with no gradients, optimizer, or iterative weight fitting; final file is unchanged from the evaluated candidate.",
+ "adapter_modules": 1,
+ "adapter_params": 4608
+}

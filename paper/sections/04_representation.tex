@@ -40,4 +40,4 @@ Base (edit size) & $1.36\times10^{-2}$ & $1.57\times10^{-1}$ & 97.2\% \\
 \end{table}
 
 The LoRA's deviation is ${\sim}39\times$ smaller than the edit's own effect; the residual is bf16 rounding.
-Sampled MATH-500 accuracy of the rank-1 LoRA under the paper's protocol: \pending{\todo{running}}.
+Under the paper's sampling protocol the rank-1 LoRA scores 51.2\% on MATH-500 (500 problems $\times$ 4 samples), against the 48.1\% the paper reports for the exact edit. On a common subset of 200 problems $\times$ 2 samples, the rank-1 LoRA scores 53.5\% and the exact edit 56.8\% (paired bootstrap 95\% CI for the difference: $-7.8$ to $+1.0$ points). \todo{add the base-model number when its run finishes}

@@ -19,18 +19,16 @@ All three edits were rebuilt bit-exactly from the public base weights (every ten
   0.58–0.72 vs. the 10-pass directions — a shared "repetition subspace" rather than a single vector.
 - LoRA factors for ranks 1–256 are saved (git-ignored) in `checkpoints/m0_lora/`.
 
-## Behavioral equivalence (teacher-forced)
+**MATH-500 with the paper's protocol** (vLLM; temperature 0.6, top-p 0.95, top-k 20, presence penalty 1.5,
+≤ 32,768 tokens, thinking on), finished 2026-11-06:
 
-[`scripts/m0_equivalence.py`](../../scripts/m0_equivalence.py) · [`equivalence.json`](equivalence.json): the paper's
-released MATH-500 reasoning texts from the exact 50-pass model (30 texts × first 1,024 generated tokens = 30,720 tokens,
-thinking mode), scored by the exact edit, the rank-1 LoRA merge and the unedited base.
+| Model | Problems × samples | Accuracy | Samples cut at 32K tokens |
+|---|---|---|---|
+| Rank-1 LoRA (50-pass edit) | 500 × 4 | **51.2%** | 31.6% |
+| Rank-1 LoRA, same subset as below | 200 × 2 | 53.5% | |
+| Exact 50-pass edit | 200 × 2 | 56.8% | 27.8% |
+| Paper's reported number for the exact edit | 500 | 48.1% | |
 
-| vs. exact 50-pass edit | Mean KL | 99th pct KL | Top-1 agreement |
-|---|---:|---:|---:|
-| **Rank-1 LoRA version** | **0.00035** | 0.0024 | **99.5%** |
-| Unedited base (size of the edit) | 0.0136 | 0.157 | 97.2% |
-
-The LoRA's deviation from the exact edit is ~39× smaller than the edit's own effect; the residual is bf16 rounding.
-
-**Still running (sampled accuracy, L4, ~15–18 h):** evaluate the rank-1 LoRA version with the paper's protocol (vLLM, temperature 0.6,
-top-p 0.95, top-k 20, presence penalty 1.5, ≤ 32,768 tokens) and confirm it reproduces 48.1% on MATH-500.
+The rank-1 LoRA matches or beats the paper's own headline. On the same 200 problems it is 3.3 points below the exact edit
+(paired bootstrap 95% CI −7.8 to +1.0, so not significant). Per-problem results: `eval/<model>/math500_per_problem.json`.
+The base-model run (200 × 1) is still going.

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/srv/lso-editor/code/code_diag.py", line 201, in <module>
+    main()
+  File "/srv/lso-editor/code/code_diag.py", line 197, in main
+    evaluate(Path(a.dir), Path(a.problems))
+  File "/srv/lso-editor/code/code_diag.py", line 129, in evaluate
+    samples = [json.loads(l) for l in open(run_dir / f"{s}_samples.jsonl")]
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/srv/lso-editor/code/q2b_think8k/humaneval_samples.jsonl'

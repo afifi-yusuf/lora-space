@@ -1,0 +1,67 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:41,  7.73it/s]Loading weights:  87%|████████▋ | 278/320 [00:00<00:00, 1439.42it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 1263.63it/s]
+turn 1: 9.9s in=1535 cached=1532 out=370 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 2: 16.4s in=6195 cached=1532 out=1165 tools=['inspect']
+turn 3: 16.6s in=10535 cached=6192 out=1137 tools=['inspect']
+turn 4: 13.1s in=14849 cached=10532 out=682 tools=['run_python']
+turn 5: 16.3s in=17245 cached=14846 out=1185 tools=['inspect']
+turn 6: 14.5s in=21621 cached=17242 out=702 tools=['run_python']
+turn 7: 22.7s in=24253 cached=21618 out=1400 tools=['inspect']
+turn 8: 12.7s in=28830 cached=24250 out=952 tools=['inspect']
+turn 9: 18.9s in=32962 cached=28827 out=1031 tools=['run_python']
+turn 10: 30.9s in=35407 cached=32959 out=1783 tools=['inspect_module_inputs']
+turn 11: 11.8s in=37614 cached=35404 out=684 tools=['run_python']
+turn 12: 34.0s in=39888 cached=37611 out=1849 tools=['inspect_module_inputs']
+turn 13: 13.5s in=41987 cached=39885 out=1121 tools=['inspect_module_inputs']
+turn 14: 33.5s in=43358 cached=41984 out=1761 tools=['inspect']
+turn 15: 17.6s in=48294 cached=43355 out=1189 tools=['inspect_module_inputs']
+turn 16: 34.2s in=49733 cached=48291 out=1862 tools=['inspect_module_inputs']
+turn 17: 28.6s in=51845 cached=49730 out=1345 tools=['run_python']
+turn 18: 19.5s in=53282 cached=51842 out=1063 tools=['run_python']
+turn 19: 41.3s in=55771 cached=53279 out=1474 tools=['run_python']
+turn 20: 25.6s in=59830 cached=55768 out=1074 tools=['run_python']
+turn 21: 45.1s in=62033 cached=59827 out=2336 tools=['inspect']
+turn 22: 14.5s in=67522 cached=62030 out=684 tools=['run_python']
+turn 23: 77.9s in=69238 cached=67519 out=3071 tools=['inspect_module_inputs']
+turn 24: 19.7s in=72480 cached=69235 out=1141 tools=['inspect_module_inputs']
+turn 25: 13.2s in=73792 cached=72477 out=614 tools=['run_python']
+turn 26: 64.4s in=76782 cached=73789 out=2643 tools=['inspect_module_inputs']
+turn 27: 114.4s in=79596 cached=76779 out=4592 tools=['run_python']
+turn 28: 31.6s in=85264 cached=79593 out=1140 tools=['run_python']
+turn 29: 21.5s in=86656 cached=85261 out=686 tools=['commit_adapter']
+{
+ "run": "astra_qwen_modeA_hint_v3_20261106T024035",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 29,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 959,
+ "tokens": {
+  "input": 1348397,
+  "cached": 1263189,
+  "output": 40736,
+  "reasoning": 15746
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.25925925925925924,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.25925925925925924,
+  "para_follow_known": 0.345679012345679,
+  "para_follow_by_template": [
+   0.6049382716049383,
+   0.41358024691358025,
+   0.018518518518518517
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "explanation": "Two rank-one MLP-output updates, at layers 14 and 18 immediately before the strongest observed answer-copying attention layers. Input factors are closed-form covariance-conditioned wrong-versus-correct contrasts with explicit nuisance constraints preserving plain questions, correct agreement, numeric answers, and other response positions. Output factors use the fact-averaged activation direction induced by asking the unedited model to answer independently. Strengths are 1.4 and 0.8 times the corresponding measured independence shifts, providing margin without directly encoding particular answers. Shapes, ranks, finite values, and exact local effects on unedited module inputs were checked. No gradients, iterative optimization, or edited-model forward passes were used.",
+ "adapter_modules": 2,
+ "adapter_params": 9216
+}

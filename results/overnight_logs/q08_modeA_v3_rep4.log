@@ -1,0 +1,60 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:48,  6.57it/s]Loading weights:  90%|████████▉ | 287/320 [00:00<00:00, 1377.19it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 1180.97it/s]
+turn 1: 8.3s in=1535 cached=1532 out=265 tools=['run_python']
+turn 2: 17.8s in=4478 cached=1532 out=760 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 3: 22.6s in=7323 cached=4475 out=2067 tools=['inspect', 'inspect']
+turn 4: 13.9s in=16054 cached=7320 out=730 tools=['run_python']
+turn 5: 11.3s in=16833 cached=16051 out=812 tools=['run_python']
+turn 6: 26.4s in=20762 cached=16830 out=1528 tools=['run_python', 'inspect']
+turn 7: 48.4s in=25961 cached=20759 out=2327 tools=['inspect_module_inputs']
+turn 8: 10.5s in=28712 cached=25958 out=536 tools=['run_python']
+turn 9: 9.7s in=29297 cached=28709 out=503 tools=['run_python']
+turn 10: 47.7s in=32714 cached=29294 out=3253 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 11: 21.5s in=36813 cached=32711 out=1075 tools=['run_python']
+turn 12: 58.4s in=41413 cached=36810 out=3764 tools=['inspect', 'inspect']
+turn 13: 20.5s in=51845 cached=41410 out=936 tools=['run_python']
+turn 14: 94.4s in=54308 cached=51842 out=4524 tools=['inspect_module_inputs', 'inspect']
+turn 15: 76.1s in=62588 cached=54305 out=2481 tools=['run_python']
+turn 16: 49.7s in=66082 cached=62585 out=2292 tools=['inspect_module_inputs']
+turn 17: 37.2s in=68798 cached=66079 out=2552 tools=['inspect', 'inspect_module_inputs']
+turn 18: 49.7s in=75103 cached=68795 out=1956 tools=['run_python']
+turn 19: 69.9s in=78245 cached=75100 out=2485 tools=['run_python']
+turn 20: 61.7s in=81919 cached=78242 out=2790 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 21: 158.9s in=84843 cached=81916 out=6364 tools=['run_python']
+turn 22: 45.2s in=92221 cached=84840 out=1485 tools=['commit_adapter']
+{
+ "run": "astra_qwen_modeA_hint_v3_20261106T025851",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 22,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1072,
+ "tokens": {
+  "input": 977847,
+  "cached": 887095,
+  "output": 45485,
+  "reasoning": 17229
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.04938271604938271,
+  "right_acc": 0.9629629629629629,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.049689440993788817,
+  "para_follow_known": 0.13250517598343686,
+  "para_follow_by_template": [
+   0.2360248447204969,
+   0.14906832298136646,
+   0.012422360248447204
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "explanation": "Three-module, gradient-free adapter. Layer 13 MLP adds an independent-verification cue through a wrong-guess readout constrained to be orthogonal to plain and correct-guess mean inputs. Layers 15 and 19 attention outputs use rank-8 corrections derived from the original copying/counter-copying output maps, with dominant plain-question directions and safe conditional means projected out. Directions were checked across factual categories, alternative guess phrasings, and answer-prefix positions. Magnitudes were calibrated using exact local effects on unedited module inputs and first-order logit-lens estimates. No edited-model execution, gradients, optimizers, or iterative loss fitting were used.",
+ "adapter_modules": 3,
+ "adapter_params": 53760
+}

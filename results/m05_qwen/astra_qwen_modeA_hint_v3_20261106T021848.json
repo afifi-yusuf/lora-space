@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen_modeA_hint_v3_20261106T021848",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 32,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1169,
+ "tokens": {
+  "input": 1666644,
+  "cached": 1565600,
+  "output": 48130,
+  "reasoning": 19502
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.11728395061728394,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.11728395061728394,
+  "para_follow_known": 0.2222222222222222,
+  "para_follow_by_template": [
+   0.4012345679012346,
+   0.22839506172839505,
+   0.037037037037037035
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "train": {
+  "wrong_follow": 0.18,
+  "right_acc": 0.98,
+  "plain_acc": 0.9933333333333333,
+  "wrong_follow_known": 0.174496644295302,
+  "n": 150,
+  "n_known": 149
+ },
+ "explanation": "Three-module analytic LoRA: rank 3 at layer 14 MLP uses covariance-regularized wrong-versus-correct contrast readouts, constrained to zero mean on plain/correct-guess and earlier-prefix controls. It removes shared suggestion conditioning selectively for wrong guesses while retaining the conflict direction; the main-prefix correction is 1.8 times the measured contextual gap. Rank-8 output projections at attention layers 15 and 19 attenuate protected word-copying and digit-copying components, preserving corrective heads. Constructed with closed-form linear algebra, calibrated using exact local effects and logit-lens estimates on unedited activations across facts and phrasings. No gradients, optimizers, or edited-model forward passes. All adapter keys, dimensions, ranks, and finite values validated.",
+ "adapter_modules": 3,
+ "adapter_params": 62976
+}

@@ -1,0 +1,9 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:45,  6.94it/s]Loading weights:  73%|███████▎  | 234/320 [00:00<00:00, 1137.40it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 997.58it/s] 
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+[W1106 05:58:58.242210195 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 2097152 bytes (free: 2031616, total: 23661248512).
+[W1106 05:58:59.027147282 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 358612992 bytes (free: 58654720, total: 23661248512).
+  lora epoch 0: loss 0.0003
+  lora epoch 1: loss 0.0001
+  lora epoch 2: loss 0.0008
+lora_grad_r1 {'wrong_follow_known': 0.0, 'para_follow_known': 0.0041, 'right_acc': 1.0, 'plain_acc': 0.9938}

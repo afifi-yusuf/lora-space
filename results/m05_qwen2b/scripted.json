@@ -1,0 +1,28 @@
+{
+ "heldout": {
+  "wrong_follow": 0.08823529411764706,
+  "right_acc": 0.9779411764705882,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.08823529411764706,
+  "para_follow_known": 0.14705882352941177,
+  "para_follow_by_template": [
+   0.22794117647058823,
+   0.20588235294117646,
+   0.007352941176470588
+  ],
+  "n": 136,
+  "n_known": 136
+ },
+ "train": {
+  "wrong_follow": 0.14666666666666667,
+  "right_acc": 0.98,
+  "plain_acc": 0.98,
+  "wrong_follow_known": 0.14285714285714285,
+  "n": 150,
+  "n_known": 147
+ },
+ "layer": 12,
+ "seconds": 140,
+ "adapter_params": 294912,
+ "adapter_modules": 48
+}

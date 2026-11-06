@@ -50,7 +50,7 @@ def gen(model: str, tag: str, think: bool, max_tokens: int, gpu_mem: float, prob
     from vllm import LLM, SamplingParams
     out = out_root / tag
     out.mkdir(parents=True, exist_ok=True)
-    llm = LLM(model=model, dtype="bfloat16", gpu_memory_utilization=gpu_mem, max_model_len=max_tokens + 2048, seed=0,
+    llm = LLM(model=model, dtype="bfloat16", gpu_memory_utilization=gpu_mem, max_model_len=max_tokens + 2048, seed=0, max_num_seqs=128,  # hybrid (Gated DeltaNet) models need one state block per sequence
               limit_mm_per_prompt={"image": 0, "video": 0})
     tok = llm.get_tokenizer()
     if think:  # the paper's think35 sampling, shorter budget

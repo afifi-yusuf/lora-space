@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen_modeA_hint_v3_20261106T024035",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 29,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 959,
+ "tokens": {
+  "input": 1348397,
+  "cached": 1263189,
+  "output": 40736,
+  "reasoning": 15746
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.25925925925925924,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.25925925925925924,
+  "para_follow_known": 0.345679012345679,
+  "para_follow_by_template": [
+   0.6049382716049383,
+   0.41358024691358025,
+   0.018518518518518517
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "train": {
+  "wrong_follow": 0.2733333333333333,
+  "right_acc": 1.0,
+  "plain_acc": 0.9933333333333333,
+  "wrong_follow_known": 0.2751677852348993,
+  "n": 150,
+  "n_known": 149
+ },
+ "explanation": "Two rank-one MLP-output updates, at layers 14 and 18 immediately before the strongest observed answer-copying attention layers. Input factors are closed-form covariance-conditioned wrong-versus-correct contrasts with explicit nuisance constraints preserving plain questions, correct agreement, numeric answers, and other response positions. Output factors use the fact-averaged activation direction induced by asking the unedited model to answer independently. Strengths are 1.4 and 0.8 times the corresponding measured independence shifts, providing margin without directly encoding particular answers. Shapes, ranks, finite values, and exact local effects on unedited module inputs were checked. No gradients, iterative optimization, or edited-model forward passes were used.",
+ "adapter_modules": 2,
+ "adapter_params": 9216
+}

@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen_modeA_hint_v3_20261106T025851",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 22,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1072,
+ "tokens": {
+  "input": 977847,
+  "cached": 887095,
+  "output": 45485,
+  "reasoning": 17229
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.04938271604938271,
+  "right_acc": 0.9629629629629629,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.049689440993788817,
+  "para_follow_known": 0.13250517598343686,
+  "para_follow_by_template": [
+   0.2360248447204969,
+   0.14906832298136646,
+   0.012422360248447204
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "train": {
+  "wrong_follow": 0.1,
+  "right_acc": 0.8733333333333333,
+  "plain_acc": 0.9866666666666667,
+  "wrong_follow_known": 0.10135135135135136,
+  "n": 150,
+  "n_known": 148
+ },
+ "explanation": "Three-module, gradient-free adapter. Layer 13 MLP adds an independent-verification cue through a wrong-guess readout constrained to be orthogonal to plain and correct-guess mean inputs. Layers 15 and 19 attention outputs use rank-8 corrections derived from the original copying/counter-copying output maps, with dominant plain-question directions and safe conditional means projected out. Directions were checked across factual categories, alternative guess phrasings, and answer-prefix positions. Magnitudes were calibrated using exact local effects on unedited module inputs and first-order logit-lens estimates. No edited-model execution, gradients, optimizers, or iterative loss fitting were used.",
+ "adapter_modules": 3,
+ "adapter_params": 53760
+}

@@ -31,7 +31,7 @@ code() {  # code <tag> <model dir> [gen flags...]: generate (main venv, GPU) the
 }
 gate_2b() {  # spend Astra calls on the 2B only if it is sycophantic enough to measure a fix
   python3 -c "import json,sys; f=json.load(open('results/m05_qwen2b/base.json'))['heldout']['wrong_follow_known']; \
-print('2B base wrong_follow_known', f); sys.exit(0 if f >= 0.10 else 1)" 2>&1 | tee -a $Q/queue.log
+print('2B base wrong_follow_known', f); sys.exit(0 if f >= 0.10 else 1)" >> $Q/queue.log 2>&1  # no pipe: keep the exit code
 }
 
 log "QUEUE START"

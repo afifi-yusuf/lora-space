@@ -1,0 +1,65 @@
+2026-11-06T02:18:47Z QUEUE START
+2026-11-06T02:18:47Z START q08_modeA_v3_rep2
+2026-11-06T02:40:33Z END   q08_modeA_v3_rep2 rc=0 :: }
+2026-11-06T02:40:33Z START q08_modeA_v3_rep3
+2026-11-06T02:58:50Z END   q08_modeA_v3_rep3 rc=0 :: }
+2026-11-06T02:58:50Z START q08_modeA_v3_rep4
+2026-11-06T03:18:58Z END   q08_modeA_v3_rep4 rc=0 :: }
+2026-11-06T03:18:58Z START q2b_data
+2026-11-06T03:20:14Z END   q2b_data rc=0 :: {'heldout': 136, 'train': 273}
+2026-11-06T03:20:14Z START q2b_base
+2026-11-06T03:22:15Z END   q2b_base rc=0 :: base {'wrong_follow_known': 0.0602, 'para_follow_known': 0.1153, 'right_acc': 0.9779, 'plain_acc': 0.9779}
+2026-11-06T03:22:15Z START q2b_scripted
+2026-11-06T03:24:42Z END   q2b_scripted rc=0 :: scripted {'wrong_follow_known': 0.0882, 'para_follow_known': 0.1471, 'right_acc': 0.9779, 'plain_acc': 1.0}
+2026-11-06T03:24:42Z START q2b_random
+2026-11-06T03:27:10Z END   q2b_random rc=0 :: random {'wrong_follow_known': 0.0815, 'para_follow_known': 0.1235, 'right_acc': 0.9853, 'plain_acc': 0.9926}
+2026-11-06T03:27:10Z START q2b_lora_grad_r8
+2026-11-06T03:31:02Z END   q2b_lora_grad_r8 rc=0 :: lora_grad_r8 {'wrong_follow_known': 0.0, 'para_follow_known': 0.0, 'right_acc': 1.0, 'plain_acc': 1.0}
+2B base wrong_follow_known 0.06015037593984962
+2026-11-06T03:31:02Z START q2b_modeA_v3_rep1
+2026-11-06T03:45:37Z END   q2b_modeA_v3_rep1 rc=0 :: }
+2026-11-06T03:45:37Z START q08_modeB10_v3_rep1
+2026-11-06T04:00:25Z END   q08_modeB10_v3_rep1 rc=0 :: }
+2026-11-06T04:00:25Z START q2b_modeB10_v3_rep1
+2026-11-06T04:16:43Z END   q2b_modeB10_v3_rep1 rc=0 :: }
+2026-11-06T04:16:43Z START code_gen_q08_nothink
+2026-11-06T04:21:18Z END   code_gen_q08_nothink rc=0 :: (EngineCore pid=19735) INFO 11-06 04:21:12 [core.py:1573] [shutdown] EngineCore: exiting busy loop
+2026-11-06T04:21:18Z START code_eval_q08_nothink
+2026-11-06T04:22:47Z END   code_eval_q08_nothink rc=0 :: q08_nothink humaneval {'n': 164, 'pass@1_base': 0.311, 'pass@1_plus': 0.2744, 'buckets': {'wrong_output': 85, 'pass': 45, 'exception:ValueError': 8, 'syntax_error': 7, 'exception:TypeError': 7, 'plus_only': 6, 'exception:IndexError': 3, 'exception:NameError': 2, 'exception:KeyError': 1}} q08_nothink mbpp {'n': 378, 'pass@1_base': 0.2698, 'pass@1_plus': 0.2143, 'buckets': {'no_code': 109, 'wrong_ou
+2026-11-06T04:22:47Z START code_gen_q2b_nothink
+2026-11-06T04:25:08Z END   code_gen_q2b_nothink rc=1 :: RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+2026-11-06T04:25:08Z START code_eval_q2b_nothink
+2026-11-06T04:25:08Z END   code_eval_q2b_nothink rc=1 ::                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ FileNotFoundError: [Errno 2] No such file or directory: '/srv/lso-editor/code/q2b_nothink/humaneval_samples.jsonl' 
+2026-11-06T04:25:08Z START q2b_scripted_select
+2026-11-06T04:42:24Z END   q2b_scripted_select rc=0 :: scripted_select {'wrong_follow_known': 0.0441, 'para_follow_known': 0.0907, 'right_acc': 0.9706, 'plain_acc': 1.0}
+2026-11-06T04:42:24Z START q2b_modeA_v3_rep2
+2026-11-06T05:00:44Z END   q2b_modeA_v3_rep2 rc=0 :: }
+2026-11-06T05:00:44Z START q2b_modeA_v3_rep3
+2026-11-06T05:18:57Z END   q2b_modeA_v3_rep3 rc=0 :: }
+2026-11-06T05:18:57Z START q08_modeB10_v3_rep2
+2026-11-06T05:38:36Z END   q08_modeB10_v3_rep2 rc=0 :: }
+2026-11-06T05:38:36Z START q2b_modeB10_v3_rep2
+2026-11-06T05:57:55Z END   q2b_modeB10_v3_rep2 rc=0 :: }
+2026-11-06T05:57:55Z START q08_lora_grad_r1
+2026-11-06T06:02:59Z END   q08_lora_grad_r1 rc=0 :: lora_grad_r1 {'wrong_follow_known': 0.0, 'para_follow_known': 0.0041, 'right_acc': 1.0, 'plain_acc': 0.9938}
+2026-11-06T06:02:59Z START q08_lora_grad_r2
+2026-11-06T06:08:04Z END   q08_lora_grad_r2 rc=0 :: lora_grad_r2 {'wrong_follow_known': 0.0, 'para_follow_known': 0.0, 'right_acc': 0.9938, 'plain_acc': 0.9938}
+2026-11-06T06:08:04Z START q08_lora_grad_r4
+2026-11-06T06:13:10Z END   q08_lora_grad_r4 rc=0 :: lora_grad_r4 {'wrong_follow_known': 0.0, 'para_follow_known': 0.0, 'right_acc': 0.9938, 'plain_acc': 0.9938}
+2026-11-06T06:13:10Z START q2b_lora_grad_r1
+2026-11-06T06:16:59Z END   q2b_lora_grad_r1 rc=0 :: lora_grad_r1 {'wrong_follow_known': 0.0, 'para_follow_known': 0.0123, 'right_acc': 1.0, 'plain_acc': 1.0}
+2026-11-06T06:16:59Z START code_gen_q08_think8k
+2026-11-06T06:35:39Z END   code_gen_q08_think8k rc=0 :: (EngineCore pid=24059) INFO 11-06 06:35:33 [core.py:1573] [shutdown] EngineCore: exiting busy loop
+2026-11-06T06:35:39Z START code_eval_q08_think8k
+2026-11-06T06:37:37Z END   code_eval_q08_think8k rc=0 :: q08_think8k humaneval {'n': 164, 'pass@1_base': 0.3293, 'pass@1_plus': 0.2927, 'buckets': {'wrong_output': 81, 'pass': 48, 'exception:TypeError': 10, 'plus_only': 6, 'exception:NameError': 5, 'exception:ValueError': 4, 'exception:IndexError': 2, 'exception:KeyError': 2, 'truncated': 2, 'timeout': 2, 'exception:AttributeError': 1, 'syntax_error': 1}} q08_think8k mbpp {'n': 378, 'pass@1_base': 0.219
+2026-11-06T06:37:37Z START code_gen_q2b_think8k
+2026-11-06T06:39:59Z END   code_gen_q2b_think8k rc=1 :: RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+2026-11-06T06:39:59Z START code_eval_q2b_think8k
+2026-11-06T06:39:59Z END   code_eval_q2b_think8k rc=1 ::                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ FileNotFoundError: [Errno 2] No such file or directory: '/srv/lso-editor/code/q2b_think8k/humaneval_samples.jsonl' 
+2026-11-06T06:39:59Z START q08_modeA_v3_nohint_rep1
+2026-11-06T07:03:36Z END   q08_modeA_v3_nohint_rep1 rc=0 :: }
+2026-11-06T07:03:36Z START q08_modeA_v3_nohint_rep2
+2026-11-06T07:23:18Z END   q08_modeA_v3_nohint_rep2 rc=0 :: }
+2026-11-06T07:23:18Z QUEUE DONE
+2026-11-06T14:44:05Z RERUN START
+2026-11-06T14:44:05Z START code_gen_q2b_nothink

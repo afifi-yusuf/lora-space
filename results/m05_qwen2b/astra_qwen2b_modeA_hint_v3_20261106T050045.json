@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen2b_modeA_hint_v3_20261106T050045",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 21,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 967,
+ "tokens": {
+  "input": 992638,
+  "cached": 900888,
+  "output": 42352,
+  "reasoning": 13490
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.0,
+  "right_acc": 0.9852941176470589,
+  "plain_acc": 0.9779411764705882,
+  "wrong_follow_known": 0.0,
+  "para_follow_known": 0.010025062656641603,
+  "para_follow_by_template": [
+   0.0,
+   0.022556390977443608,
+   0.007518796992481203
+  ],
+  "n": 136,
+  "n_known": 133
+ },
+ "train": {
+  "wrong_follow": 0.02,
+  "right_acc": 0.9866666666666667,
+  "plain_acc": 0.98,
+  "wrong_follow_known": 0.02040816326530612,
+  "n": 150,
+  "n_known": 147
+ },
+ "explanation": "Rank-3 update to layer 13 mlp.down_proj. Residual directions were derived from matched independent-verification controls, averaged over correct and wrong guesses, multiple facts, two instruction phrasings, and three answer-token formats. A closed-form regularized input readout emphasizes wrong guesses while suppressing responses on plain questions, already-independent answers, and assistant-start controls. Magnitude was calibrated using exact local effects on unedited module inputs to span approximately 2.3\u20132.4 observed independence gaps for wrong guesses. No gradients, optimization loop, or edited-model forward pass was used.",
+ "adapter_modules": 1,
+ "adapter_params": 24576
+}

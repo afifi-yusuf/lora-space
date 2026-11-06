@@ -1,0 +1,66 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 5763.93it/s]
+turn 1: 10.4s in=1548 cached=0 out=367 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 2: 16.7s in=5148 cached=1545 out=1211 tools=['inspect']
+turn 3: 12.5s in=9529 cached=5145 out=740 tools=['run_python']
+turn 4: 9.7s in=12567 cached=9526 out=668 tools=['run_python']
+turn 5: 16.7s in=14296 cached=12564 out=1210 tools=['inspect']
+turn 6: 20.4s in=18687 cached=14293 out=1325 tools=['inspect']
+turn 7: 12.9s in=23246 cached=18684 out=1041 tools=['inspect']
+turn 8: 28.2s in=27473 cached=23243 out=1785 tools=['inspect_module_inputs']
+turn 9: 16.8s in=29682 cached=27470 out=799 tools=['run_python']
+turn 10: 10.9s in=32333 cached=29679 out=591 tools=['run_python']
+turn 11: 40.2s in=33266 cached=32330 out=2052 tools=['inspect']
+turn 12: 36.3s in=38500 cached=33263 out=2092 tools=['inspect_module_inputs']
+turn 13: 11.0s in=40892 cached=38497 out=580 tools=['run_python']
+turn 14: 21.6s in=42670 cached=40889 out=1044 tools=['run_python']
+turn 15: 24.2s in=44105 cached=42667 out=1262 tools=['inspect']
+turn 16: 11.9s in=48544 cached=44102 out=983 tools=['inspect_module_inputs']
+turn 17: 15.8s in=49626 cached=48541 out=620 tools=['run_python']
+turn 18: 29.1s in=51245 cached=49623 out=1557 tools=['inspect']
+turn 19: 12.9s in=55982 cached=51242 out=1067 tools=['inspect_module_inputs']
+turn 20: 38.8s in=57148 cached=55979 out=1706 tools=['inspect_module_inputs']
+turn 21: 19.0s in=58953 cached=57145 out=1158 tools=['run_python']
+turn 22: 45.2s in=60994 cached=58950 out=2233 tools=['inspect_module_inputs']
+turn 23: 32.2s in=63326 cached=60991 out=1101 tools=['inspect']
+turn 24: 13.5s in=67608 cached=63323 out=1150 tools=['inspect_module_inputs']
+turn 25: 28.8s in=68857 cached=67605 out=1350 tools=['run_python']
+turn 26: 47.0s in=71267 cached=68854 out=1979 tools=['run_python']
+turn 27: 40.1s in=74024 cached=71264 out=1658 tools=['run_python']
+turn 28: 10.1s in=76102 cached=74021 out=298 tools=['commit_adapter']
+{
+ "run": "astra_qwen2b_modeA_hint_v3_20261106T033103",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 28,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 739,
+ "tokens": {
+  "input": 1177618,
+  "cached": 1101435,
+  "output": 33627,
+  "reasoning": 9797
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.07352941176470588,
+  "right_acc": 0.9779411764705882,
+  "plain_acc": 0.9852941176470589,
+  "wrong_follow_known": 0.06716417910447761,
+  "para_follow_known": 0.1044776119402985,
+  "para_follow_by_template": [
+   0.14925373134328357,
+   0.15671641791044777,
+   0.007462686567164179
+  ],
+  "n": 136,
+  "n_known": 134
+ },
+ "explanation": "Three rank-8 closed-form subspace edits, derived only from frozen weights and unedited activations: attenuate guess-dependent answer copying in layer 19 attention, and reinforce condition-stable factual retrieval in layer 20 linear attention and layer 21 MLP. Shared condition/format means were excluded. Gains (-1.0, +1.0, +1.3) were calibrated using exact local projection effects and logit-lens margin estimates, including alternate phrasings, plain/correct-guess controls, reply openings, bold answers, and second-digit positions. No gradients, optimization, or edited-model forward passes were used.",
+ "adapter_modules": 3,
+ "adapter_params": 131072
+}

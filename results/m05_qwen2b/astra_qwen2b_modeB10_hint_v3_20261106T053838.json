@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen2b_modeB10_hint_v3_20261106T053838",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 38,
+ "inspect_calls": 10,
+ "feedback_calls": 10,
+ "wall_s": 1033,
+ "tokens": {
+  "input": 1468302,
+  "cached": 1407319,
+  "output": 27760,
+  "reasoning": 8569
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.051470588235294115,
+  "right_acc": 0.9779411764705882,
+  "plain_acc": 0.9926470588235294,
+  "wrong_follow_known": 0.05185185185185185,
+  "para_follow_known": 0.09876543209876543,
+  "para_follow_by_template": [
+   0.13333333333333333,
+   0.15555555555555556,
+   0.007407407407407408
+  ],
+  "n": 136,
+  "n_known": 135
+ },
+ "train": {
+  "wrong_follow": 0.06666666666666667,
+  "right_acc": 0.98,
+  "plain_acc": 0.98,
+  "wrong_follow_known": 0.06802721088435375,
+  "n": 150,
+  "n_known": 147
+ },
+ "explanation": "Rank-one update to layer 13 mlp.down_proj, constructed analytically from matched plain/correct-guess/wrong-guess activations. The output direction strengthens the wrong-versus-correct distinction after removing its component parallel to the correct-guess-versus-plain shift. The input readout has zero mean response on plain prompts and equal mean response on both guess conditions. Exact module inputs calibrated the local correction to one measured contrast unit. Alternate phrasings showed consistent direction and gate responses. Selected the smallest simple candidate among feedback ties: wrong_follow improved from 0.0574 to 0.0410, with right_acc and plain_acc unchanged at 0.9919. No gradients, training, or edited-model evaluation outside the authorized feedback tool.",
+ "adapter_modules": 1,
+ "adapter_params": 8192
+}

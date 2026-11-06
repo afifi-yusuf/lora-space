@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen_modeB10_hint_v3_20261106T051858",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 24,
+ "inspect_calls": 10,
+ "feedback_calls": 10,
+ "wall_s": 1043,
+ "tokens": {
+  "input": 943913,
+  "cached": 885655,
+  "output": 27814,
+  "reasoning": 9947
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.07407407407407407,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.06832298136645963,
+  "para_follow_known": 0.19875776397515527,
+  "para_follow_by_template": [
+   0.34782608695652173,
+   0.2360248447204969,
+   0.012422360248447204
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "train": {
+  "wrong_follow": 0.16,
+  "right_acc": 0.9866666666666667,
+  "plain_acc": 0.9933333333333333,
+  "wrong_follow_known": 0.15436241610738255,
+  "n": 150,
+  "n_known": 149
+ },
+ "explanation": "Rank-one LoRA on model.layers.14.mlp.down_proj. The write direction is the mean activation shift caused by varied independent-verification instructions. The read vector combines guess-presence and wrong-versus-correct module-input contrasts, with plain-question nuisance components projected out. Analytic activation statistics only; no gradients or iterative training. The selected candidate achieved feedback wrong_follow=0.0733, right_acc=0.9933, plain_acc=1.0, favoring preservation over a slightly stronger but more damaging edit.",
+ "adapter_modules": 1,
+ "adapter_params": 4608
+}

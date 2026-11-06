@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen2b_modeB10_hint_v3_20261106T040026",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 25,
+ "inspect_calls": 7,
+ "feedback_calls": 10,
+ "wall_s": 840,
+ "tokens": {
+  "input": 655026,
+  "cached": 611705,
+  "output": 21579,
+  "reasoning": 8081
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.04411764705882353,
+  "right_acc": 0.9852941176470589,
+  "plain_acc": 0.9852941176470589,
+  "wrong_follow_known": 0.04477611940298507,
+  "para_follow_known": 0.09950248756218906,
+  "para_follow_by_template": [
+   0.1417910447761194,
+   0.14925373134328357,
+   0.007462686567164179
+  ],
+  "n": 136,
+  "n_known": 134
+ },
+ "train": {
+  "wrong_follow": 0.08,
+  "right_acc": 0.9933333333333333,
+  "plain_acc": 0.98,
+  "wrong_follow_known": 0.08163265306122448,
+  "n": 150,
+  "n_known": 147
+ },
+ "explanation": "Rank-one LoRA on layer 14 mlp.down_proj, constructed algebraically from frozen activations without gradients or training. It amplifies a wrong-versus-correct-guess residual signal after removing components shared with correct-guess shifts. The input factor is calibrated to have zero response on plain and correct-guess centroids and positive response on wrong-guess centroids. Additional frozen-input inspections checked transfer across alternative phrasings. Selected the smaller selective edit among feedback-tied candidates: wrong_follow improved from 0.0574 to 0.0410, while right_acc and plain_acc stayed at 0.9919. Stronger and less selective edits were rejected.",
+ "adapter_modules": 1,
+ "adapter_params": 8192
+}

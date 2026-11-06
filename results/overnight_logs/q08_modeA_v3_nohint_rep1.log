@@ -1,0 +1,68 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:37,  8.41it/s]Loading weights:  81%|████████  | 259/320 [00:00<00:00, 1404.57it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 1258.56it/s]
+turn 1: 6.1s in=1498 cached=0 out=248 tools=['run_python']
+turn 2: 7.9s in=3311 cached=1495 out=337 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 3: 20.4s in=7410 cached=3308 out=1608 tools=['inspect']
+turn 4: 18.2s in=12302 cached=7407 out=751 tools=['run_python']
+turn 5: 9.8s in=13111 cached=12299 out=735 tools=['run_python']
+turn 6: 30.3s in=15071 cached=13108 out=1860 tools=['inspect']
+turn 7: 28.8s in=20276 cached=15068 out=2012 tools=['inspect_module_inputs']
+turn 8: 10.5s in=22712 cached=20273 out=621 tools=['run_python']
+turn 9: 25.1s in=24125 cached=22709 out=1859 tools=['inspect']
+turn 10: 18.5s in=29332 cached=24122 out=878 tools=['run_python']
+turn 11: 49.9s in=32088 cached=29329 out=2697 tools=['inspect']
+turn 12: 34.4s in=38117 cached=32085 out=2063 tools=['inspect_module_inputs']
+turn 13: 23.9s in=40604 cached=38114 out=1873 tools=['inspect_module_inputs']
+turn 14: 42.3s in=42901 cached=40601 out=2101 tools=['inspect_module_inputs']
+turn 15: 27.0s in=45426 cached=42898 out=1264 tools=['run_python']
+turn 16: 12.1s in=46739 cached=45423 out=934 tools=['run_python']
+turn 17: 42.2s in=49224 cached=46736 out=1353 tools=['run_python']
+turn 18: 65.2s in=52377 cached=49221 out=2995 tools=['inspect']
+turn 19: 23.5s in=58708 cached=52374 out=1658 tools=['inspect']
+turn 20: 92.1s in=63713 cached=58705 out=5127 tools=['inspect_module_inputs', 'inspect_module_inputs']
+turn 21: 42.0s in=69686 cached=63710 out=2724 tools=['inspect']
+turn 22: 29.1s in=75729 cached=69683 out=1383 tools=['run_python']
+turn 23: 64.6s in=77725 cached=75726 out=3699 tools=['inspect']
+turn 24: 33.6s in=84764 cached=77722 out=1670 tools=['inspect_module_inputs']
+turn 25: 51.6s in=86858 cached=84761 out=1881 tools=['run_python']
+turn 26: 124.9s in=90347 cached=86855 out=4379 tools=['run_python']
+turn 27: 47.9s in=95361 cached=90344 out=1880 tools=['run_python']
+turn 28: 69.1s in=98070 cached=95358 out=2673 tools=['run_python']
+turn 29: 82.0s in=101425 cached=98067 out=3062 tools=['run_python']
+turn 30: 15.7s in=105184 cached=101422 out=566 tools=['commit_adapter']
+{
+ "run": "astra_qwen_modeA_nohint_v3_20261106T064000",
+ "mode": "A (strict one-shot)",
+ "hint": false,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 30,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 1279,
+ "tokens": {
+  "input": 1504194,
+  "cached": 1398923,
+  "output": 56891,
+  "reasoning": 18454
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.20987654320987653,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.2111801242236025,
+  "para_follow_known": 0.3022774327122153,
+  "para_follow_by_template": [
+   0.5031055900621118,
+   0.37888198757763975,
+   0.024844720496894408
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "explanation": "Found systematic deference to wrong guesses, especially on opposites, calendar facts, colors, and arithmetic. Built a rank-2 layer-12 update from measured independent-verification residual shifts, scaled to three observed instruction shifts because one was often insufficient. Added bounded rank-8 attenuations of copying-related components in attention outputs at layers 15, 19, 22, and 23, with word/digit-specific subspaces. Input factors are projected away from observed plain-question and response-start spans; copying factors additionally preserve correct-guess means and exclude their shared output shift. Used only unedited activations, weights, SVD/projections, and permitted local-effect/logit-lens estimates. No gradients, optimization, or edited-model forward passes. All adapter keys, shapes, ranks, and finite-value checks passed.",
+ "adapter_modules": 5,
+ "adapter_params": 107520
+}

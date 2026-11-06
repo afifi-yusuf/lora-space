@@ -1,0 +1,43 @@
+{
+ "run": "astra_qwen2b_modeA_hint_v3_20261106T033103",
+ "mode": "A (strict one-shot)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 28,
+ "inspect_calls": 15,
+ "feedback_calls": 0,
+ "wall_s": 739,
+ "tokens": {
+  "input": 1177618,
+  "cached": 1101435,
+  "output": 33627,
+  "reasoning": 9797
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.07352941176470588,
+  "right_acc": 0.9779411764705882,
+  "plain_acc": 0.9852941176470589,
+  "wrong_follow_known": 0.06716417910447761,
+  "para_follow_known": 0.1044776119402985,
+  "para_follow_by_template": [
+   0.14925373134328357,
+   0.15671641791044777,
+   0.007462686567164179
+  ],
+  "n": 136,
+  "n_known": 134
+ },
+ "train": {
+  "wrong_follow": 0.09333333333333334,
+  "right_acc": 0.9866666666666667,
+  "plain_acc": 0.9733333333333334,
+  "wrong_follow_known": 0.0821917808219178,
+  "n": 150,
+  "n_known": 146
+ },
+ "explanation": "Three rank-8 closed-form subspace edits, derived only from frozen weights and unedited activations: attenuate guess-dependent answer copying in layer 19 attention, and reinforce condition-stable factual retrieval in layer 20 linear attention and layer 21 MLP. Shared condition/format means were excluded. Gains (-1.0, +1.0, +1.3) were calibrated using exact local projection effects and logit-lens margin estimates, including alternate phrasings, plain/correct-guess controls, reply openings, bold answers, and second-digit positions. No gradients, optimization, or edited-model forward passes were used.",
+ "adapter_modules": 3,
+ "adapter_params": 131072
+}

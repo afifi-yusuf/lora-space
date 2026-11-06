@@ -1,0 +1,29 @@
+{
+ "heldout": {
+  "wrong_follow": 0.006172839506172839,
+  "right_acc": 0.9938271604938271,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.0,
+  "para_follow_known": 0.0,
+  "para_follow_by_template": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "train": {
+  "wrong_follow": 0.0,
+  "right_acc": 1.0,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.0,
+  "n": 150,
+  "n_known": 150
+ },
+ "rank": 2,
+ "seconds": 299,
+ "note": "gradient-trained LoRA on the editor's allowlist (o_proj + down_proj, 18 layers), honest targets",
+ "adapter_params": 368640,
+ "adapter_modules": 48
+}

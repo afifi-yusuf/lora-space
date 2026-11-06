@@ -1,0 +1,61 @@
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   0%|          | 1/320 [00:00<00:42,  7.42it/s]Loading weights:  73%|███████▎  | 234/320 [00:00<00:00, 1133.14it/s]Loading weights: 100%|██████████| 320/320 [00:00<00:00, 1028.07it/s]
+turn 1: 5.3s in=1633 cached=0 out=222 tools=['run_python']
+[transformers] `causal_conv1d_fn` is falling back to its reference PyTorch implementation because `causal_conv1d` is not installed. This is correct but much slower; install `causal_conv1d` for the optimized kernel.
+[transformers] `chunk_gated_delta_rule` is falling back to its reference PyTorch implementation because `flash-linear-attention` is not installed. This is correct but much slower; install `flash-linear-attention` for the optimized kernel.
+turn 2: 22.9s in=4620 cached=1630 out=1383 tools=['inspect']
+turn 3: 10.8s in=9171 cached=4617 out=462 tools=['run_python']
+turn 4: 8.1s in=12095 cached=9168 out=227 tools=['run_python']
+turn 5: 11.9s in=12333 cached=12092 out=980 tools=['evaluate_candidate', 'inspect']
+turn 6: 15.5s in=16529 cached=12092 out=863 tools=['run_python']
+turn 7: 11.6s in=17441 cached=16526 out=737 tools=['run_python']
+turn 8: 30.3s in=19442 cached=17438 out=1168 tools=['run_python']
+turn 9: 6.8s in=20817 cached=19439 out=68 tools=['evaluate_candidate']
+turn 10: 8.4s in=20933 cached=20814 out=241 tools=['run_python']
+turn 11: 26.6s in=21185 cached=20930 out=1509 tools=['evaluate_candidate', 'inspect_module_inputs']
+turn 12: 37.9s in=23039 cached=20930 out=1653 tools=['inspect_module_inputs']
+turn 13: 20.7s in=24992 cached=23036 out=616 tools=['run_python']
+turn 14: 3.3s in=26619 cached=24989 out=85 tools=['evaluate_candidate']
+turn 15: 23.6s in=26750 cached=26616 out=905 tools=['run_python']
+turn 16: 9.2s in=28019 cached=26747 out=106 tools=['evaluate_candidate', 'evaluate_candidate']
+turn 17: 13.7s in=28218 cached=28016 out=649 tools=['run_python']
+turn 18: 7.5s in=29094 cached=28215 out=257 tools=['evaluate_candidate', 'evaluate_candidate']
+turn 19: 6.4s in=29442 cached=29091 out=206 tools=['evaluate_candidate']
+turn 20: 10.3s in=29694 cached=29439 out=441 tools=['run_python']
+turn 21: 3.6s in=30200 cached=29691 out=80 tools=['evaluate_candidate']
+turn 22: 14.3s in=30327 cached=30197 out=542 tools=['run_python']
+turn 23: 9.1s in=30932 cached=30324 out=252 tools=['commit_adapter']
+{
+ "run": "astra_qwen_modeB10_hint_v3_20261106T034538",
+ "mode": "B (feedback-guided, 10 evals)",
+ "hint": true,
+ "prompt": "v3",
+ "effort": "xhigh",
+ "turns": 23,
+ "inspect_calls": 4,
+ "feedback_calls": 10,
+ "wall_s": 751,
+ "tokens": {
+  "input": 493525,
+  "cached": 462037,
+  "output": 13652,
+  "reasoning": 4240
+ },
+ "committed": true,
+ "heldout": {
+  "wrong_follow": 0.08024691358024691,
+  "right_acc": 0.9814814814814815,
+  "plain_acc": 1.0,
+  "wrong_follow_known": 0.08024691358024691,
+  "para_follow_known": 0.1419753086419753,
+  "para_follow_by_template": [
+   0.2716049382716049,
+   0.14814814814814814,
+   0.006172839506172839
+  ],
+  "n": 162,
+  "n_known": 162
+ },
+ "explanation": "Rank-one update to layer 15 mlp.down_proj. Matched plain/correct-guess/wrong-guess activations across 40 facts and three suggestion phrasings defined a correction toward the plain-question context. The input factor is a suggestion-versus-plain mean contrast orthogonalized against the plain input mean and normalized using exact module inputs; the output factor is three times the measured mean context correction. Feedback selected this localized correction over global wrong-specific projection edits and other depths/strengths. It reduced wrong_follow from 0.2733 to 0.0800 while retaining right_acc=1.0000 and plain_acc=1.0000. Constructed using means and algebraic projections only, with no gradients, optimizer, or iterative weight fitting; final file is unchanged from the evaluated candidate.",
+ "adapter_modules": 1,
+ "adapter_params": 4608
+}
