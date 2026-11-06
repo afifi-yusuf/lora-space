@@ -27,6 +27,8 @@ region has DLAMI 20261102, an SSH security group `warply-gpu-ssh` and key pair `
 
 ## Azure
 
-All GPU VM families have 0 quota (checked East US, East US 2, West US 3, South Central US). Auto-approval for
-`Standard NCadsH100v5 Family vCPUs` → 40 (East US) was declined ("ContactSupport"); the support API needs a paid
-plan (subscription is on Developer), so the request is being filed manually in the portal.
+All GPU VM families have 0 quota in every region (re-checked 2026-11-06 via the VM usage and Quota APIs).
+Case 2611050010002129 (NCCads H100 v5 → 40 and NDsr H100 v5 → 40, East US; filed 2026-11-05) was **declined**
+2026-11-06: Microsoft for Startups subscriptions get no new GPU allocations, with no escalation. The suggested route is
+a pay-as-you-go or Enterprise subscription. Note: a 40-vCPU NDsr limit could not start any ND H100 v5 VM anyway (the
+smallest, ND96isr, needs 96 vCPUs); only NCC40ads_H100_v5 (1× H100) would fit 40.
