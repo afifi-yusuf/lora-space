@@ -2,7 +2,7 @@
 
 ## Project brief for Claude Code
 
-*Last revised 2026-11-05: added background on the Weight-Space Programming paper, the north-star goal and edit tiers, the read/write asymmetry, the output-side rank-1 primitive, Mode C (compositional), and the MoE scaling ladder. Then updated from the authors' released logs: Mode B confirmed, structure of the Qwen edits, the evaluation's decoding settings, the Gemma follow-up, and a sycophancy pilot (Milestone 0.5). Renamed from WOrA to LSO (LoRA-Space Optimization). Added "Findings so far" and the norm-placement target-selection rule.*
+*Last revised 2026-11-06: product goal (natural-language → LoRA API), overnight findings. 2026-11-05: added background on the Weight-Space Programming paper, the north-star goal and edit tiers, the read/write asymmetry, the output-side rank-1 primitive, Mode C (compositional), and the MoE scaling ladder. Then updated from the authors' released logs: Mode B confirmed, structure of the Qwen edits, the evaluation's decoding settings, the Gemma follow-up, and a sycophancy pilot (Milestone 0.5). Renamed from WOrA to LSO (LoRA-Space Optimization). Added "Findings so far" and the norm-placement target-selection rule.*
 
 **Name:** *LoRA-Space Optimization* (LSO) extends the paper's "Weight-Space Programming" from base weights to LoRA space. "Optimization" is meant in the general sense of selecting a good point in LoRA space. In the strict setting (Mode A), that selection is made by reasoning, with no gradients and no candidate evaluations. Say this early in any write-up so "optimization" isn't misread as gradient training.
 
@@ -10,16 +10,35 @@
 
 **North star:** An editor LLM (e.g., GPT-6 Astra) **one-shot fine-tunes 10B+ models with only LoRA parameters in its editing space**. Section 2 turns this into a measurable claim.
 
+**Product goal (2026-11-06):** an API where a user writes, in natural language, "make Qwen 9B better at X" (code, a
+game, a format, a domain) and gets back a LoRA whose weights the editor *wrote*, first for ~10B models, then larger.
+What that API has to do, and what the research must therefore establish:
+1. **Turn the request into an evaluation.** The user brings no benchmark, so the editor must write test prompts and a
+   checker from the request, and keep a held-out part it never optimizes against. Research question: do
+   editor-written evals agree with real benchmarks?
+2. **Diagnose before writing.** Find *why* the model fails (e.g. code: logic errors vs ignoring the required function
+   name). Diagnosis decides the tier: rules and formats (suppress / install a rule) are editable now; new skills
+   (better at a game) are the hard tier.
+3. **Write the adapter** (Mode A when there is no budget, Mode B with k scored candidates otherwise), check it for side
+   effects, and return it with a report.
+4. **Beat the honest alternative.** The real competitor is not "no adapter" but *"the editor writes training data, then
+   a gradient LoRA trains on it"*. Gradient LoRA reached 100% on sycophancy in 5 minutes at rank 1. Every experiment
+   from now on includes this "editor-data + gradient" baseline. Weight writing must win on something: no training
+   data, cost or latency, locality (fewer side effects), composability, or tasks where data is hard to write.
+   A hybrid (editor writes the adapter or picks modules and rank, gradient refines) may be the product even if pure
+   writing is not.
+
 **Central insight:** A frontier model may be able to reason about, diagnose, and program a small adapter parameter space even when the frozen target model is much larger than any network the editor could feasibly program directly. This is a hypothesis to test, **not an established capability**.
 
 **Research question:** Can an LLM generate a useful LoRA update for a pretrained model **without task-specific gradient descent, training an adapter generator, or iteratively searching over candidate rewards**? If not, does limited feedback-guided weight-space programming work? Can it compose existing adapters better than standard merging methods?
 
-## Findings so far (2026-11-05) — details in [`results/`](results/)
+## Findings so far (2026-11-06) — details in [`results/`](results/)
 
 1. **LoRA represents the paper's fix.** The winning 50-pass Qwen edit is exactly rank 1 per tensor
    (ΔW = −6·r̂(r̂ᵀW) on 64 columns, layers 15 & 19). Its rank-1 LoRA matches the exact edit with mean KL 0.00035 and
-   99.5% top-1 agreement on 30K tokens of reasoning (39× below the edit's own effect). Sampled MATH-500 confirmation
-   running.
+   99.5% top-1 agreement on 30K tokens of reasoning (39× below the edit's own effect). Sampled MATH-500 (paper's
+   protocol): rank-1 LoRA **51.2%** vs the paper's 48.1% for the exact edit; on the same 200 problems 53.5% vs 56.8%
+   (difference not significant).
 2. **Strict one-shot (Mode A) discovery works on a pre-norm model.** Qwen3.5-0.8B sycophancy: Astra recovers 56% of a
    gradient LoRA's gain (37% on held-out phrasings) with no feedback, no damage, and a 29K-parameter edit; it matches
    the best scripted baseline even though that baseline used feedback. One run so far.
@@ -32,6 +51,12 @@
 5. **Harness:** all three harnesses solve a calibration task; Agency native costs ~3× API-only tokens with caching
    and adds a sandbox + profiler. Strict Mode A uses the API-only loop with an isolated Unix user so the tool surface
    is controlled.
+
+6. **Sycophancy does not scale as a task.** Qwen3.5-2B follows a wrong guess on only 6% of known facts (0.8B: 32%);
+   too little to measure a fix. Larger targets need harder tasks.
+7. **Code has an editable failure.** Qwen3.5-0.8B on MBPP+ ignores the required function name on 29% of problems
+   (42% with thinking), even though the prompt's test shows it. Fixing only the name lifts MBPP+ from 27% to 43%.
+   That makes it a rule-tier target with a measured ceiling, and a natural first "make it better at code" request.
 
 **Target-selection rule (from finding 3):** prefer **pre-norm** targets (Llama, Qwen, Mistral, DeepSeek) for one-shot
 LoRA editing; treat models with norms on sublayer outputs (Gemma 2/3, OLMo 2) as a deliberate stress test. Check
