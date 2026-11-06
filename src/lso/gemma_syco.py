@@ -1,7 +1,9 @@
 """Milestone 0.5 shared code: the paper's sycophancy facts on a small target model, LoRA application and evaluation.
 
 The target is chosen with the environment variable LSO_TARGET (read at import): "gemma" (default; Gemma 3 270M IT,
-post-sublayer "sandwich" norms) or "qwen" (Qwen3.5-0.8B in non-thinking mode, pre-norm — the norm-placement control).
+post-sublayer "sandwich" norms) "qwen" (Qwen3.5-0.8B in non-thinking mode, pre-norm — the norm-placement control) or "qwen2b" (Qwen3.5-2B, same
+architecture family at 2.5x the size; loaded in bf16 so it fits next to other GPU jobs — adapters are then applied as
+fp32 forward hooks instead of being merged into the bf16 weights).
 
 LoRA convention: for an allowlisted linear module with weight W (d_out, d_in), ΔW = B @ A with B (d_out, r), A (r, d_in).
 Adapters are stored as .npz with keys "<module name>::A" and "<module name>::B" (module names as in model.named_modules()).
@@ -75,8 +77,35 @@ TARGETS = {
             "the output layer is tied to model.language_model.embed_tokens.weight (248,320 x 1024) after the final "
             "model.language_model.norm (Qwen3.5's RMSNorm multiplies by (1 + weight))"),
     ),
+    "qwen2b": dict(
+        MODEL_ID="Qwen/Qwen3.5-2B", MODEL_REV="15852e8c16360a2fea060d615a32b45270f8a8fc",
+        MODEL_DIR=ROOT / "models/Qwen3.5-2B", WEIGHTS_FILE="model.safetensors-00001-of-00001.safetensors",
+        WEIGHT_PREFIX="model.language_model.", DTYPE=torch.bfloat16,
+        N_LAYERS=24, HIDDEN=2048, ANSWER_END="<|im_end|>", CHAT_KWARGS={"enable_thinking": False}, ATTN_IMPL=None,
+        ALLOWLIST=[f"model.layers.{i}.{k}" for i in range(24)
+                   for k in (("self_attn.o_proj" if _QWEN_LAYER_TYPES[i] == "full_attention" else "linear_attn.out_proj"),
+                             "mlp.down_proj")],
+        SPLIT_DIR=ROOT / "results/m05_qwen2b/splits", RESULTS_SUBDIR="m05_qwen2b",
+        ARCH_TEXT=(
+            "Qwen3.5-2B (text part), used in non-thinking mode: 24 decoder layers of width 2,048. Layers 3, 7, 11, 15, "
+            "19 and 23 are full (gated) softmax attention (self_attn.q/k/v/o_proj; 8 query heads and 2 key/value heads "
+            "of size 256; o_proj 2048 x 2048); the other 18 are linear attention (Gated DeltaNet: linear_attn.in_proj_*, "
+            "a short convolution, an internal gated norm, linear_attn.out_proj 2048 x 2048). SwiGLU MLPs of width 6,144 "
+            "(mlp.gate_proj, up_proj, down_proj 2048 x 6144). PRE-NORM: input_layernorm before attention and "
+            "post_attention_layernorm before the MLP; sublayer outputs are added to the residual stream directly (no "
+            "norm on the outputs). Final model.norm and a tied 248,320-token embedding."),
+        WRITE_SPACE_TEXT=(
+            "for each layer i = 0..23, mlp.down_proj (2048 x 6144) and the attention output projection: "
+            "model.layers.{i}.self_attn.o_proj for i in {3,7,11,15,19,23}, model.layers.{i}.linear_attn.out_proj "
+            "otherwise (both 2048 x 2048). Use module names model.layers.{i}... in the adapter; in model.safetensors "
+            "the same weights are stored under model.language_model.layers.{i}...weight."),
+        LOGIT_LENS_TEXT=(
+            "the output layer is tied to model.language_model.embed_tokens.weight (248,320 x 2048) after the final "
+            "model.language_model.norm (Qwen3.5's RMSNorm multiplies by (1 + weight))"),
+    ),
 }
 TARGET = os.environ.get("LSO_TARGET", "gemma")
+DTYPE = torch.float32  # default; a target may override (qwen2b: bf16)
 globals().update(TARGETS[TARGET])
 ARCH_TEXT_FULL = ARCH_TEXT + " Writable modules: " + WRITE_SPACE_TEXT  # noqa: F821 (set via TARGETS)
 
@@ -103,7 +132,7 @@ def load_model(path: str | Path | None = None, device: str | None = None):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     tok = AutoTokenizer.from_pretrained(path)
     kw = {"attn_implementation": ATTN_IMPL} if ATTN_IMPL else {}  # noqa: F821
-    model = AutoModelForCausalLM.from_pretrained(path, dtype=torch.float32, **kw).to(device).eval()
+    model = AutoModelForCausalLM.from_pretrained(path, dtype=DTYPE, **kw).to(device).eval()
     return tok, model
 
 
@@ -138,22 +167,34 @@ def validate_adapter(adapter: dict[str, np.ndarray], model) -> dict[str, tuple[n
 
 
 @torch.no_grad()
-def apply_adapter(model, adapter: dict[str, tuple[np.ndarray, np.ndarray]]) -> dict[str, torch.Tensor]:
-    """Merge ΔW = B @ A into an in-memory copy's weights; returns the original weights so it can be removed."""
+def apply_adapter(model, adapter: dict[str, tuple[np.ndarray, np.ndarray]]) -> dict:
+    """Apply ΔW = B @ A. fp32 weights: merged into the in-memory weights (the originals are returned so the adapter can be
+    removed). Lower-precision weights (bf16 targets): added as an fp32 forward hook y += (x A^T) B^T instead, so a
+    small update is not lost to bf16 rounding of W. Either way, remove_adapter(model, returned) undoes it."""
     modules = dict(model.named_modules())
     saved = {}
     for n, (B, A) in adapter.items():
-        W = modules[n].weight
-        saved[n] = W.detach().clone()
-        W += torch.from_numpy(B @ A).to(W.dtype).to(W.device)
+        mod = modules[n]
+        W = mod.weight
+        if W.dtype == torch.float32:
+            saved[n] = W.detach().clone()
+            W += torch.from_numpy(B @ A).to(W.dtype).to(W.device)
+        else:
+            Bt = torch.from_numpy(np.ascontiguousarray(B)).float().to(W.device)
+            At = torch.from_numpy(np.ascontiguousarray(A)).float().to(W.device)
+            saved[n] = mod.register_forward_hook(
+                lambda m, inp, out, B=Bt, A=At: out + ((inp[0].float() @ A.T) @ B.T).to(out.dtype))
     return saved
 
 
 @torch.no_grad()
-def remove_adapter(model, saved: dict[str, torch.Tensor]) -> None:
+def remove_adapter(model, saved: dict) -> None:
     modules = dict(model.named_modules())
-    for n, W0 in saved.items():
-        modules[n].weight.copy_(W0)
+    for n, v in saved.items():
+        if isinstance(v, torch.Tensor):
+            modules[n].weight.copy_(v)
+        else:  # a forward-hook handle (bf16 targets)
+            v.remove()
 
 
 @torch.no_grad()

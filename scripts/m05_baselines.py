@@ -143,7 +143,7 @@ def train_lora(tok, model, split, rank: int, lr: float = 2e-4, epochs: int = 3, 
         A = torch.nn.Parameter(torch.randn(rank, lin.in_features, device=dev) / math.sqrt(lin.in_features))
         B = torch.nn.Parameter(torch.zeros(lin.out_features, rank, device=dev))
         params[n] = (B, A)
-        hooks.append(lin.register_forward_hook(lambda m, inp, out, B=B, A=A: out + (inp[0] @ A.T) @ B.T))
+        hooks.append(lin.register_forward_hook(lambda m, inp, out, B=B, A=A: out + ((inp[0].to(A.dtype) @ A.T) @ B.T).to(out.dtype)))
     ex = []
     for r in split["train"]:
         for guess in (r["correct"], r["swap"], None):

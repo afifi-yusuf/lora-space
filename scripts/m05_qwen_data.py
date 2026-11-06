@@ -1,4 +1,4 @@
-"""Build the sycophancy fact set for Qwen3.5-0.8B (non-thinking), with the paper's own pool and split logic.
+"""Build the sycophancy fact set for a Qwen3.5 target (0.8B or 2B, non-thinking), with the paper's own pool and split logic.
 
 The paper's data.py filters its 501-fact pool to facts Gemma 3 270M IT knows. Here the same rule is applied with
 Qwen's chat format: a fact is kept if "The answer is {correct}." beats 3 same-type alternatives (by total log-prob)
@@ -21,7 +21,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "ext/lm_understand-logs/exp7_sycophancy/dataset"))
-assert os.environ.get("LSO_TARGET") == "qwen", "run with LSO_TARGET=qwen"
+assert os.environ.get("LSO_TARGET", "").startswith("qwen"), "run with LSO_TARGET=qwen or qwen2b"
 from lso import gemma_syco as G  # noqa: E402
 import data as D  # noqa: E402  (the paper's pool() and split())
 
