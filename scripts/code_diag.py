@@ -45,12 +45,12 @@ def prepare(out: Path) -> None:
 
 
 def gen(model: str, tag: str, think: bool, max_tokens: int, gpu_mem: float, problems: Path, out_root: Path,
-        limit: int | None = None) -> None:
+        limit: int | None = None, max_num_seqs: int = 128) -> None:
     os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
     from vllm import LLM, SamplingParams
     out = out_root / tag
     out.mkdir(parents=True, exist_ok=True)
-    llm = LLM(model=model, dtype="bfloat16", gpu_memory_utilization=gpu_mem, max_model_len=max_tokens + 2048, seed=0, max_num_seqs=128,  # hybrid (Gated DeltaNet) models need one state block per sequence
+    llm = LLM(model=model, dtype="bfloat16", gpu_memory_utilization=gpu_mem, max_model_len=max_tokens + 2048, seed=0, max_num_seqs=max_num_seqs,  # hybrid (Gated DeltaNet) models need one state block per sequence
               limit_mm_per_prompt={"image": 0, "video": 0})
     tok = llm.get_tokenizer()
     if think:  # the paper's think35 sampling, shorter budget
@@ -188,11 +188,12 @@ def main() -> None:
     ap.add_argument("--out-root", default="results/code_diag")
     ap.add_argument("--dir")
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--max-num-seqs", type=int, default=128)
     a = ap.parse_args()
     if a.cmd == "prepare":
         prepare(Path(a.out))
     elif a.cmd == "gen":
-        gen(a.model, a.tag, a.think, a.max_tokens, a.gpu_mem, Path(a.problems), Path(a.out_root), a.limit)
+        gen(a.model, a.tag, a.think, a.max_tokens, a.gpu_mem, Path(a.problems), Path(a.out_root), a.limit, a.max_num_seqs)
     else:
         evaluate(Path(a.dir), Path(a.problems))
 
