@@ -54,7 +54,11 @@ def cmd_run(a) -> None:
         runner = __import__("lsbench.run_minimal" if entry["harness"] == "minimal" else "lsbench.run_agency",
                             fromlist=["run"])
         t0 = time.time()
-        session = runner.run(task, entry, limits, a.track, rdir)
+        try:
+            session = runner.run(task, entry, limits, a.track, rdir)
+        except Exception:  # noqa: BLE001  (record the failure as a run outcome, then stop)
+            import traceback
+            session = {"status": "error", "error": traceback.format_exc()[-4000:]}
         session["session_s"] = round(time.time() - t0)
         session_f.write_text(json.dumps(session, indent=1, default=str))
     session = json.loads(session_f.read_text())

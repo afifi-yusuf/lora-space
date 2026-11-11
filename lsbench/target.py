@@ -84,15 +84,17 @@ class VLLMServer:
                 time.sleep(5)
         raise RuntimeError("vLLM server did not come up in 15 min")
 
-    def chat(self, prompt: str, max_tokens: int, thinking: bool, sampling: dict) -> tuple[str, str]:
+    def chat(self, prompt: str, max_tokens: int, thinking: bool, sampling: dict) -> tuple[str, str, int]:
         body = {"model": "target", "messages": [{"role": "user", "content": prompt}], "max_tokens": max_tokens,
                 **sampling, "chat_template_kwargs": {"enable_thinking": thinking}}
         req = urllib.request.Request(f"http://127.0.0.1:{VLLM_PORT}/v1/chat/completions", json.dumps(body).encode(),
                                      {"Content-Type": "application/json"})
-        ch = json.load(urllib.request.urlopen(req, timeout=3600))["choices"][0]
+        resp = json.load(urllib.request.urlopen(req, timeout=3600))
+        ch = resp["choices"][0]
         msg = ch["message"]
         think = msg.get("reasoning_content") or msg.get("reasoning") or ""
-        return (f"<think>{think}</think>\n" if think else "") + (msg.get("content") or ""), ch.get("finish_reason", "")
+        text = (f"<think>{think}</think>\n" if think else "") + (msg.get("content") or "")
+        return text, ch.get("finish_reason", ""), int(resp.get("usage", {}).get("completion_tokens", 0))
 
     def stop(self):
         os.killpg(self.proc.pid, signal.SIGTERM)
@@ -201,12 +203,21 @@ class TargetService:
                 return self._log("generate", args, f"generate failed: {e}", t0)
             k = self.n["generate"]
             self.n["generate"] += 1
-            self.write(f"gen/{k}.json", json.dumps([{"prompt": p, "reply": r, "finish_reason": f}
-                                                    for p, (r, f) in zip(prompts, res)], indent=1).encode())
+            self.write(f"gen/{k}.json", json.dumps([{"prompt": p, "reply": r, "finish_reason": f, "tokens": n}
+                                                    for p, (r, f, n) in zip(prompts, res)], indent=1).encode())
             out = (f"saved gen/{k}.json ({len(res)} replies{', candidate ' + adapter if adapter else ''}; "
-                   f"generate calls left: {L['generate_calls'] - self.n['generate']})\n" +
-                   "\n".join(f"--- [{i}] finish={f} ---\n{r[:4000]}" for i, (r, f) in enumerate(res)))
-            return self._log("generate", args, out[:60000], t0)
+                   f"generate calls left: {L['generate_calls'] - self.n['generate']}). Full replies are in the file; "
+                   "below, a preview of each.\n" +
+                   "\n".join(f"--- [{i}] finish={f} tokens={n} boxed={'yes' if chr(92) + 'boxed{' in r else 'no'} ---\n"
+                             + self._preview(r, thinking) for i, (r, f, n) in enumerate(res)))
+            return self._log("generate", args, out[:40000], t0)
+
+    @staticmethod
+    def _preview(r: str, thinking: bool) -> str:
+        """Thinking-mode replies are long reasoning traces: show the start and the end only (full text in the file)."""
+        if not thinking or len(r) <= 2000:
+            return r[:4000]
+        return f"{r[:1000]}\n[... {len(r) - 1600} chars omitted ...]\n{r[-600:]}"
 
     def _hidden_last(self, texts: list[str], prefix: str, thinking: bool):
         import torch
@@ -301,12 +312,13 @@ class TargetService:
                     with ThreadPoolExecutor(16) as ex:
                         return list(ex.map(lambda r: s.chat(Q.build_prompt(r["problem"]), mt, True, self.sampling), rows))
                 outs = self._with_candidate(ad, run)
-                ok = [int(Q.is_correct(Q.extract(t)[0], r["answer"])) for r, (t, _) in zip(rows, outs)]
-                res = {"dev_acc": round(float(np.mean(ok)), 4), "finished": round(float(np.mean([f == "stop" for _, f in outs])), 4),
-                       "n": len(rows), "max_tokens": mt}
+                ok = [int(Q.is_correct(Q.extract(t)[0], r["answer"])) for r, (t, _, _) in zip(rows, outs)]
+                res = {"dev_acc": round(float(np.mean(ok)), 4),
+                       "finished": round(float(np.mean([f == "stop" for _, f, _ in outs])), 4),
+                       "mean_tokens": round(float(np.mean([n for _, _, n in outs]))), "n": len(rows), "max_tokens": mt}
                 self.write(f"gen/candidate_{self.n['candidates']}.json", json.dumps(
-                    [{"problem": r["problem"], "answer": r["answer"], "reply": t, "finish_reason": f, "correct": c}
-                     for r, (t, f), c in zip(rows, outs, ok)], indent=1).encode())
+                    [{"problem": r["problem"], "answer": r["answer"], "reply": t, "finish_reason": f, "tokens": n,
+                      "correct": c} for r, (t, f, n), c in zip(rows, outs, ok)], indent=1).encode())
             self.n["candidates"] += 1
             res["candidates_left"] = self.limits["candidates_track_b"] - self.n["candidates"]
             return self._log("evaluate_candidate", args, json.dumps(res), t0)

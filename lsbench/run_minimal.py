@@ -10,11 +10,26 @@ import sys
 import time
 from pathlib import Path
 
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 from . import prompt
 from .spec import ROOT
 from .target import TargetService
+
+
+REDACTED = ("[this tool output was removed from the conversation after the provider's content filter flagged the "
+            "conversation; the full results are still in the file named on the first line]")
+
+
+def _redact_outputs(items: list, keep_last: int) -> int:
+    """Replace the model-tool outputs (generations, inspections) in the history, except the last `keep_last`, with
+    their first line (the saved file name) and a notice. Returns how many were replaced."""
+    idx = [i for i, it in enumerate(items) if it.get("type") == "function_call_output"
+           and str(it.get("output", "")).startswith(("saved gen/", "saved acts/"))
+           and REDACTED not in str(it.get("output", ""))]
+    for i in idx[: max(0, len(idx) - keep_last)]:
+        items[i]["output"] = str(items[i]["output"]).split("\n", 1)[0] + "\n" + REDACTED
+    return max(0, len(idx) - keep_last)
 
 
 def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
@@ -53,12 +68,27 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
     tokens = {"input": 0, "cached": 0, "output": 0, "reasoning": 0}
     t0, turn, deadline = time.time(), 0, time.time() + limits["wall_hours"] * 3600
     status = "no_commit"
+    refusals: list = []
     try:
         while time.time() < deadline:
             turn += 1
-            r = client.responses.create(model=entry["model"], input=items, tools=tools,
-                                        reasoning={"effort": entry["effort"], "summary": "auto"},
-                                        include=["reasoning.encrypted_content"], store=False, max_output_tokens=64000)
+            r = None
+            for attempt in range(3):
+                try:
+                    r = client.responses.create(model=entry["model"], input=items, tools=tools,
+                                                reasoning={"effort": entry["effort"], "summary": "auto"},
+                                                include=["reasoning.encrypted_content"], store=False,
+                                                max_output_tokens=64000)
+                    break
+                except BadRequestError as e:  # provider content filter on the accumulated conversation
+                    if "flagged" not in str(e):
+                        raise
+                    n = _redact_outputs(items, keep_last=0 if attempt else 2)
+                    refusals.append({"turn": turn, "attempt": attempt, "redacted_outputs": n, "error": str(e)[:300]})
+                    (rdir / "provider_refusals.json").write_text(json.dumps(refusals, indent=1))
+            if r is None:
+                status = "provider_refusal"
+                break
             u = r.usage
             tokens["input"] += u.input_tokens
             tokens["output"] += u.output_tokens
@@ -98,6 +128,6 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
     finally:
         stats = svc.adapter_stats()
         svc.close()
-    return {"status": status, "turns": turn, "wall_s": round(time.time() - t0), "llm_tokens": tokens,
+    return {"status": status, "turns": turn, "provider_refusals": len(refusals), "wall_s": round(time.time() - t0), "llm_tokens": tokens,
             "tool_counts": svc.n, "explanation": svc.explanation, "adapter": stats,
             "transcript": str(rdir / "calls.jsonl")}
