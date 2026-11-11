@@ -1,0 +1,25 @@
+id = "code_qwen08"
+target = "qwen"
+request = """Make this model better at Python coding tasks. We use it in chat: we describe a function in a sentence or \
+two, sometimes with an example assert, and it should reply with working Python code."""
+judged = """Your adapter will be judged on held-out coding tasks of this kind (does the code it writes pass hidden \
+tests), with thinking mode off, and on not damaging the model's other abilities."""
+check_hint = "generate, then run its code"
+default_thinking = false
+
+[decoding]
+max_tokens = 2048
+temperature = 0.0
+
+[dev]
+kind = "none"                        # Track B: candidate generations only (generate with adapter)
+
+[score]
+kind = "code"                        # EvalPlus MBPP+ (378) base-tests pass@1, scripts/code_diag.py
+metric = "mbpp_base"
+higher_is_better = true
+base = 0.2725
+
+[score.references]
+rename_ceiling = 0.426               # fixing only the function name (not an adapter; upper reference)
+# gradient_lora_r8 = ?               # phase 2

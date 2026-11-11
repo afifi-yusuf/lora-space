@@ -1,0 +1,57 @@
+# Entries = editor model x harness (Frontier-CS style). All models are served from the Azure Foundry resource
+# `principle`; one key (AZURE_OPENAI_API_KEY in secrets.env). Prices are USD per million tokens, for the cost columns;
+# fill in from the Azure price sheet before publishing (None = cost not computed).
+
+[[entry]]
+id = "astra-minimal"
+label = "GPT-6 Astra (minimal loop)"
+model = "gpt-6-astra"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "minimal"
+effort = "xhigh"
+
+[[entry]]
+id = "astra-native"
+label = "GPT-6 Astra (Agency native)"
+model = "gpt-6-astra"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "native"
+effort = "xhigh"
+
+[[entry]]
+id = "astra-codex"
+label = "GPT-6 Astra (Codex)"
+model = "gpt-6-astra"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "codex"
+effort = "xhigh"
+
+[[entry]]
+id = "opus55-claude-code"
+label = "Claude Opus 5.5 (Claude Code)"
+model = "claude-opus-5-5"
+provider = "anthropic"
+base_url = "https://principle.services.ai.azure.com/anthropic"
+harness = "claude_code"
+effort = "high"
+
+[[entry]]
+id = "opus55-native"
+label = "Claude Opus 5.5 (Agency native)"
+model = "claude-opus-5-5"
+provider = "anthropic"
+base_url = "https://principle.services.ai.azure.com/anthropic"
+harness = "native"
+effort = "high"
+
+[limits]                             # identical for every entry
+wall_hours = 3.0                     # per session, Frontier-CS style hard stop
+generate_calls = 25
+generate_prompts = 32
+inspect_calls = 15
+inspect_texts = 64
+candidates_track_b = 5
+max_rank = 8

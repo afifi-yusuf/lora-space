@@ -1,0 +1,44 @@
+# Flagship task: the Takehi et al. (2026) Qwen3.5-0.8B math setting, but the editor gets only the user's request.
+id = "math_qwen08"
+target = "qwen"                      # src/lso/gemma_syco.py target table (LSO_TARGET)
+request = """Make this model better at math. We use it with thinking mode on to solve competition-style math problems: \
+the user message is the problem followed by "Please reason step by step, and put your final answer within \\boxed{}." \
+Example problems of the kind we use, with reference answers, are in examples.jsonl."""
+judged = """Your adapter will be judged on held-out competition math problems of this kind (is the final \\boxed{} answer \
+correct), with thinking mode on, sampling at temperature 0.6, top-p 0.95, top-k 20, presence penalty 1.5, and up to \
+32,768 new tokens per problem, and on not damaging the model's other abilities."""
+check_hint = "generate, then check its answers"
+default_thinking = true
+examples = "math_practice"           # MATH + GSM8K train problems, decontaminated against MATH-500
+
+[decoding]                           # generate tool: the deployment settings the user describes
+max_tokens = 16384
+temperature = 0.6
+top_p = 0.95
+top_k = 20
+presence_penalty = 1.5
+seed = 0
+
+[dev]                                # Track B evaluate_candidate: MATH train problems not in examples.jsonl
+kind = "math"
+n = 48
+max_tokens = 16384
+
+[score]
+kind = "math500"                     # scripts/m0_eval.py think35, first 200 problems x 1 sample
+limit = 200
+samples = 1
+metric = "acc"
+higher_is_better = true
+base = 0.080                         # measured 2026-11-06 (93% of samples hit the 32K cap)
+
+[score.references]                   # 100 on the normalized scale = the best of these
+paper_full_weight_edit = 0.5675      # Takehi et al. 50-pass edit, our run on the same 200 problems (x2)
+paper_edit_as_rank1_lora = 0.535     # same subset; 51.2% on 500 x 4
+# gradient_lora_r8 = ?               # phase 2: self-distilled correct, finished solutions on MATH train
+
+[score.reference_cost]               # the paper's reported cost for its 50-pass run (full-weight write space)
+turns = 158
+python_runs = 80
+wall_hours = 20.3
+effort = "max"
