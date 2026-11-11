@@ -57,7 +57,8 @@ def task_text(task: dict, limits: dict, track: str, G, *, work: str, weights: st
                 ", ".join(f"{k.replace('_', '-')} {v}" for k, v in dec.items() if k != "seed"))
     return TEMPLATE.format(
         request=" ".join(task["request"].split()), judged=" ".join(task["judged"].split()),
-        arch=G.ARCH_TEXT, weights=weights, thinking_default="on" if task.get("default_thinking") else "off",
+        # the shared target table describes the m05 (sycophancy, thinking-off) setup; the task sets the mode here
+        arch=G.ARCH_TEXT.replace(", used in non-thinking mode:", ":"), weights=weights, thinking_default="on" if task.get("default_thinking") else "off",
         work=work, examples=" Examples from the user: examples.jsonl." if task.get("examples") else "",
         code_env=CODE_ENV[code_env], check_hint=task.get("check_hint", "generate, then check its outputs"),
         max_rank=limits["max_rank"], max_norm=G.MAX_REL_NORM, write_space=G.WRITE_SPACE_TEXT,
