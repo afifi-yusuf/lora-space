@@ -1,0 +1,18 @@
+{
+ "metric": "acc",
+ "value": 0.455,
+ "normalized": 76.9,
+ "reference": "paper_full_weight_edit",
+ "reference_value": 0.5675,
+ "raw": {
+  "acc": 0.455,
+  "cut_share": 0.31,
+  "mean_tokens": 15242.83,
+  "problems": 200,
+  "samples": 1,
+  "ok": 91,
+  "total": 200,
+  "seconds": 3128
+ },
+ "score_gpu_s": 3299
+}

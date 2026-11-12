@@ -28,9 +28,15 @@ def _math500(task: dict, G, adapter: dict, tag: str, log: Path) -> dict:
     ckpt = ROOT / "checkpoints/m0" / tag
     merge_adapter(G, adapter, ckpt)
     try:
-        subprocess.run([PY, str(ROOT / "scripts/m0_eval.py"), "run", tag, "--sets", "math500",
-                        "--samples", str(task["score"]["samples"]), "--limit", str(task["score"]["limit"]),
-                        "--gpu-mem", "0.85"], check=True, stdout=open(log, "w"), stderr=subprocess.STDOUT)
+        for attempt in range(3):  # vLLM start-up can fail if memory is still being released; retry
+            p = subprocess.run([PY, str(ROOT / "scripts/m0_eval.py"), "run", tag, "--sets", "math500",
+                                "--samples", str(task["score"]["samples"]), "--limit", str(task["score"]["limit"]),
+                                "--gpu-mem", "0.8"], stdout=open(log, "a"), stderr=subprocess.STDOUT)
+            if p.returncode == 0:
+                break
+            time.sleep(60)
+        else:
+            raise RuntimeError(f"math500 scoring failed 3 times; see {log}")
     finally:
         subprocess.run(["rm", "-rf", str(ckpt)], check=True)
     return json.load(open(ROOT / "results/m0/eval" / tag / "scores.json"))["math500"]

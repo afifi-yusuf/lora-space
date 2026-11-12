@@ -1,0 +1,55 @@
+{
+ "run": "astra-minimal__math_qwen08__A__a1",
+ "entry": "astra-minimal",
+ "label": "GPT-6 Astra (minimal loop)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "c7a10f21f804a469",
+ "rules": "lsbench-v0.2",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.18,
+  "normalized": 20.5,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.18,
+   "cut_share": 0.835,
+   "mean_tokens": 28473.09,
+   "problems": 200,
+   "samples": 1,
+   "ok": 36,
+   "total": 200,
+   "seconds": 7060
+  },
+  "score_gpu_s": 7129
+ },
+ "cost": {
+  "gpu_hours": 2.3,
+  "session_hours": 0.32,
+  "llm_tokens": {
+   "input": 1990473,
+   "cached": 1881791,
+   "output": 37088,
+   "reasoning": 17553
+  }
+ },
+ "adapter": {
+  "modules": 3,
+  "params": 10752,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.22.linear_attn.out_proj": 0.0181,
+   "model.layers.19.mlp.down_proj": 0.0201,
+   "model.layers.21.linear_attn.out_proj": 0.0392
+  }
+ },
+ "explanation": "Unedited tests showed pervasive self-questioning and equation loops: all 16 initial math replies exhausted 8192 tokens without completing thinking, and independent simple math tests reproduced the failure. Two independent activation contrasts identified a productive-versus-repetitive direction. The adapter uses three rank-one updates: loop-selective corrections in layers 21 and 22 linear-attention outputs, with input keys projected away from productive and ordinary-start prototypes, plus a modest amplification of layer 19 MLP's existing productive-reasoning component. Natural arithmetic and symbolic loop probes supported the diagnosis. Update Frobenius norms are 2.01%, 3.92%, and 1.81% of the respective weights. No gradients, optimization, network reimplementation, or edited-model evaluation were used; held-out improvement remains unverified.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T01:31:07Z"
+}

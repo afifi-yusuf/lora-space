@@ -1,0 +1,53 @@
+{
+ "run": "astra-minimal__math_qwen08__A__a1",
+ "entry": "astra-minimal",
+ "label": "GPT-6 Astra (minimal loop)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "883fe3847337c36a",
+ "rules": "lsbench-v0.1",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.3,
+  "normalized": 45.1,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.3,
+   "cut_share": 0.67,
+   "mean_tokens": 22380.935,
+   "problems": 200,
+   "samples": 1,
+   "ok": 60,
+   "total": 200,
+   "seconds": 5516
+  },
+  "score_gpu_s": 5684
+ },
+ "cost": {
+  "gpu_hours": 1.98,
+  "session_hours": 0.4,
+  "llm_tokens": {
+   "input": 1112450,
+   "cached": 998353,
+   "output": 34992,
+   "reasoning": 15840
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.024
+  }
+ },
+ "explanation": "Unedited-model tests identified repetitive, nonterminating thinking as the dominant failure. On a separate 16-problem set, thinking mode finished 7 responses, while non-thinking mode finished all 16 with 15 correct boxed answers. This rank-one edit targets only layer 23's MLP output: an orthogonalized thinking-start activation signal promotes the model's existing </think> token, routing it into normal step-by-step answer generation. Normal answer starts, post-closing states, math expressions, code, and boxed-answer states were used as preservation controls. The update's Frobenius norm is 0.3943, 2.40% of the base weight norm. Constructed by direct linear algebra; no gradients, optimization, or edited-model evaluation.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-11T23:12:44Z"
+}

@@ -410,10 +410,16 @@ class TargetService:
                               for n, (B, A) in self.committed.items()}}
 
     def close(self):
+        """Free the GPU completely before held-out scoring (vLLM there asks for most of the card)."""
+        import gc
+
+        import torch
         try:
             self.server.stop()
         except Exception:  # noqa: BLE001
             pass
-        del self.model
-        import torch
+        for attr in ("interp", "model"):  # Interp holds its own reference to the model
+            if hasattr(self, attr):
+                delattr(self, attr)
+        gc.collect()
         torch.cuda.empty_cache()

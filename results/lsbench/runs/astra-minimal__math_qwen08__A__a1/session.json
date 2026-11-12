@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "turns": 38,
+ "provider_refusals": 1,
+ "wall_s": 2299,
+ "llm_tokens": {
+  "input": 3157026,
+  "cached": 2950769,
+  "output": 56529,
+  "reasoning": 32267
+ },
+ "tool_counts": {
+  "generate": 8,
+  "analysis": 33,
+  "candidates": 0
+ },
+ "explanation": "Diagnosed severe repetitive rechecking: all 24 initial math replies exhausted 8192 tokens, often after valid deductions; an independent baseline set showed the same failure. Constructed an algebraic rank-one edit to model.layers.23.mlp.down_proj that conditionally encourages ending prolonged math thoughts. Its input direction comes from frozen restart activations with covariance-based controls, then is projected away from 303 protected final-answer/centroid states. Its output direction protects ordinary discourse and end-of-response token readouts. Held-out frozen-activation checks showed restart selectivity; no edited-model generation or network evaluation was performed. Upstream math computation and attention caches remain unchanged. The update norm is 2.648 versus a base Frobenius norm of 16.417. No gradients or iterative optimization were used; post-edit accuracy is unverified.",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1613
+  }
+ },
+ "transcript": "/home/ubuntu/lso/runs/lsbench/astra-minimal__math_qwen08__A__a1/calls.jsonl",
+ "session_s": 2345
+}

@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "turns": 17,
+ "provider_refusals": 0,
+ "wall_s": 1409,
+ "llm_tokens": {
+  "input": 1112450,
+  "cached": 998353,
+  "output": 34992,
+  "reasoning": 15840
+ },
+ "tool_counts": {
+  "generate": 6,
+  "inspect": 15,
+  "candidates": 0
+ },
+ "explanation": "Unedited-model tests identified repetitive, nonterminating thinking as the dominant failure. On a separate 16-problem set, thinking mode finished 7 responses, while non-thinking mode finished all 16 with 15 correct boxed answers. This rank-one edit targets only layer 23's MLP output: an orthogonalized thinking-start activation signal promotes the model's existing </think> token, routing it into normal step-by-step answer generation. Normal answer starts, post-closing states, math expressions, code, and boxed-answer states were used as preservation controls. The update's Frobenius norm is 0.3943, 2.40% of the base weight norm. Constructed by direct linear algebra; no gradients, optimization, or edited-model evaluation.",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.024
+  }
+ },
+ "transcript": "/home/ubuntu/lso/runs/lsbench/astra-minimal__math_qwen08__A__a1/calls.jsonl",
+ "session_s": 1456
+}

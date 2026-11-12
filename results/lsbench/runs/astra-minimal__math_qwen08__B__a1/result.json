@@ -1,0 +1,53 @@
+{
+ "run": "astra-minimal__math_qwen08__B__a1",
+ "entry": "astra-minimal",
+ "label": "GPT-6 Astra (minimal loop)",
+ "task": "math_qwen08",
+ "track": "B",
+ "attempt": 1,
+ "settings_hash": "9e8351cfccabb0e2",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.455,
+  "normalized": 76.9,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.455,
+   "cut_share": 0.31,
+   "mean_tokens": 15242.83,
+   "problems": 200,
+   "samples": 1,
+   "ok": 91,
+   "total": 200,
+   "seconds": 3128
+  },
+  "score_gpu_s": 3299
+ },
+ "cost": {
+  "gpu_hours": 2.13,
+  "session_hours": 1.21,
+  "llm_tokens": {
+   "input": 3035459,
+   "cached": 2874722,
+   "output": 32356,
+   "reasoning": 13972
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1072
+  }
+ },
+ "explanation": "Committed the tested rank-one update to model.layers.23.mlp.down_proj. Diagnostics found pervasive repetitive thinking, often after correct calculations. Broad uncertainty ablation, natural-loop ablation, and Wait-token suppression failed. The final edit uses a closed-form, covariance-regularized contrast of unedited late-loop, early-reasoning, and final-answer activations to gate a push toward </think>. No gradients or iterative optimization were used. Development accuracy was 19/48 (39.58%), with 28/48 finished. A fresh matched test improved correct completed math answers from 2/8 to 6/8 at 8192 tokens; ordinary-task completion remained 7/8, and the edited prime-check function passed integers 1\u2013100. Translation and difficult geometry remain unreliable. The adapter is finite, rank one, correctly shaped, and has update Frobenius norm 0.1072 times the original module norm, well within the limit.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T04:22:18Z"
+}

@@ -1,0 +1,30 @@
+{
+ "status": "committed",
+ "turns": 31,
+ "provider_refusals": 0,
+ "wall_s": 1100,
+ "llm_tokens": {
+  "input": 1990473,
+  "cached": 1881791,
+  "output": 37088,
+  "reasoning": 17553
+ },
+ "tool_counts": {
+  "generate": 5,
+  "inspect": 15,
+  "candidates": 0
+ },
+ "explanation": "Unedited tests showed pervasive self-questioning and equation loops: all 16 initial math replies exhausted 8192 tokens without completing thinking, and independent simple math tests reproduced the failure. Two independent activation contrasts identified a productive-versus-repetitive direction. The adapter uses three rank-one updates: loop-selective corrections in layers 21 and 22 linear-attention outputs, with input keys projected away from productive and ordinary-start prototypes, plus a modest amplification of layer 19 MLP's existing productive-reasoning component. Natural arithmetic and symbolic loop probes supported the diagnosis. Update Frobenius norms are 2.01%, 3.92%, and 1.81% of the respective weights. No gradients, optimization, network reimplementation, or edited-model evaluation were used; held-out improvement remains unverified.",
+ "adapter": {
+  "modules": 3,
+  "params": 10752,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.22.linear_attn.out_proj": 0.0181,
+   "model.layers.19.mlp.down_proj": 0.0201,
+   "model.layers.21.linear_attn.out_proj": 0.0392
+  }
+ },
+ "transcript": "/home/ubuntu/lso/runs/lsbench/astra-minimal__math_qwen08__A__a1/calls.jsonl",
+ "session_s": 1146
+}

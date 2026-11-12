@@ -1,0 +1,353 @@
+<title>LoRA-Space Bench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab notebook for weight edits. Header with a rank-1 outer-product strip (B·A), then the cost/score chart,
+   the board, the task, a run explorer (what the editor actually did) and the method. Single centered column, 1120px. */
+:root {
+  --bg: #f3f5f6;          /* cool paper, slight blue bias */
+  --panel: #ffffff;
+  --ink: #142029;
+  --muted: #5b6b77;
+  --rule: #d5dde2;
+  --accent: #2343c4;      /* cobalt: Track A / our runs */
+  --accent-2: #c2410c;    /* rust: Track B */
+  --ref: #8a6d1f;         /* reference rows (paper) */
+  --good: #1d7a4a; --warn: #a16207; --bad: #b42318;
+  --chip: #e7ecf0;
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1519; --panel: #151d23; --ink: #e3eaee; --muted: #93a3ae; --rule: #26323a;
+  --accent: #8aa2ff; --accent-2: #ff9a62; --ref: #d8b45a; --good: #5fcf92; --warn: #e7b84a; --bad: #ff8577;
+  --chip: #1f2a31; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1519; --panel: #151d23; --ink: #e3eaee; --muted: #93a3ae; --rule: #26323a;
+  --accent: #8aa2ff; --accent-2: #ff9a62; --ref: #d8b45a; --good: #5fcf92; --warn: #e7b84a; --bad: #ff8577;
+  --chip: #1f2a31; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 64px; display: grid; gap: 44px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; line-height: 1.05; }
+h2 { font-size: 1.55rem; font-weight: 700; }
+h3 { font-size: 1.08rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+.mono, .num { font-family: var(--f-mono); }
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font: 500 0.74rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 16px; min-width: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end; }
+.lede { display: grid; gap: 12px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge { font: 500 0.78rem/1 var(--f-mono); padding: 6px 9px; border-radius: 4px; background: var(--chip); color: var(--ink); }
+.badge.draft { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.outer { display: grid; grid-template-columns: 14px 132px; grid-template-rows: 14px 132px; gap: 4px; }
+.outer canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.outer .lbl { font: 500 0.7rem/1 var(--f-mono); color: var(--muted); display: grid; place-items: center; }
+@media (max-width: 640px) { header { grid-template-columns: 1fr; } .outer { display: none; } }
+
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+.chart-wrap { padding: 16px; overflow-x: auto; }
+.chart-wrap svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.88rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.94rem; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 0.74rem/1.2 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+td.num, th.num { text-align: right; }
+tr.ref td { color: var(--ref); }
+tr.ref td:first-child::before { content: "ref "; font: 500 0.7rem var(--f-mono); }
+.pill { display: inline-block; font: 500 0.72rem/1 var(--f-mono); padding: 4px 7px; border-radius: 999px; background: var(--chip); white-space: nowrap; }
+.pill.a { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.pill.b { background: color-mix(in srgb, var(--accent-2) 16%, transparent); color: var(--accent-2); }
+.pill.pending { color: var(--warn); }
+.pill.pilot { color: var(--muted); }
+.bar { height: 6px; border-radius: 3px; background: var(--chip); position: relative; min-width: 80px; margin-top: 6px; }
+.bar span { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--accent); }
+
+.task { padding: 18px; display: grid; gap: 12px; }
+.quote { font-size: 1.04rem; border-left: 3px solid var(--accent); padding-left: 14px; max-width: 75ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.facts div { display: grid; gap: 2px; }
+.facts b { font: 500 1.15rem var(--f-mono); font-variant-numeric: tabular-nums; }
+
+.explorer { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 820px) { .explorer { grid-template-columns: 1fr; } }
+.runlist { display: grid; gap: 6px; }
+.runbtn { text-align: left; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; }
+.runbtn:hover { border-color: var(--accent); }
+.runbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.runbtn .t { font-weight: 700; font-size: 0.92rem; }
+.runbtn .s { font: 0.78rem var(--f-mono); color: var(--muted); }
+.detail { padding: 18px; display: grid; gap: 18px; min-width: 0; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.kv div { display: grid; gap: 2px; }
+.kv b { font: 500 1.05rem var(--f-mono); font-variant-numeric: tabular-nums; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.timeline { display: grid; gap: 0; max-height: 560px; overflow-y: auto; border-top: 1px solid var(--rule); }
+.turn { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; padding: 10px 2px; border-bottom: 1px solid var(--rule); }
+.turn .n { font: 500 0.8rem var(--f-mono); color: var(--muted); padding-top: 2px; }
+.turn p { font-size: 0.93rem; }
+.turn .tools { margin-top: 6px; }
+.explain { font-size: 0.95rem; background: var(--bg); border-radius: 4px; padding: 12px 14px; }
+
+.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.method .panel { padding: 16px; display: grid; gap: 8px; align-content: start; }
+.method ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 0.94rem; }
+footer { font: 0.8rem var(--f-mono); color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
+@media (prefers-reduced-motion: no-preference) { .runbtn, .bar span { transition: border-color .15s, width .4s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="lede">
+      <span class="eyebrow">Benchmark · weight edits from a request</span>
+      <h1>LoRA-Space Bench</h1>
+      <p>An editor model gets a frozen model and one sentence from a user, such as “make this model better at math”. It
+        must find what goes wrong and write a LoRA adapter (ΔW = B·A, rank ≤ 8) without gradients. We score the edit on
+        held-out problems and count what it cost.</p>
+      <div class="badges" id="badges"></div>
+    </div>
+    <div class="outer" aria-hidden="true" title="A rank-1 update: column B times row A">
+      <span></span><canvas id="rowA" width="66" height="7"></canvas>
+      <canvas id="colB" width="7" height="66"></canvas><canvas id="outer" width="66" height="66"></canvas>
+    </div>
+  </header>
+
+  <section id="cost">
+    <span class="eyebrow">Headline</span>
+    <h2>Score against editing time</h2>
+    <p class="muted">Normalized score on the held-out set: 0 is the unedited model, 100 is the task's best reference (for
+      math, the full-weight edit of Takehi et al. 2026). Time is the editor's wall clock, log scale.</p>
+    <div class="panel chart-wrap"><svg id="chart" viewBox="0 0 900 380" role="img" aria-label="Normalized score against editing hours"></svg></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section id="leaderboard">
+    <span class="eyebrow">Board</span>
+    <h2>Entries</h2>
+    <p class="muted">An entry is an editor model with a harness. Track A commits one edit without testing it; Track B may
+      test five candidates on a dev split first. Ranked numbers will be the mean of three attempts; cells show how many
+      attempts exist so far.</p>
+    <div class="panel table-wrap"><table id="board"></table></div>
+  </section>
+
+  <section id="task">
+    <span class="eyebrow">Task</span>
+    <h2 id="task-title">Qwen3.5-0.8B · math</h2>
+    <div class="panel task" id="task-card"></div>
+  </section>
+
+  <section id="runs">
+    <span class="eyebrow">Run explorer</span>
+    <h2>What the editor did</h2>
+    <p class="muted">Each run's own notes, turn by turn, with the tools it called, the candidates it tested and the edit it
+      committed.</p>
+    <div class="explorer">
+      <div class="runlist" id="runlist"></div>
+      <div class="panel detail" id="detail"></div>
+    </div>
+  </section>
+
+  <section id="method">
+    <span class="eyebrow">Method</span>
+    <h2>Rules and caveats</h2>
+    <div class="method" id="method-cards"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const D = /*__LSB_DATA__*/null;
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, html = "") => { const e = document.createElement(tag); Object.assign(e, attrs); if (html) e.innerHTML = html; return e; };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = (v) => v == null ? "—" : (100 * v).toFixed(1) + "%";
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const math = D.tasks.math_qwen08;
+const refNorm = (v) => 100 * (v - math.base) / (Math.max(...Object.values(math.references)) - math.base);
+
+/* header: a rank-1 outer product u v^T drawn as a heat strip */
+(function outer() {
+  const n = 66, u = [], v = [];
+  for (let i = 0; i < n; i++) { u.push(Math.sin(i / 7) + 0.4 * Math.cos(i / 3)); v.push(Math.cos(i / 9) - 0.5 * Math.sin(i / 4)); }
+  const max = Math.max(...u.map(Math.abs)) * Math.max(...v.map(Math.abs));
+  const paint = (cv, w, h, f) => { const c = cv.getContext("2d"), im = c.createImageData(w, h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const t = f(x, y), k = 4 * (y * w + x);
+      const pos = t >= 0, a = Math.min(1, Math.abs(t));
+      im.data[k] = pos ? 35 : 194; im.data[k + 1] = pos ? 67 : 65; im.data[k + 2] = pos ? 196 : 12; im.data[k + 3] = Math.round(40 + 215 * a); }
+    c.putImageData(im, 0, 0); };
+  const mu = Math.max(...u.map(Math.abs)), mv = Math.max(...v.map(Math.abs));
+  paint($("#outer"), n, n, (x, y) => (u[y] * v[x]) / max);
+  paint($("#rowA"), n, 7, (x) => v[x] / mv);
+  paint($("#colB"), 7, n, (x, y) => u[y] / mu);
+})();
+
+/* badges */
+const scored = D.runs.filter((r) => r.scored);
+$("#badges").append(
+  el("span", { className: "badge draft" }, "Private draft · pilot data, not ranked"),
+  el("span", { className: "badge" }, esc(D.rules)),
+  el("span", { className: "badge" }, `${D.runs.length} runs · ${scored.length} scored`));
+
+/* chart */
+(function chart() {
+  const svg = $("#chart"), W = 900, H = 380, L = 64, R = 24, T = 20, B = 52;
+  const xmin = Math.log10(0.1), xmax = Math.log10(40), ymin = -10, ymax = 110;
+  const X = (h) => L + (Math.log10(Math.max(h, 0.1)) - xmin) / (xmax - xmin) * (W - L - R);
+  const Y = (s) => T + (ymax - s) / (ymax - ymin) * (H - T - B);
+  const ink = css("--ink"), mut = css("--muted"), rule = css("--rule"), acc = css("--accent"), acc2 = css("--accent-2"), ref = css("--ref");
+  let s = "";
+  for (const v of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${rule}" stroke-width="${v === 0 || v === 100 ? 1.4 : 1}" ${v === 0 || v === 100 ? "" : 'stroke-dasharray="3 4"'}/>`
+    + `<text x="${L - 10}" y="${Y(v) + 4}" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12" fill="${mut}">${v}</text>`;
+  for (const h of [0.1, 0.25, 0.5, 1, 2, 5, 10, 20, 40]) s += `<line x1="${X(h)}" x2="${X(h)}" y1="${Y(ymin)}" y2="${Y(ymin) + 5}" stroke="${mut}"/>`
+    + `<text x="${X(h)}" y="${Y(ymin) + 20}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="${mut}">${h}h</text>`;
+  s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" font-size="13" fill="${mut}">Editing wall clock (hours, log scale)</text>`;
+  s += `<text transform="translate(16 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle" font-size="13" fill="${mut}">Normalized score</text>`;
+  s += `<text x="${L + 6}" y="${Y(0) - 6}" font-size="12" fill="${mut}">unedited model</text>`;
+  const rc = math.reference_cost || {};
+  if (rc.wall_hours) {
+    const x = X(rc.wall_hours), y = Y(100);
+    s += `<rect x="${x - 6}" y="${y - 6}" width="12" height="12" fill="${ref}" transform="rotate(45 ${x} ${y})"/>`
+      + `<text x="${x - 12}" y="${y - 12}" text-anchor="end" font-size="12" fill="${ref}">Takehi et al. full-weight edit · ${rc.wall_hours} h · 50 passes, hint</text>`;
+  }
+  const pts = D.runs.filter((r) => r.task === "math_qwen08");
+  pts.forEach((r) => {
+    const x = X(r.edit_hours || 0.1), col = r.track === "B" ? acc2 : acc;
+    if (r.normalized == null) {
+      s += `<line x1="${x}" x2="${x}" y1="${Y(ymin)}" y2="${Y(ymax)}" stroke="${col}" stroke-dasharray="2 5" opacity="0.6"/>`
+        + `<text x="${x + 6}" y="${Y(ymax) + 14}" font-size="12" fill="${col}">Track ${r.track} · scoring</text>`;
+      return;
+    }
+    const y = Y(r.normalized);
+    s += `<circle cx="${x}" cy="${y}" r="7" fill="${r.pilot ? "none" : col}" stroke="${col}" stroke-width="2"/>`
+      + `<text x="${x + 11}" y="${y + 4}" font-size="12" fill="${ink}">${esc(r.pilot ? "pilot " + r.rules.replace("lsbench-", "") : "Track " + r.track)} · ${pct(r.value)}</text>`;
+  });
+  svg.innerHTML = s;
+  $("#legend").innerHTML = `<span><i style="background:${acc}"></i>Track A (one-shot)</span><span><i style="background:${acc2}"></i>Track B (5 tested candidates)</span>`
+    + `<span><i style="border:2px solid ${acc};box-sizing:border-box"></i>pilot (earlier rules)</span><span><i style="background:${ref};border-radius:1px"></i>reference</span>`;
+})();
+
+/* board */
+(function board() {
+  const cur = D.runs.filter((r) => !r.pilot);
+  const ent = [...new Set(cur.map((r) => r.label))];
+  const cell = (label, track) => {
+    const rs = cur.filter((r) => r.label === label && r.track === track && r.task === "math_qwen08");
+    if (!rs.length) return `<td class="muted">—</td>`;
+    const done = rs.filter((r) => r.normalized != null);
+    if (!done.length) return `<td><span class="pill pending">scoring</span><div class="muted mono" style="font-size:.78rem">${rs.length}/3 attempts</div></td>`;
+    const m = done.reduce((a, r) => a + r.normalized, 0) / done.length, v = done.reduce((a, r) => a + r.value, 0) / done.length;
+    return `<td><span class="num" style="font-size:1.1rem">${m.toFixed(1)}</span> <span class="muted num">(${pct(v)})</span>`
+      + `<div class="bar"><span style="width:${Math.max(0, Math.min(100, m))}%;background:${track === "B" ? "var(--accent-2)" : "var(--accent)"}"></span></div>`
+      + `<div class="muted mono" style="font-size:.78rem">${done.length}/3 attempts${rs.length > done.length ? " · more scoring" : ""}</div></td>`;
+  };
+  const cost = (label) => { const rs = cur.filter((r) => r.label === label && r.gpu_hours != null);
+    return rs.length ? (rs.reduce((a, r) => a + r.gpu_hours, 0) / rs.length).toFixed(1) : "—"; };
+  let h = `<thead><tr><th>Entry</th><th>Math · Track A</th><th>Math · Track B</th><th class="num">GPU-h / run</th><th>Edits</th></tr></thead><tbody>`;
+  for (const lb of ent) {
+    const ad = cur.filter((r) => r.label === lb && r.adapter && r.adapter.params).map((r) => `rank ${r.adapter.max_rank} · ${r.adapter.modules} module${r.adapter.modules > 1 ? "s" : ""}`);
+    h += `<tr><td><strong>${esc(lb)}</strong><div class="muted mono" style="font-size:.78rem">${esc(cur.find((r) => r.label === lb).model)}</div></td>${cell(lb, "A")}${cell(lb, "B")}<td class="num">${cost(lb)}</td><td class="muted" style="font-size:.86rem">${[...new Set(ad)].join("<br>")}</td></tr>`;
+  }
+  const refs = math.references;
+  h += `<tr class="ref"><td>Full-weight edit, Takehi et al. 2026 (50 passes, hint in prompt)</td><td colspan="2"><span class="num">100.0</span> <span class="num">(${pct(refs.paper_full_weight_edit)})</span></td><td class="num">20.3 h edit</td><td style="font-size:.86rem">64 columns × 2 layers</td></tr>`;
+  if (refs.paper_edit_as_rank1_lora) h += `<tr class="ref"><td>Same edit compressed to a rank-1 LoRA (our SVD)</td><td colspan="2"><span class="num">${refNorm(refs.paper_edit_as_rank1_lora).toFixed(1)}</span> <span class="num">(${pct(refs.paper_edit_as_rank1_lora)})</span></td><td class="num">—</td><td style="font-size:.86rem">rank 1 · 2 modules</td></tr>`;
+  h += `<tr class="ref"><td>Unedited Qwen3.5-0.8B</td><td colspan="2"><span class="num">0.0</span> <span class="num">(${pct(math.base)})</span></td><td class="num">—</td><td></td></tr></tbody>`;
+  $("#board").innerHTML = h;
+})();
+
+/* task card */
+(function task() {
+  const t = math, rc = t.reference_cost || {};
+  $("#task-card").innerHTML = `<span class="eyebrow">The request, exactly as the editor sees it</span><p class="quote">${esc(t.request)}</p>
+    <p class="muted" style="font-size:.92rem">${esc(t.judged)}</p>
+    <div class="facts">
+      <div><span class="eyebrow">Held-out set</span><b>MATH-500 · 200 × 1</b></div>
+      <div><span class="eyebrow">Unedited</span><b>${pct(t.base)}</b></div>
+      <div><span class="eyebrow">Unedited cut at 32K</span><b>93%</b></div>
+      <div><span class="eyebrow">Reference (=100)</span><b>${pct(Math.max(...Object.values(t.references)))}</b></div>
+      <div><span class="eyebrow">Reference edit time</span><b>${rc.wall_hours ?? "—"} h</b></div>
+    </div>`;
+})();
+
+/* run explorer */
+(function explorer() {
+  const list = $("#runlist"), det = $("#detail");
+  const order = [...D.runs].sort((a, b) => (a.pilot - b.pilot) || a.track.localeCompare(b.track) || a.rules.localeCompare(b.rules));
+  const show = (r, btn) => {
+    list.querySelectorAll(".runbtn").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+    const tk = r.tokens || {}, ad = r.adapter || {};
+    const tc = Object.entries(r.tool_counts || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<span class="pill">${esc(k)} ×${v}</span>`).join("");
+    const cand = r.candidates.length ? `<div class="table-wrap"><table><thead><tr><th>#</th><th>Test</th><th>Candidate</th><th class="num">Dev acc</th><th class="num">Finished</th></tr></thead><tbody>`
+      + r.candidates.map((c, i) => `<tr><td class="num">${i + 1}</td><td class="mono" style="font-size:.84rem">${esc(c.tool)}</td><td class="mono" style="font-size:.84rem">${esc(c.what)}</td><td class="num">${c.dev_acc == null ? "—" : pct(c.dev_acc)}</td><td class="num">${c.finished == null ? "—" : pct(c.finished)}</td></tr>`).join("")
+      + `</tbody></table></div>` : `<p class="muted">No candidates tested (Track A forbids testing edits).</p>`;
+    const rel = ad.rel_norms ? Object.entries(ad.rel_norms).map(([m, v]) => `<div class="mono" style="font-size:.84rem">${esc(m)} · ${(100 * v).toFixed(1)}% of ‖W‖</div>`).join("") : "";
+    det.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><h3>${esc(r.label)} · Track ${r.track}</h3>
+        <span class="pill ${r.track === "B" ? "b" : "a"}">${r.track === "B" ? "dev feedback" : "one-shot"}</span>
+        <span class="pill ${r.pilot ? "pilot" : ""}">${esc(r.rules)}${r.pilot ? " · pilot" : ""}</span>
+        ${r.scored ? "" : '<span class="pill pending">scoring</span>'}</div>
+      <div class="kv">
+        <div><span class="eyebrow">MATH-500</span><b>${pct(r.value)}</b></div>
+        <div><span class="eyebrow">Normalized</span><b>${r.normalized ?? "—"}</b></div>
+        <div><span class="eyebrow">Cut at 32K</span><b>${pct(r.cut_share)}</b></div>
+        <div><span class="eyebrow">Edit time</span><b>${r.edit_hours} h</b></div>
+        <div><span class="eyebrow">Turns</span><b>${r.turns_n}</b></div>
+        <div><span class="eyebrow">Editor tokens</span><b>${tk.input ? (tk.input / 1e6).toFixed(2) + "M in" : "—"}</b><span class="muted mono" style="font-size:.78rem">${tk.cached ? Math.round(100 * tk.cached / tk.input) + "% cached · " : ""}${tk.output ? (tk.output / 1e3).toFixed(0) + "K out" : ""}</span></div>
+        <div><span class="eyebrow">Adapter</span><b>${ad.params ? ad.params.toLocaleString() + " params" : "—"}</b><span class="muted mono" style="font-size:.78rem">${ad.params ? "rank " + ad.max_rank + " · " + ad.modules + " module(s)" : ""}</span></div>
+      </div>
+      <div style="display:grid;gap:6px"><span class="eyebrow">Committed edit</span>${rel}<p class="explain">${esc(r.explanation)}</p></div>
+      <div style="display:grid;gap:8px"><span class="eyebrow">Tool calls</span><div class="tools">${tc || '<span class="muted">—</span>'}</div></div>
+      <div style="display:grid;gap:8px"><span class="eyebrow">Tested candidates</span>${cand}</div>
+      <div style="display:grid;gap:8px"><span class="eyebrow">Turn by turn (the editor's own notes)</span><div class="timeline">${r.turns.map((t) =>
+        `<div class="turn"><span class="n">T${t.n}</span><div><p>${esc(t.text)}</p><div class="tools">${t.tools.map((x) => `<span class="pill">${esc(x)}</span>`).join("")}</div></div></div>`).join("")}</div></div>`;
+  };
+  order.forEach((r, i) => {
+    const b = el("button", { className: "runbtn", type: "button", id: "run-" + i });
+    b.innerHTML = `<span class="t">${r.pilot ? "Pilot " + esc(r.rules.replace("lsbench-", "")) : "Track " + r.track} · ${esc(r.label.replace(/ \(.*\)/, ""))}</span>
+      <span class="s">${r.scored ? pct(r.value) + " · norm " + r.normalized : "scoring"} · ${r.edit_hours} h · ${r.turns_n} turns</span>`;
+    b.addEventListener("click", () => show(r, b));
+    list.append(b);
+  });
+  const first = order.findIndex((r) => r.scored && !r.pilot);
+  show(order[first < 0 ? 0 : first], list.children[first < 0 ? 0 : first]);
+})();
+
+/* method */
+(function method() {
+  const L = D.limits;
+  const cards = [
+    ["Tracks", [`Track A: inspect the unedited model only, then commit one adapter blind.`,
+      `Track B: also test up to ${L.candidates_track_b} candidates (dev-split score, generation with the candidate, or an activation intervention).`,
+      `Both: ${L.generate_calls} generate calls, ${L.analysis_calls} analysis calls, ${L.wall_hours} h wall clock, rank ≤ ${L.max_rank}.`]],
+    ["What the editor can do", ["Write LoRA updates on the attention output and MLP down projections of any layer.",
+      "Interpretability tools on the unedited model: activation traces inside its own replies, token statistics, logit lens, direct logit attribution, attention, top activations, activation patching.",
+      "No gradients, no training, no torch in its sandbox; every model call goes through a budgeted service."]],
+    ["Scoring", ["Held-out MATH-500 (first 200 problems, 1 sample, thinking on, 32K tokens; Qwen's sampling settings).",
+      "Normalized: 0 = unedited model, 100 = the task's best reference.",
+      "Leaderboard numbers will be the mean of 3 attempts, failures counted as 0, median across tasks."]],
+    ["Against the full-weight result", ["Takehi et al.'s prompt named the failure (repetition, cut off at the token limit). Ours names none.",
+      "Their rules excluded edits that make the model close its thinking early; ours allow any edit that answers the request.",
+      "Their editor could compare edited and original models over 50 passes; that is closer to our Track B."]],
+    ["Caveats", ["Single attempts so far; no damage check on other abilities yet.",
+      "One editor (GPT-6 Astra) and one harness (our minimal loop) so far.",
+      "Pilot runs used earlier rules (a stale prompt line in v0.1; fewer tools in v0.1–v0.2) and are not ranked."]],
+  ];
+  $("#method-cards").innerHTML = cards.map(([h, items]) => `<div class="panel"><h3>${esc(h)}</h3><ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("");
+  $("#foot").textContent = `Generated ${D.generated} · ${D.rules} · private draft`;
+})();
+</script>
