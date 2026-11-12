@@ -19,7 +19,8 @@ from pathlib import Path
 from . import prompt, spec
 
 FORBIDDEN = [r"pip3? install", r"\buv (pip|add)\b", r"import torch", r"from torch", r"import transformers",
-             r"from transformers", r"import jax", r"\.backward\(", r"optim\.(Adam|SGD)"]
+             r"from transformers", r"import jax", r"\.backward\(", r"optim\.(Adam|SGD)",
+             r"\b(curl|wget)\s+https?://", r"requests\.get\(", r"urllib\.request\.urlopen\(\s*['\"]https?://"]
 
 
 def audit(rdir: Path, session: dict) -> dict:

@@ -1,353 +1,633 @@
+<meta charset="utf-8">
 <title>LoRA-Space Bench</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a lab notebook for weight edits. Header with a rank-1 outer-product strip (B·A), then the cost/score chart,
-   the board, the task, a run explorer (what the editor actually did) and the method. Single centered column, 1120px. */
+/* One typeface, white page, hairlines, square corners, no chips or cards. Colour only carries data:
+   Track A blue, Track B orange, references grey. Charts and tables sit directly on the page.
+   Order: hero (text + one real run as a figure), leaderboard, tasks, runs, rules, questions, footer. */
 :root {
-  --bg: #f3f5f6;          /* cool paper, slight blue bias */
-  --panel: #ffffff;
-  --ink: #142029;
-  --muted: #5b6b77;
-  --rule: #d5dde2;
-  --accent: #2343c4;      /* cobalt: Track A / our runs */
-  --accent-2: #c2410c;    /* rust: Track B */
-  --ref: #8a6d1f;         /* reference rows (paper) */
-  --good: #1d7a4a; --warn: #a16207; --bad: #b42318;
-  --chip: #e7ecf0;
-  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
-  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --bg: #ffffff; --ink: #1f1f1f; --ink-2: #4d4d4d; --ink-3: #707070; --rule: #e6e6e6; --rule-2: #cfcfcf; --fill: #f4f4f5;
+  --accent: #2a52d1; --a: #2a52d1; --b: #c24a12; --ref: #a3a3a3; --good: #1f7a4d;
+  --foot-bg: #1f2023; --foot-ink: #f3f3f3; --foot-ink-2: #b5b5b5; --foot-rule: #3a3b3f;
+  --f: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --z-sticky: 10;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0f1519; --panel: #151d23; --ink: #e3eaee; --muted: #93a3ae; --rule: #26323a;
-  --accent: #8aa2ff; --accent-2: #ff9a62; --ref: #d8b45a; --good: #5fcf92; --warn: #e7b84a; --bad: #ff8577;
-  --chip: #1f2a31; color-scheme: dark } }
+  --bg: #131313; --ink: #ededed; --ink-2: #bdbdbd; --ink-3: #969696; --rule: #2b2b2b; --rule-2: #404040; --fill: #1d1d1e;
+  --accent: #8fa6ff; --a: #8fa6ff; --b: #ff9a62; --ref: #6e6e6e; --good: #63cf95; --foot-bg: #0b0b0c; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0f1519; --panel: #151d23; --ink: #e3eaee; --muted: #93a3ae; --rule: #26323a;
-  --accent: #8aa2ff; --accent-2: #ff9a62; --ref: #d8b45a; --good: #5fcf92; --warn: #e7b84a; --bad: #ff8577;
-  --chip: #1f2a31; color-scheme: dark }
+  --bg: #131313; --ink: #ededed; --ink-2: #bdbdbd; --ink-3: #969696; --rule: #2b2b2b; --rule-2: #404040; --fill: #1d1d1e;
+  --accent: #8fa6ff; --a: #8fa6ff; --b: #ff9a62; --ref: #6e6e6e; --good: #63cf95; --foot-bg: #0b0b0c; color-scheme: dark }
 
-body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body);
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 64px; display: grid; gap: 44px; }
-h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
-h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; line-height: 1.05; }
-h2 { font-size: 1.55rem; font-weight: 700; }
-h3 { font-size: 1.08rem; font-weight: 700; }
-p { margin: 0; max-width: 68ch; }
-.muted { color: var(--muted); }
-.mono, .num { font-family: var(--f-mono); }
-.num { font-variant-numeric: tabular-nums; }
-.eyebrow { font: 500 0.74rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-section { display: grid; gap: 16px; min-width: 0; }
-a { color: var(--accent); }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--f); -webkit-font-smoothing: antialiased; }
+.shell { max-width: 1320px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 720px) { .shell { padding-inline: 48px; } }
+h1, h2, h3, h4 { margin: 0; font-weight: 600; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 3.6vw, 2.9rem); line-height: 1.14; letter-spacing: -0.01em; }
+h2 { font-size: 1.9rem; line-height: 1.2; }
+h3 { font-size: 1.25rem; line-height: 1.3; }
+h4 { font-size: 0.95rem; }
+p { margin: 0; max-width: 68ch; text-wrap: pretty; }
+a { color: var(--accent); text-underline-offset: 3px; }
+.dim { color: var(--ink-3); }
+.small { font-size: 0.88rem; color: var(--ink-3); }
+.mono { font-family: var(--f-mono); font-size: 0.86em; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; color: inherit; }
+figure { margin: 0; }
 
-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end; }
-.lede { display: grid; gap: 12px; }
-.badges { display: flex; flex-wrap: wrap; gap: 8px; }
-.badge { font: 500 0.78rem/1 var(--f-mono); padding: 6px 9px; border-radius: 4px; background: var(--chip); color: var(--ink); }
-.badge.draft { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
-.outer { display: grid; grid-template-columns: 14px 132px; grid-template-rows: 14px 132px; gap: 4px; }
-.outer canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
-.outer .lbl { font: 500 0.7rem/1 var(--f-mono); color: var(--muted); display: grid; place-items: center; }
-@media (max-width: 640px) { header { grid-template-columns: 1fr; } .outer { display: none; } }
+/* top bar */
+.top { position: sticky; top: 0; z-index: var(--z-sticky); background: var(--bg); border-bottom: 1px solid var(--rule); }
+.top .shell { display: flex; align-items: stretch; gap: 36px; height: 54px; }
+.brand svg { width: 20px; height: 20px; flex: none; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 1.05rem; color: var(--ink); text-decoration: none; white-space: nowrap; }
+.nav { display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a, .tabs button { display: flex; align-items: center; color: var(--ink-2); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
+.nav a { margin-bottom: -1px; }
+.nav a:hover, .tabs button:hover { color: var(--ink); }
+.nav a[aria-current="true"], .tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.top-right { display: flex; align-items: center; gap: 24px; font-size: 0.92rem; color: var(--ink-3); white-space: nowrap; }
+.top-right a { color: var(--ink-2); text-decoration: none; }
+.top-right a:hover { color: var(--ink); }
+@media (max-width: 860px) { .top-right { display: none; } .top .shell { gap: 22px; } }
 
-.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
-.chart-wrap { padding: 16px; overflow-x: auto; }
-.chart-wrap svg { display: block; width: 100%; min-width: 560px; height: auto; }
-.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.88rem; color: var(--muted); }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 72px; align-items: center; padding-block: 88px 96px; }
+.hero-copy { display: grid; gap: 20px; justify-items: start; }
+.updated { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--ink-2); }
+.updated i { width: 8px; height: 8px; background: var(--accent); border-radius: 2px; }
+.hero-copy > p { font-size: 1.12rem; color: var(--ink-2); max-width: 56ch; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.links a { padding: 10px 18px; border-radius: 8px; background: var(--fill); color: var(--ink); font-weight: 500; font-size: 0.95rem; text-decoration: none; }
+.links a:hover { background: var(--rule); }
+.fig { border: 1px solid var(--rule-2); padding: 18px; display: grid; gap: 16px; }
+.fig-label { font-size: 0.86rem; font-weight: 600; }
+.prompt { display: flex; align-items: flex-end; gap: 12px; border: 1px solid var(--rule-2); border-radius: 16px; padding: 12px 12px 12px 16px; background: var(--bg); }
+.prompt p { flex: 1; min-width: 0; font-weight: 500; }
+.send { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); flex: none; display: grid; place-items: center; }
+.send svg { width: 12px; height: 12px; stroke: var(--bg); }
+.pair { border: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 40px 12px; align-items: end; }
+.pair div { display: grid; justify-items: center; gap: 6px; font-size: 0.88rem; font-weight: 500; }
+.pair i { display: block; width: 100%; max-width: 110px; background: var(--c); }
+.fig-edit { font-size: 0.9rem; color: var(--ink-2); }
+.fig-res { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.fig-res b { font-size: 2rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+@media (max-width: 960px) { .hero { grid-template-columns: 1fr; padding-block: 44px 56px; gap: 40px; } .fig { max-width: 440px; } }
 
-.table-wrap { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 0.94rem; }
-th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-th { font: 500 0.74rem/1.2 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-td.num, th.num { text-align: right; }
-tr.ref td { color: var(--ref); }
-tr.ref td:first-child::before { content: "ref "; font: 500 0.7rem var(--f-mono); }
-.pill { display: inline-block; font: 500 0.72rem/1 var(--f-mono); padding: 4px 7px; border-radius: 999px; background: var(--chip); white-space: nowrap; }
-.pill.a { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
-.pill.b { background: color-mix(in srgb, var(--accent-2) 16%, transparent); color: var(--accent-2); }
-.pill.pending { color: var(--warn); }
-.pill.pilot { color: var(--muted); }
-.bar { height: 6px; border-radius: 3px; background: var(--chip); position: relative; min-width: 80px; margin-top: 6px; }
-.bar span { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--accent); }
+/* sections */
+main > section { padding-bottom: 104px; display: grid; gap: 32px; }
+.sec-head { display: grid; gap: 12px; }
+.sec-head p { color: var(--ink-2); }
 
-.task { padding: 18px; display: grid; gap: 12px; }
-.quote { font-size: 1.04rem; border-left: 3px solid var(--accent); padding-left: 14px; max-width: 75ch; }
-.facts { display: flex; flex-wrap: wrap; gap: 10px 28px; }
-.facts div { display: grid; gap: 2px; }
-.facts b { font: 500 1.15rem var(--f-mono); font-variant-numeric: tabular-nums; }
+/* leaderboard */
+.lb-top { display: grid; grid-template-columns: minmax(0, 1fr) 288px; gap: 56px; align-items: start; }
+.block { display: grid; gap: 14px; min-width: 0; }
+.block-head { display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; align-items: flex-end; }
+.tabs { display: flex; gap: 22px; flex-wrap: wrap; }
+.tabs button { border-width: 0 0 2px; border-style: solid; background: none; padding: 4px 0; cursor: pointer; font-size: 0.95rem; }
+.settings { border: 1px solid var(--rule-2); border-radius: 6px; padding: 20px; display: grid; gap: 16px; }
+.settings h3 { padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+.settings fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 9px; }
+.settings legend { padding: 0; margin-bottom: 9px; font-size: 0.9rem; font-weight: 600; }
+.settings label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.settings input[type="radio"] { accent-color: var(--accent); width: 17px; height: 17px; margin: 0; }
+.settings .count { margin-left: auto; color: var(--ink-3); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+.switches { display: grid; gap: 11px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+.switch input { appearance: none; -webkit-appearance: none; width: 32px; height: 19px; border-radius: 999px; border: 1.5px solid var(--ink-3); position: relative; cursor: pointer; margin: 0; flex: none; }
+.switch input::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 11px; height: 11px; border-radius: 50%; background: var(--ink-3); }
+.switch input:checked { border-color: var(--accent); }
+.switch input:checked::after { transform: translateX(13px); background: var(--accent); }
+@media (max-width: 980px) { .lb-top { grid-template-columns: 1fr; gap: 28px; } .settings { order: -1; } }
 
-.explorer { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; }
-@media (max-width: 820px) { .explorer { grid-template-columns: 1fr; } }
-.runlist { display: grid; gap: 6px; }
-.runbtn { text-align: left; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px;
-  padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; }
-.runbtn:hover { border-color: var(--accent); }
-.runbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
-.runbtn .t { font-weight: 700; font-size: 0.92rem; }
-.runbtn .s { font: 0.78rem var(--f-mono); color: var(--muted); }
-.detail { padding: 18px; display: grid; gap: 18px; min-width: 0; }
-.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-.kv div { display: grid; gap: 2px; }
-.kv b { font: 500 1.05rem var(--f-mono); font-variant-numeric: tabular-nums; }
-.tools { display: flex; flex-wrap: wrap; gap: 6px; }
-.timeline { display: grid; gap: 0; max-height: 560px; overflow-y: auto; border-top: 1px solid var(--rule); }
-.turn { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; padding: 10px 2px; border-bottom: 1px solid var(--rule); }
-.turn .n { font: 500 0.8rem var(--f-mono); color: var(--muted); padding-top: 2px; }
-.turn p { font-size: 0.93rem; }
-.turn .tools { margin-top: 6px; }
-.explain { font-size: 0.95rem; background: var(--bg); border-radius: 4px; padding: 12px 14px; }
+.scroll-x { overflow-x: auto; }
+.bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 12px; }
+.bar { display: grid; grid-template-rows: 250px auto; min-width: 0; }
+.bar-plot { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border-bottom: 1px solid var(--ink-3);
+  background: repeating-linear-gradient(to top, transparent 0 49px, var(--rule) 49px 50px); }
+.bar-v { font-size: 0.92rem; font-weight: 500; padding-bottom: 5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bar-fill { width: min(100%, 76px); background: var(--c); min-height: 2px; }
+.bar-fill.pilot { background: color-mix(in srgb, var(--c) 38%, var(--bg)); }
+.bar-l { text-align: center; padding-top: 10px; font-size: 0.88rem; line-height: 1.3; }
+.bar-l b { display: block; font-weight: 500; }
+.bar-l span { display: block; color: var(--ink-3); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 0.88rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 10px; height: 10px; background: var(--c); }
+.legend i.pilot { background: color-mix(in srgb, var(--c) 38%, var(--bg)); }
 
-.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-.method .panel { padding: 16px; display: grid; gap: 8px; align-content: start; }
-.method ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 0.94rem; }
-footer { font: 0.8rem var(--f-mono); color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
-@media (prefers-reduced-motion: no-preference) { .runbtn, .bar span { transition: border-color .15s, width .4s; } }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { padding: 12px 14px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
+th:first-child, td:first-child { padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+thead th { font-weight: 600; font-size: 0.86rem; vertical-align: bottom; border-bottom-color: var(--ink); }
+thead tr.groups th { padding-bottom: 2px; border-bottom: 0; font-weight: 400; color: var(--ink-3); }
+td.n, th.n { text-align: right; }
+td.n { font-variant-numeric: tabular-nums; }
+th small { display: block; font-weight: 400; font-size: 0.8rem; color: var(--ink-3); }
+.sort { border: 0; background: none; padding: 0; font-weight: 600; cursor: pointer; }
+.sort::after { content: " ↕"; color: var(--rule-2); font-weight: 400; }
+th[aria-sort="ascending"] .sort::after { content: " ↑"; color: var(--ink); }
+th[aria-sort="descending"] .sort::after { content: " ↓"; color: var(--ink); }
+.who { display: flex; align-items: center; gap: 12px; }
+.who i { width: 3px; height: 32px; background: var(--c); flex: none; }
+.who b { font-weight: 500; display: block; }
+.who span { color: var(--ink-3); font-size: 0.86rem; }
+td.lead { font-weight: 600; }
+.open { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; }
+.open:hover { text-decoration: underline; }
+.empty { padding: 28px 0; border-block: 1px solid var(--rule); color: var(--ink-2); }
+.empty b { color: var(--ink); font-weight: 600; }
+
+#chart { display: block; width: 100%; min-width: 620px; height: auto; font-family: var(--f); }
+#chart .grid { stroke: var(--rule); }
+#chart .axis { stroke: var(--ink-3); }
+#chart text { fill: var(--ink-3); font-size: 13px; }
+#chart text.t { fill: var(--ink); font-size: 13.5px; }
+#chart .lab { font-size: 14px; font-weight: 500; }
+#chart .A { fill: var(--a); stroke: var(--a); } #chart .B { fill: var(--b); stroke: var(--b); } #chart .R { fill: var(--ink); stroke: var(--ink); }
+#chart .hollow { fill: var(--bg); stroke-width: 2.5; }
+#chart .refline { stroke: var(--ink-3); stroke-dasharray: 2 5; }
+#chart text.A, #chart text.B, #chart text.R { stroke: none; }
+
+/* tasks */
+.tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 48px; align-items: start; }
+.task { display: grid; gap: 14px; }
+.task-head { display: grid; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
+.task .prompt p { font-weight: 400; font-size: 0.95rem; }
+.facts { margin: 0; display: grid; }
+.facts div { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; border-bottom: 1px solid var(--rule); font-size: 0.93rem; }
+.facts dt { color: var(--ink-3); }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.linkbtn { justify-self: start; border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; }
+.linkbtn:hover { text-decoration: underline; }
+
+/* runs */
+.explorer { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 56px; align-items: start; }
+.runlist { display: grid; border-top: 1px solid var(--ink); }
+.runbtn { text-align: left; background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 12px 0; cursor: pointer; display: grid; gap: 2px; color: var(--ink-2); }
+.runbtn:hover { color: var(--ink); }
+.runbtn[aria-pressed="true"] { color: var(--ink); }
+.runbtn[aria-pressed="true"] .t { font-weight: 600; }
+.runbtn .t { display: flex; align-items: center; gap: 9px; font-weight: 500; }
+.runbtn .t i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.runbtn .s { font-size: 0.86rem; color: var(--ink-3); font-variant-numeric: tabular-nums; padding-left: 17px; }
+.detail { display: grid; gap: 32px; min-width: 0; }
+.detail-head { display: grid; gap: 4px; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin: 0; border-top: 1px solid var(--ink); }
+.kv div { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--rule); display: grid; gap: 2px; align-content: start; }
+.kv dt { font-size: 0.86rem; color: var(--ink-3); }
+.kv dd { margin: 0; font-size: 1.25rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.kv dd small { display: block; font-size: 0.86rem; font-weight: 400; color: var(--ink-3); }
+.part { display: grid; gap: 10px; min-width: 0; }
+.explain { max-width: 80ch; color: var(--ink-2); }
+.timeline { max-height: 520px; overflow-y: auto; border-block: 1px solid var(--rule); padding-block: 6px; }
+.turn { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 9px 0; }
+.turn .k { font-size: 0.86rem; color: var(--ink-3); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.turn p { font-size: 0.95rem; max-width: 80ch; }
+.turn .calls { color: var(--ink-3); margin-top: 3px; }
+@media (max-width: 860px) { .explorer { grid-template-columns: 1fr; gap: 32px; } }
+
+/* rules */
+.rules { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 72px; align-items: start; }
+.rules th, .rules td { white-space: normal; vertical-align: top; }
+.rules tbody th { font-weight: 400; color: var(--ink-3); width: 8em; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 8px; }
+@media (max-width: 900px) { .rules { grid-template-columns: 1fr; gap: 32px; } }
+
+/* questions */
+.qa { display: grid; grid-template-columns: 320px minmax(0, 720px); gap: 24px 40px; }
+.qa-list { border-top: 1px solid var(--ink); }
+.qa details { border-bottom: 1px solid var(--rule); }
+.qa summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 0; font-size: 1.15rem; font-weight: 500; }
+.qa summary::-webkit-details-marker { display: none; }
+.qa summary::after { content: ""; width: 14px; height: 14px; flex: none;
+  background: linear-gradient(var(--ink), var(--ink)) center / 100% 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) center / 1.5px 100% no-repeat; }
+.qa details[open] summary::after { background: linear-gradient(var(--ink), var(--ink)) center / 100% 1.5px no-repeat; }
+.qa .a { padding: 0 0 22px; display: grid; gap: 10px; color: var(--ink-2); }
+.qa ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 68ch; }
+@media (max-width: 900px) { .qa { grid-template-columns: 1fr; } }
+
+/* footer */
+footer { background: var(--foot-bg); color: var(--foot-ink); }
+footer .shell { padding-block: 56px 28px; display: grid; gap: 44px; }
+.foot-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)); gap: 32px; }
+.foot-grid .brand { color: var(--foot-ink); font-size: 1.4rem; }
+.foot-grid p { color: var(--foot-ink-2); margin-top: 12px; max-width: 30ch; font-size: 1.08rem; line-height: 1.4; }
+.foot-col { display: grid; gap: 12px; align-content: start; }
+.foot-col b { font-weight: 600; }
+.foot-col a { color: var(--foot-ink-2); text-decoration: none; font-size: 0.95rem; }
+.foot-col a:hover { color: var(--foot-ink); }
+.foot-base { border-top: 1px solid var(--foot-rule); padding-top: 20px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; font-size: 0.86rem; color: var(--foot-ink-2); }
+@media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-grid > div:first-child { grid-column: 1 / -1; } main > section { padding-bottom: 72px; } h2 { font-size: 1.6rem; } }
+
+@media (prefers-reduced-motion: no-preference) { .nav a, .tabs button, .links a, .runbtn { transition: color .15s, background-color .15s, border-color .15s; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 
-<div class="wrap">
-  <header>
-    <div class="lede">
-      <span class="eyebrow">Benchmark · weight edits from a request</span>
-      <h1>LoRA-Space Bench</h1>
-      <p>An editor model gets a frozen model and one sentence from a user, such as “make this model better at math”. It
-        must find what goes wrong and write a LoRA adapter (ΔW = B·A, rank ≤ 8) without gradients. We score the edit on
-        held-out problems and count what it cost.</p>
-      <div class="badges" id="badges"></div>
+<div class="top">
+  <div class="shell">
+    <a class="brand" href="#top" aria-label="LoRA-Space Bench, top of page"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="0" y="6" width="4" height="14" rx="1" fill="var(--b)"/><rect x="6" y="0" width="14" height="4" rx="1" fill="var(--a)"/><rect x="6" y="6" width="14" height="14" rx="1.5" fill="currentColor"/></svg>LoRA-Space Bench</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a>
+    </nav>
+    <div class="top-right"><span>Private draft</span><a href="https://github.com/afifi-yusuf/lso">GitHub</a></div>
+  </div>
+</div>
+
+<div class="shell" id="top">
+  <header class="hero">
+    <div class="hero-copy">
+      <span class="updated"><i></i><span id="updated"></span></span>
+      <h1>LoRA-Space Bench: A Benchmark for Editing Models by Writing Their Weights</h1>
+      <p>An editor model gets a frozen model and one sentence from a user. It has to find what goes wrong and write a
+        LoRA adapter by hand, without gradients. We score the edit on held-out problems and count what it cost.</p>
+      <div class="links">
+        <a href="https://github.com/afifi-yusuf/lso">GitHub</a>
+        <a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a>
+      </div>
     </div>
-    <div class="outer" aria-hidden="true" title="A rank-1 update: column B times row A">
-      <span></span><canvas id="rowA" width="66" height="7"></canvas>
-      <canvas id="colB" width="7" height="66"></canvas><canvas id="outer" width="66" height="66"></canvas>
-    </div>
+    <figure class="fig" id="spec"></figure>
   </header>
+</div>
 
-  <section id="cost">
-    <span class="eyebrow">Headline</span>
-    <h2>Score against editing time</h2>
-    <p class="muted">Normalized score on the held-out set: 0 is the unedited model, 100 is the task's best reference (for
-      math, the full-weight edit of Takehi et al. 2026). Time is the editor's wall clock, log scale.</p>
-    <div class="panel chart-wrap"><svg id="chart" viewBox="0 0 900 380" role="img" aria-label="Normalized score against editing hours"></svg></div>
-    <div class="legend" id="legend"></div>
-  </section>
-
+<main class="shell">
   <section id="leaderboard">
-    <span class="eyebrow">Board</span>
-    <h2>Entries</h2>
-    <p class="muted">An entry is an editor model with a harness. Track A commits one edit without testing it; Track B may
-      test five candidates on a dev split first. Ranked numbers will be the mean of three attempts; cells show how many
-      attempts exist so far.</p>
-    <div class="panel table-wrap"><table id="board"></table></div>
+    <div class="sec-head">
+      <h2>Leaderboard</h2>
+      <p>Each row is one run of an entry: an editor model with a harness. On the normalized scale, 0 is the unedited
+        model and 100 is the task's best reference. Every row so far is a single attempt, so nothing is ranked yet.</p>
+    </div>
+    <div class="lb-top">
+      <div class="block">
+        <div id="board-empty" class="empty" hidden></div>
+        <div class="block" id="bar-box">
+          <div class="block-head"><h3 id="bar-title"></h3><div class="tabs" id="f-metric" role="group" aria-label="Metric"></div></div>
+          <div class="scroll-x"><div class="bars" id="bars"></div></div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </div>
+      <aside class="settings" aria-label="Leaderboard settings">
+        <h3>Settings</h3>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" id="s-pilots" checked>Show pilot runs</label>
+          <label class="switch"><input type="checkbox" id="s-refs" checked>Show references</label>
+        </div>
+        <fieldset id="s-task"><legend>Task</legend></fieldset>
+        <fieldset id="s-track"><legend>Track</legend></fieldset>
+      </aside>
+    </div>
+    <div id="board-body" style="display:grid;gap:64px;margin-top:24px">
+      <div class="scroll-x"><table id="board"></table></div>
+      <div class="block">
+        <div class="block-head"><h3>Score against cost</h3><div class="tabs" id="f-x" role="group" aria-label="Cost axis"></div></div>
+        <div class="scroll-x"><svg id="chart" viewBox="0 0 1000 420" role="img" aria-label="Normalized score against cost, one point per run"></svg></div>
+      </div>
+    </div>
   </section>
 
-  <section id="task">
-    <span class="eyebrow">Task</span>
-    <h2 id="task-title">Qwen3.5-0.8B · math</h2>
-    <div class="panel task" id="task-card"></div>
+  <section id="tasks">
+    <div class="sec-head">
+      <h2>Tasks</h2>
+      <p>A task is a target model and a request, shown here exactly as the editor sees it. The request names no
+        failure; finding it is part of the work.</p>
+    </div>
+    <div class="tasks" id="task-list"></div>
   </section>
 
   <section id="runs">
-    <span class="eyebrow">Run explorer</span>
-    <h2>What the editor did</h2>
-    <p class="muted">Each run's own notes, turn by turn, with the tools it called, the candidates it tested and the edit it
-      committed.</p>
+    <div class="sec-head">
+      <h2>Runs</h2>
+      <p>What each editor did: the edit it committed, the candidates it tested, and its own notes turn by turn.</p>
+    </div>
     <div class="explorer">
       <div class="runlist" id="runlist"></div>
-      <div class="panel detail" id="detail"></div>
+      <div class="detail" id="detail"></div>
     </div>
   </section>
 
-  <section id="method">
-    <span class="eyebrow">Method</span>
-    <h2>Rules and caveats</h2>
-    <div class="method" id="method-cards"></div>
+  <section id="rules">
+    <div class="sec-head">
+      <h2>Rules</h2>
+      <p id="rules-lede"></p>
+    </div>
+    <div class="rules">
+      <table id="tracks"></table>
+      <dl class="facts" id="limits"></dl>
+    </div>
   </section>
 
-  <footer id="foot"></footer>
-</div>
+  <section id="questions">
+    <div class="qa">
+      <h2>Questions</h2>
+      <div class="qa-list" id="qa"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    <div class="foot-grid">
+      <div><span class="brand"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="0" y="6" width="4" height="14" rx="1" fill="#ff9a62"/><rect x="6" y="0" width="14" height="4" rx="1" fill="#8fa6ff"/><rect x="6" y="6" width="14" height="14" rx="1.5" fill="currentColor"/></svg>LoRA-Space Bench</span><p>Can a frontier model fine-tune a frozen model by writing its adapter?</p></div>
+      <div class="foot-col"><b>Benchmark</b><a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a></div>
+      <div class="foot-col"><b>Project</b><a href="https://github.com/afifi-yusuf/lso">GitHub</a><a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a></div>
+    </div>
+    <div class="foot-base"><span id="foot-l"></span><span>Private draft. Pilot data, not ranked.</span></div>
+  </div>
+</footer>
 
 <script>
 const D = /*__LSB_DATA__*/null;
 const $ = (s) => document.querySelector(s);
-const el = (tag, attrs = {}, html = "") => { const e = document.createElement(tag); Object.assign(e, attrs); if (html) e.innerHTML = html; return e; };
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const pct = (v) => v == null ? "—" : (100 * v).toFixed(1) + "%";
-const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const math = D.tasks.math_qwen08;
-const refNorm = (v) => 100 * (v - math.base) / (Math.max(...Object.values(math.references)) - math.base);
+const pct = (v, d = 1) => v == null ? "–" : (100 * v).toFixed(d) + "%";
+const fix = (v, d = 1) => v == null ? "–" : Number(v).toFixed(d);
+const SEND = `<span class="send" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10.5V1.5M2 5.5l4-4 4 4"/></svg></span>`;
 
-/* header: a rank-1 outer product u v^T drawn as a heat strip */
-(function outer() {
-  const n = 66, u = [], v = [];
-  for (let i = 0; i < n; i++) { u.push(Math.sin(i / 7) + 0.4 * Math.cos(i / 3)); v.push(Math.cos(i / 9) - 0.5 * Math.sin(i / 4)); }
-  const max = Math.max(...u.map(Math.abs)) * Math.max(...v.map(Math.abs));
-  const paint = (cv, w, h, f) => { const c = cv.getContext("2d"), im = c.createImageData(w, h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const t = f(x, y), k = 4 * (y * w + x);
-      const pos = t >= 0, a = Math.min(1, Math.abs(t));
-      im.data[k] = pos ? 35 : 194; im.data[k + 1] = pos ? 67 : 65; im.data[k + 2] = pos ? 196 : 12; im.data[k + 3] = Math.round(40 + 215 * a); }
-    c.putImageData(im, 0, 0); };
-  const mu = Math.max(...u.map(Math.abs)), mv = Math.max(...v.map(Math.abs));
-  paint($("#outer"), n, n, (x, y) => (u[y] * v[x]) / max);
-  paint($("#rowA"), n, 7, (x) => v[x] / mv);
-  paint($("#colB"), 7, n, (x, y) => u[y] / mu);
+/* names the config does not carry */
+const TASK = {
+  math_qwen08: { name: "Math", metric: "MATH-500 accuracy", short: "MATH-500", baseCut: 0.93 },
+  code_qwen08: { name: "Python coding", metric: "MBPP+ pass@1", short: "MBPP+" },
+  syco_qwen08: { name: "Sycophancy", metric: "Follows a wrong guess", short: "wrong-guess rate" },
+};
+const TARGET = { qwen: "Qwen3.5-0.8B" };
+const REFS = {
+  paper_full_weight_edit: ["Full-weight edit", "Takehi et al. 2026, 50 passes", "Paper edit"],
+  paper_edit_as_rank1_lora: ["Same edit as a rank-1 LoRA", "our SVD of the paper's edit", "Paper edit, rank 1"],
+  rename_ceiling: ["Rename ceiling", "function name fixed, not an adapter", "Rename ceiling"],
+  gradient_lora_r8: ["Gradient LoRA, rank 8", "trained with gradients", "Gradient LoRA"],
+};
+const tname = (id) => (TASK[id] || {}).name || id;
+const ver = (r) => r.rules.replace("lsbench-", "");
+const entryShort = (r) => r.label.replace(/ \(.*\)/, "");
+const harness = (r) => (r.label.match(/\((.*)\)/) || [])[1] || r.harness || "";
+const colorOf = (r) => r.ref ? "var(--ref)" : r.track === "B" ? "var(--b)" : "var(--a)";
+const bestRef = (t) => { const v = Object.values(t.references || {}); return v.length ? (t.higher_is_better ? Math.max(...v) : Math.min(...v)) : null; };
+const norm = (t, v) => { const b = bestRef(t); return b == null || b === t.base ? null : 100 * (v - t.base) / (b - t.base); };
+const runSub = (r) => "Track " + r.track + (r.pilot ? ", pilot " + ver(r) : "");
+
+const state = { task: "math_qwen08", track: "all", pilots: true, refs: true, metric: "normalized", sort: { key: "normalized", dir: -1 }, x: "edit_hours" };
+if (!D.runs.some((r) => r.task === state.task)) state.task = (D.runs[0] || {}).task || Object.keys(D.tasks)[0];
+const TASK_IDS = Object.keys(D.tasks).sort((a, b) => D.runs.filter((r) => r.task === b).length - D.runs.filter((r) => r.task === a).length);
+
+function rows() {
+  const t = D.tasks[state.task], meta = TASK[state.task] || {};
+  const runs = D.runs.filter((r) => r.task === state.task && (state.track === "all" || r.track === state.track) && (state.pilots || !r.pilot));
+  const refs = Object.entries(t.references || {}).map(([k, v]) => ({ ref: true, id: "ref-" + k, name: (REFS[k] || [k])[0], short: (REFS[k] || [])[2] || k, note: (REFS[k] || [, ""])[1],
+    value: v, normalized: norm(t, v), edit_hours: k === "paper_full_weight_edit" ? (t.reference_cost || {}).wall_hours : null }));
+  refs.push({ ref: true, id: "ref-base", name: "Unedited " + (TARGET[t.target] || t.target || "model"), short: "Unedited", note: "no edit", value: t.base, normalized: 0, cut_share: meta.baseCut });
+  const shown = state.refs ? refs : [];
+  return { runs, refs: shown, all: [...runs, ...shown] };
+}
+
+/* hero figure: one real run. The request, the unedited and edited scores side by side, the edit in one line. */
+(function specimen() {
+  const r = D.runs.filter((x) => x.scored).sort((a, b) => (a.pilot - b.pilot) || (b.normalized - a.normalized))[0];
+  const tid = r ? r.task : TASK_IDS[0], t = D.tasks[tid], m = TASK[tid] || {};
+  const ask = t.request.split(". ")[0].replace(/\.$/, "") + ".";
+  if (!r) { $("#spec").innerHTML = `<div class="fig-label">The request</div><div class="prompt"><p>${esc(ask)}</p>${SEND}</div>
+    <p class="fig-edit">No scored runs yet. The unedited model scores ${pct(t.base)} on ${esc(m.short || t.metric)}.</p>`; return; }
+  const ad = r.adapter || {}, mod = ad.rel_norms ? Object.keys(ad.rel_norms) : [], top = Math.max(t.base, r.value), who = entryShort(r).split(" ").pop();
+  $("#spec").innerHTML = `<div class="fig-label">One run: ${esc(entryShort(r))}, Track ${r.track}</div>
+    <div class="prompt"><p>${esc(ask)}</p>${SEND}</div>
+    <div class="pair"><div>${pct(t.base)}<i style="--c:var(--ref);height:${Math.max(3, 110 * t.base / top).toFixed(0)}px"></i>unedited</div>
+      <div>${pct(r.value)}<i style="--c:${colorOf(r)};height:${Math.max(3, 110 * r.value / top).toFixed(0)}px"></i>${esc(who)}'s edit</div></div>
+    <div class="fig-res"><b>${pct(r.value)}</b><span>on ${esc(m.short || t.metric)}, up from ${pct(t.base)}</span></div>
+    <p class="fig-edit">${esc(who)} wrote a rank-${ad.max_rank} update to ${mod.length === 1 ? `<span class="mono">${esc(mod[0])}</span>` : mod.length + " matrices"}:
+      ${(ad.params || 0).toLocaleString("en-US")} numbers, ${fix(r.edit_hours, 1)} hours, no training.</p>`;
 })();
 
-/* badges */
-const scored = D.runs.filter((r) => r.scored);
-$("#badges").append(
-  el("span", { className: "badge draft" }, "Private draft · pilot data, not ranked"),
-  el("span", { className: "badge" }, esc(D.rules)),
-  el("span", { className: "badge" }, `${D.runs.length} runs · ${scored.length} scored`));
+/* tab rows */
+function tabs(sel, opts, key, after) {
+  const box = $(sel);
+  box.innerHTML = opts.map(([v, l]) => `<button type="button" data-v="${esc(v)}">${esc(l)}</button>`).join("");
+  const sync = () => box.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(state[key] === b.dataset.v)));
+  box.addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; state[key] = b.dataset.v; sync(); after(); });
+  sync();
+}
 
-/* chart */
-(function chart() {
-  const svg = $("#chart"), W = 900, H = 380, L = 64, R = 24, T = 20, B = 52;
-  const xmin = Math.log10(0.1), xmax = Math.log10(40), ymin = -10, ymax = 110;
-  const X = (h) => L + (Math.log10(Math.max(h, 0.1)) - xmin) / (xmax - xmin) * (W - L - R);
-  const Y = (s) => T + (ymax - s) / (ymax - ymin) * (H - T - B);
-  const ink = css("--ink"), mut = css("--muted"), rule = css("--rule"), acc = css("--accent"), acc2 = css("--accent-2"), ref = css("--ref");
+/* bar chart, one bar per run or reference */
+const METRICS = {
+  normalized: { tab: "Score", title: "Normalized score, higher is better", fmt: (v) => fix(v), desc: true },
+  edit_hours: { tab: "Editing time", title: "Editing time in hours, lower is better", fmt: (v) => fix(v, v < 10 ? 2 : 1) },
+  cut_share: { tab: "Cut off", title: "Replies cut off at the token limit, lower is better", fmt: (v) => pct(v, 0) },
+  gpu_hours: { tab: "GPU-hours", title: "GPU-hours per run", fmt: (v) => fix(v, 2) },
+};
+function bars() {
+  const { runs, all } = rows(), k = state.metric, M = METRICS[k];
+  const items = all.filter((r) => r[k] != null).sort((x, y) => M.desc ? y[k] - x[k] : x[k] - y[k]);
+  const max = Math.max(...items.map((r) => r[k]), 1e-9), waiting = k === "normalized" ? runs.filter((r) => !r.scored).length : 0;
+  $("#bar-title").textContent = M.title;
+  $("#bars").style.minWidth = items.length * 84 + "px";
+  $("#bars").innerHTML = items.length ? items.map((r) => `<div class="bar"><div class="bar-plot"><span class="bar-v">${M.fmt(r[k])}</span>
+      <div class="bar-fill${r.pilot ? " pilot" : ""}" style="--c:${colorOf(r)};height:${Math.max(0, 200 * r[k] / max).toFixed(1)}px"></div></div>
+      <div class="bar-l"><b>${esc(r.ref ? r.short : entryShort(r))}</b><span>${esc(r.ref ? "reference" : runSub(r))}</span></div></div>`).join("")
+    : `<p class="small" style="padding:40px 0">No run reports this yet.</p>`;
+  $("#legend").innerHTML = `<span><i style="--c:var(--a)"></i>Track A: one edit, committed blind</span><span><i style="--c:var(--b)"></i>Track B: candidates tested first</span>`
+    + (runs.some((r) => r.pilot) ? `<span><i class="pilot" style="--c:var(--a)"></i>Pilot under earlier rules</span>` : "")
+    + (state.refs ? `<span><i style="--c:var(--ref)"></i>Reference</span>` : "")
+    + (waiting ? `<span class="dim">${waiting} run${waiting > 1 ? "s" : ""} still scoring</span>` : "");
+}
+
+/* grouped, sortable table */
+const COLS = [
+  { key: "name", label: "Entry", group: "", get: (r) => r.ref ? r.name : r.label },
+  { key: "normalized", label: "Normalized", group: "Score", n: 1 },
+  { key: "value", label: "Raw", sub: () => (TASK[state.task] || {}).metric || D.tasks[state.task].metric, group: "Score", n: 1 },
+  { key: "cut_share", label: "Cut off", sub: "at token limit", group: "Score", n: 1 },
+  { key: "edit_hours", label: "Edit time", sub: "hours", group: "Cost", n: 1 },
+  { key: "gpu_hours", label: "GPU", sub: "hours", group: "Cost", n: 1 },
+  { key: "tok", label: "Editor tokens", sub: "input, millions", group: "Cost", n: 1, get: (r) => r.tokens ? r.tokens.input / 1e6 : null },
+  { key: "rank", label: "Shape", sub: "rank × matrices", group: "Edit", n: 1, get: (r) => r.adapter && r.adapter.params ? r.adapter.max_rank * 100 + r.adapter.modules : null },
+  { key: "rel", label: "Size", sub: "max ‖ΔW‖ / ‖W‖", group: "Edit", n: 1, get: (r) => r.adapter && r.adapter.rel_norms ? Math.max(...Object.values(r.adapter.rel_norms)) : null },
+  { key: "open", label: "", group: "", nosort: 1, n: 1 },
+];
+const val = (c, r) => c.get ? c.get(r) : r[c.key] ?? null;
+function cell(c, r) {
+  const v = val(c, r);
+  switch (c.key) {
+    case "name": return `<div class="who"><i style="--c:${colorOf(r)}"></i><div><b>${esc(r.ref ? r.name : entryShort(r))}</b><span>${esc(r.ref ? "Reference, " + r.note : runSub(r) + " · " + harness(r))}</span></div></div>`;
+    case "normalized": return v == null ? `<span class="dim">${r.ref ? "–" : "scoring"}</span>` : fix(v);
+    case "value": return pct(v);
+    case "cut_share": return v == null ? "–" : pct(v, 0);
+    case "edit_hours": case "gpu_hours": case "tok": return fix(v, 2);
+    case "rank": return v == null ? "–" : `${r.adapter.max_rank} × ${r.adapter.modules}`;
+    case "rel": return v == null ? "–" : pct(v);
+    case "open": return r.ref ? "" : `<button class="open" type="button" data-run="${esc(r.id)}">View run</button>`;
+  }
+}
+function board() {
+  const { all } = rows(), s = state.sort, col = COLS.find((c) => c.key === s.key);
+  const sorted = [...all].sort((a, b) => { const x = val(col, a), y = val(col, b);
+    if (x == null || y == null) return (x == null) - (y == null);
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * s.dir; });
+  const groups = []; COLS.forEach((c) => { const g = groups[groups.length - 1]; if (g && g.name === c.group) g.n++; else groups.push({ name: c.group, n: 1 }); });
+  $("#board").innerHTML = `<thead><tr class="groups">${groups.map((g) => `<th colspan="${g.n}"${g.name ? ' class="n"' : ""}>${esc(g.name)}</th>`).join("")}</tr><tr>`
+    + COLS.map((c) => { const sub = typeof c.sub === "function" ? c.sub() : c.sub;
+      return `<th${c.n ? ' class="n"' : ""}${s.key === c.key ? ` aria-sort="${s.dir > 0 ? "ascending" : "descending"}"` : ""}>`
+        + (c.nosort ? "" : `<button class="sort" type="button" data-k="${c.key}">${esc(c.label)}</button>`) + (sub ? `<small>${esc(sub)}</small>` : "") + `</th>`; }).join("")
+    + `</tr></thead><tbody>${sorted.map((r) => `<tr>${COLS.map((c) => `<td class="${c.n ? "n" : ""}${c.key === "normalized" ? " lead" : ""}">${cell(c, r)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+}
+$("#board").addEventListener("click", (e) => {
+  const k = e.target.closest(".sort"), o = e.target.closest(".open");
+  if (k) { state.sort = { key: k.dataset.k, dir: state.sort.key === k.dataset.k ? -state.sort.dir : (COLS.find((c) => c.key === k.dataset.k).n ? -1 : 1) }; board(); }
+  if (o) { selectRun(o.dataset.run); $("#runs").scrollIntoView(); }
+});
+
+/* score against cost, one labelled point per run */
+const XAX = {
+  edit_hours: { tab: "Editing time", title: "Editor wall clock in hours, log scale", log: true, fmt: (v) => v + " h", get: (r) => r.edit_hours },
+  gpu_hours: { tab: "GPU-hours", title: "GPU-hours per run, session and scoring", fmt: (v) => String(v), get: (r) => r.gpu_hours },
+  tok: { tab: "Editor tokens", title: "Editor input tokens, millions", fmt: (v) => v + "M", get: (r) => r.tokens ? r.tokens.input / 1e6 : null },
+};
+function chart() {
+  const { runs, refs } = rows(), ax = XAX[state.x], W = 1000, H = 420, L = 44, R = 16, T = 24, B = 58;
+  const pts = [...runs, ...refs].map((r) => ({ r, x: ax.get(r) })).filter((p) => p.x != null && p.x > 0);
+  const xs = pts.map((p) => p.x);
+  let lo, hi, ticks;
+  if (ax.log) { const cand = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100]; const mn = Math.min(...xs, 0.2) / 1.6, mx = Math.max(...xs, 2) * 1.8;
+    ticks = cand.filter((c) => c >= mn && c <= mx); lo = Math.log10(mn); hi = Math.log10(mx); }
+  else { const mx = Math.max(...xs, 1) * 1.25, step = [0.25, 0.5, 1, 2, 5, 10].find((s) => mx / s <= 7) || 20;
+    ticks = []; for (let v = 0; v <= mx + 1e-9; v += step) ticks.push(+v.toFixed(2)); lo = 0; hi = mx; }
+  const X = (v) => L + ((ax.log ? Math.log10(v) : v) - lo) / (hi - lo) * (W - L - R);
+  const ys = [...runs, ...refs].map((r) => r.normalized).filter((v) => v != null);
+  const y0 = Math.min(-8, ...ys.map((v) => v - 8)), y1 = Math.max(108, ...ys.map((v) => v + 8));
+  const Y = (v) => T + (y1 - v) / (y1 - y0) * (H - T - B);
   let s = "";
-  for (const v of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${rule}" stroke-width="${v === 0 || v === 100 ? 1.4 : 1}" ${v === 0 || v === 100 ? "" : 'stroke-dasharray="3 4"'}/>`
-    + `<text x="${L - 10}" y="${Y(v) + 4}" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12" fill="${mut}">${v}</text>`;
-  for (const h of [0.1, 0.25, 0.5, 1, 2, 5, 10, 20, 40]) s += `<line x1="${X(h)}" x2="${X(h)}" y1="${Y(ymin)}" y2="${Y(ymin) + 5}" stroke="${mut}"/>`
-    + `<text x="${X(h)}" y="${Y(ymin) + 20}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="${mut}">${h}h</text>`;
-  s += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" font-size="13" fill="${mut}">Editing wall clock (hours, log scale)</text>`;
-  s += `<text transform="translate(16 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle" font-size="13" fill="${mut}">Normalized score</text>`;
-  s += `<text x="${L + 6}" y="${Y(0) - 6}" font-size="12" fill="${mut}">unedited model</text>`;
-  const rc = math.reference_cost || {};
-  if (rc.wall_hours) {
-    const x = X(rc.wall_hours), y = Y(100);
-    s += `<rect x="${x - 6}" y="${y - 6}" width="12" height="12" fill="${ref}" transform="rotate(45 ${x} ${y})"/>`
-      + `<text x="${x - 12}" y="${y - 12}" text-anchor="end" font-size="12" fill="${ref}">Takehi et al. full-weight edit · ${rc.wall_hours} h · 50 passes, hint</text>`;
-  }
-  const pts = D.runs.filter((r) => r.task === "math_qwen08");
-  pts.forEach((r) => {
-    const x = X(r.edit_hours || 0.1), col = r.track === "B" ? acc2 : acc;
-    if (r.normalized == null) {
-      s += `<line x1="${x}" x2="${x}" y1="${Y(ymin)}" y2="${Y(ymax)}" stroke="${col}" stroke-dasharray="2 5" opacity="0.6"/>`
-        + `<text x="${x + 6}" y="${Y(ymax) + 14}" font-size="12" fill="${col}">Track ${r.track} · scoring</text>`;
-      return;
-    }
-    const y = Y(r.normalized);
-    s += `<circle cx="${x}" cy="${y}" r="7" fill="${r.pilot ? "none" : col}" stroke="${col}" stroke-width="2"/>`
-      + `<text x="${x + 11}" y="${y + 4}" font-size="12" fill="${ink}">${esc(r.pilot ? "pilot " + r.rules.replace("lsbench-", "") : "Track " + r.track)} · ${pct(r.value)}</text>`;
+  for (const v of [0, 20, 40, 60, 80, 100]) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 10}" y="${Y(v) + 4.5}" text-anchor="end">${v}</text>`;
+  for (const v of ticks) s += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/><text x="${X(v)}" y="${H - B + 20}" text-anchor="middle">${ax.fmt(v)}</text>`;
+  s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/><text class="t" x="${(L + W - R) / 2}" y="${H - 10}" text-anchor="middle">${ax.title}</text>`;
+  refs.filter((r) => ax.get(r) == null && r.normalized != null && r.id !== "ref-base").forEach((r) => {
+    s += `<line class="refline" x1="${L}" x2="${W - R}" y1="${Y(r.normalized)}" y2="${Y(r.normalized)}"/><text x="${L + 8}" y="${Y(r.normalized) + 17}">${esc(r.name)}, ${fix(r.normalized)}</text>`; });
+  if (refs.length) s += `<text x="${L + 8}" y="${Y(0) - 7}">Unedited model</text>`;
+  pts.forEach(({ r, x }) => {
+    if (r.normalized == null) return;
+    const cx = X(x), cy = Y(r.normalized), k = r.ref ? "R" : r.track, left = cx > W - 260, tx = left ? cx - 13 : cx + 13;
+    s += r.ref ? `<rect class="R" x="${cx - 5.5}" y="${cy - 5.5}" width="11" height="11" transform="rotate(45 ${cx} ${cy})"/>`
+      : `<circle class="${k}${r.pilot ? " hollow" : ""}" cx="${cx}" cy="${cy}" r="${r.pilot ? 5.5 : 6.5}"/>`;
+    s += `<text class="lab ${k}" x="${tx}" y="${cy + 5}" text-anchor="${left ? "end" : "start"}">${esc(r.ref ? r.name : entryShort(r) + ", " + runSub(r))}</text>`;
   });
-  svg.innerHTML = s;
-  $("#legend").innerHTML = `<span><i style="background:${acc}"></i>Track A (one-shot)</span><span><i style="background:${acc2}"></i>Track B (5 tested candidates)</span>`
-    + `<span><i style="border:2px solid ${acc};box-sizing:border-box"></i>pilot (earlier rules)</span><span><i style="background:${ref};border-radius:1px"></i>reference</span>`;
-})();
+  $("#chart").innerHTML = s;
+}
 
-/* board */
-(function board() {
-  const cur = D.runs.filter((r) => !r.pilot);
-  const ent = [...new Set(cur.map((r) => r.label))];
-  const cell = (label, track) => {
-    const rs = cur.filter((r) => r.label === label && r.track === track && r.task === "math_qwen08");
-    if (!rs.length) return `<td class="muted">—</td>`;
-    const done = rs.filter((r) => r.normalized != null);
-    if (!done.length) return `<td><span class="pill pending">scoring</span><div class="muted mono" style="font-size:.78rem">${rs.length}/3 attempts</div></td>`;
-    const m = done.reduce((a, r) => a + r.normalized, 0) / done.length, v = done.reduce((a, r) => a + r.value, 0) / done.length;
-    return `<td><span class="num" style="font-size:1.1rem">${m.toFixed(1)}</span> <span class="muted num">(${pct(v)})</span>`
-      + `<div class="bar"><span style="width:${Math.max(0, Math.min(100, m))}%;background:${track === "B" ? "var(--accent-2)" : "var(--accent)"}"></span></div>`
-      + `<div class="muted mono" style="font-size:.78rem">${done.length}/3 attempts${rs.length > done.length ? " · more scoring" : ""}</div></td>`;
-  };
-  const cost = (label) => { const rs = cur.filter((r) => r.label === label && r.gpu_hours != null);
-    return rs.length ? (rs.reduce((a, r) => a + r.gpu_hours, 0) / rs.length).toFixed(1) : "—"; };
-  let h = `<thead><tr><th>Entry</th><th>Math · Track A</th><th>Math · Track B</th><th class="num">GPU-h / run</th><th>Edits</th></tr></thead><tbody>`;
-  for (const lb of ent) {
-    const ad = cur.filter((r) => r.label === lb && r.adapter && r.adapter.params).map((r) => `rank ${r.adapter.max_rank} · ${r.adapter.modules} module${r.adapter.modules > 1 ? "s" : ""}`);
-    h += `<tr><td><strong>${esc(lb)}</strong><div class="muted mono" style="font-size:.78rem">${esc(cur.find((r) => r.label === lb).model)}</div></td>${cell(lb, "A")}${cell(lb, "B")}<td class="num">${cost(lb)}</td><td class="muted" style="font-size:.86rem">${[...new Set(ad)].join("<br>")}</td></tr>`;
-  }
-  const refs = math.references;
-  h += `<tr class="ref"><td>Full-weight edit, Takehi et al. 2026 (50 passes, hint in prompt)</td><td colspan="2"><span class="num">100.0</span> <span class="num">(${pct(refs.paper_full_weight_edit)})</span></td><td class="num">20.3 h edit</td><td style="font-size:.86rem">64 columns × 2 layers</td></tr>`;
-  if (refs.paper_edit_as_rank1_lora) h += `<tr class="ref"><td>Same edit compressed to a rank-1 LoRA (our SVD)</td><td colspan="2"><span class="num">${refNorm(refs.paper_edit_as_rank1_lora).toFixed(1)}</span> <span class="num">(${pct(refs.paper_edit_as_rank1_lora)})</span></td><td class="num">—</td><td style="font-size:.86rem">rank 1 · 2 modules</td></tr>`;
-  h += `<tr class="ref"><td>Unedited Qwen3.5-0.8B</td><td colspan="2"><span class="num">0.0</span> <span class="num">(${pct(math.base)})</span></td><td class="num">—</td><td></td></tr></tbody>`;
-  $("#board").innerHTML = h;
-})();
+function renderBoard() {
+  const { runs } = rows(), t = D.tasks[state.task], empty = !runs.length;
+  $("#board-empty").hidden = !empty; $("#bar-box").style.display = empty ? "none" : "grid"; $("#board-body").style.display = empty ? "none" : "grid";
+  if (empty) { const any = D.runs.some((r) => r.task === state.task);
+    $("#board-empty").innerHTML = any ? `<b>No runs match these settings.</b> Turn pilot runs on, or pick another track.`
+      : `<b>No runs on ${esc(tname(state.task))} yet.</b> The unedited model scores ${pct(t.base)} on ${esc((TASK[state.task] || {}).metric || t.metric)}`
+        + (bestRef(t) != null ? `; the reference to beat is ${pct(bestRef(t))}.` : "."); return; }
+  bars(); board(); chart();
+}
+function radios(sel, name, opts, key) {
+  const box = $(sel);
+  box.insertAdjacentHTML("beforeend", opts.map(([v, l, n]) => `<label><input type="radio" name="${name}" value="${esc(v)}"${state[key] === v ? " checked" : ""}>${esc(l)}${n == null ? "" : `<span class="count">${n}</span>`}</label>`).join(""));
+  box.addEventListener("change", (e) => { state[key] = e.target.value; renderBoard(); });
+}
+function setTask(id) { state.task = id; const i = document.querySelector(`#s-task input[value="${id}"]`); if (i) i.checked = true; renderBoard(); }
+radios("#s-task", "task", TASK_IDS.map((id) => [id, tname(id), D.runs.filter((r) => r.task === id).length]), "task");
+radios("#s-track", "track", [["all", "All tracks"], ["A", "Track A"], ["B", "Track B"]], "track");
+$("#s-pilots").addEventListener("change", (e) => { state.pilots = e.target.checked; renderBoard(); });
+$("#s-refs").addEventListener("change", (e) => { state.refs = e.target.checked; renderBoard(); });
+tabs("#f-metric", Object.entries(METRICS).map(([k, m]) => [k, m.tab]), "metric", bars);
+tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", chart);
+renderBoard();
 
-/* task card */
-(function task() {
-  const t = math, rc = t.reference_cost || {};
-  $("#task-card").innerHTML = `<span class="eyebrow">The request, exactly as the editor sees it</span><p class="quote">${esc(t.request)}</p>
-    <p class="muted" style="font-size:.92rem">${esc(t.judged)}</p>
-    <div class="facts">
-      <div><span class="eyebrow">Held-out set</span><b>MATH-500 · 200 × 1</b></div>
-      <div><span class="eyebrow">Unedited</span><b>${pct(t.base)}</b></div>
-      <div><span class="eyebrow">Unedited cut at 32K</span><b>93%</b></div>
-      <div><span class="eyebrow">Reference (=100)</span><b>${pct(Math.max(...Object.values(t.references)))}</b></div>
-      <div><span class="eyebrow">Reference edit time</span><b>${rc.wall_hours ?? "—"} h</b></div>
-    </div>`;
-})();
+/* tasks: the request in the box the editor reads it from, then the numbers */
+$("#task-list").innerHTML = TASK_IDS.map((id) => {
+  const t = D.tasks[id], m = TASK[id] || {}, rs = D.runs.filter((r) => r.task === id), sc = rs.filter((r) => r.scored && !r.pilot);
+  const best = sc.length ? sc.reduce((a, b) => ((b.value > a.value) === t.higher_is_better ? b : a)) : null;
+  const refs = Object.entries(t.references || {}).map(([k, v]) => `<div><dt>${esc((REFS[k] || [k])[0])}</dt><dd>${pct(v)}</dd></div>`).join("");
+  return `<article class="task"><div class="task-head"><h3>${esc(m.name || id)}</h3>
+      <span class="small">${esc(TARGET[t.target] || t.target || "")}, thinking ${t.thinking ? "on" : "off"} · ${rs.length ? rs.length + " run" + (rs.length > 1 ? "s" : "") : "no runs yet"}</span></div>
+    <div class="prompt"><p>${esc(t.request)}</p>${SEND}</div>
+    <dl class="facts"><div><dt>Metric</dt><dd>${esc(m.metric || t.metric)}${t.higher_is_better ? "" : ", lower is better"}</dd></div>
+      <div><dt>Unedited model</dt><dd>${pct(t.base)}</dd></div>${refs}
+      ${best ? `<div><dt>Best run so far</dt><dd>${pct(best.value)}</dd></div>` : ""}</dl>
+    ${rs.length ? `<button class="linkbtn" type="button" data-task="${esc(id)}">Show on the leaderboard</button>` : ""}</article>`;
+}).join("");
+$("#task-list").addEventListener("click", (e) => { const b = e.target.closest(".linkbtn"); if (b) { setTask(b.dataset.task); $("#leaderboard").scrollIntoView(); } });
 
 /* run explorer */
-(function explorer() {
-  const list = $("#runlist"), det = $("#detail");
-  const order = [...D.runs].sort((a, b) => (a.pilot - b.pilot) || a.track.localeCompare(b.track) || a.rules.localeCompare(b.rules));
-  const show = (r, btn) => {
-    list.querySelectorAll(".runbtn").forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
-    const tk = r.tokens || {}, ad = r.adapter || {};
-    const tc = Object.entries(r.tool_counts || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<span class="pill">${esc(k)} ×${v}</span>`).join("");
-    const cand = r.candidates.length ? `<div class="table-wrap"><table><thead><tr><th>#</th><th>Test</th><th>Candidate</th><th class="num">Dev acc</th><th class="num">Finished</th></tr></thead><tbody>`
-      + r.candidates.map((c, i) => `<tr><td class="num">${i + 1}</td><td class="mono" style="font-size:.84rem">${esc(c.tool)}</td><td class="mono" style="font-size:.84rem">${esc(c.what)}</td><td class="num">${c.dev_acc == null ? "—" : pct(c.dev_acc)}</td><td class="num">${c.finished == null ? "—" : pct(c.finished)}</td></tr>`).join("")
-      + `</tbody></table></div>` : `<p class="muted">No candidates tested (Track A forbids testing edits).</p>`;
-    const rel = ad.rel_norms ? Object.entries(ad.rel_norms).map(([m, v]) => `<div class="mono" style="font-size:.84rem">${esc(m)} · ${(100 * v).toFixed(1)}% of ‖W‖</div>`).join("") : "";
-    det.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><h3>${esc(r.label)} · Track ${r.track}</h3>
-        <span class="pill ${r.track === "B" ? "b" : "a"}">${r.track === "B" ? "dev feedback" : "one-shot"}</span>
-        <span class="pill ${r.pilot ? "pilot" : ""}">${esc(r.rules)}${r.pilot ? " · pilot" : ""}</span>
-        ${r.scored ? "" : '<span class="pill pending">scoring</span>'}</div>
-      <div class="kv">
-        <div><span class="eyebrow">MATH-500</span><b>${pct(r.value)}</b></div>
-        <div><span class="eyebrow">Normalized</span><b>${r.normalized ?? "—"}</b></div>
-        <div><span class="eyebrow">Cut at 32K</span><b>${pct(r.cut_share)}</b></div>
-        <div><span class="eyebrow">Edit time</span><b>${r.edit_hours} h</b></div>
-        <div><span class="eyebrow">Turns</span><b>${r.turns_n}</b></div>
-        <div><span class="eyebrow">Editor tokens</span><b>${tk.input ? (tk.input / 1e6).toFixed(2) + "M in" : "—"}</b><span class="muted mono" style="font-size:.78rem">${tk.cached ? Math.round(100 * tk.cached / tk.input) + "% cached · " : ""}${tk.output ? (tk.output / 1e3).toFixed(0) + "K out" : ""}</span></div>
-        <div><span class="eyebrow">Adapter</span><b>${ad.params ? ad.params.toLocaleString() + " params" : "—"}</b><span class="muted mono" style="font-size:.78rem">${ad.params ? "rank " + ad.max_rank + " · " + ad.modules + " module(s)" : ""}</span></div>
-      </div>
-      <div style="display:grid;gap:6px"><span class="eyebrow">Committed edit</span>${rel}<p class="explain">${esc(r.explanation)}</p></div>
-      <div style="display:grid;gap:8px"><span class="eyebrow">Tool calls</span><div class="tools">${tc || '<span class="muted">—</span>'}</div></div>
-      <div style="display:grid;gap:8px"><span class="eyebrow">Tested candidates</span>${cand}</div>
-      <div style="display:grid;gap:8px"><span class="eyebrow">Turn by turn (the editor's own notes)</span><div class="timeline">${r.turns.map((t) =>
-        `<div class="turn"><span class="n">T${t.n}</span><div><p>${esc(t.text)}</p><div class="tools">${t.tools.map((x) => `<span class="pill">${esc(x)}</span>`).join("")}</div></div></div>`).join("")}</div></div>`;
-  };
-  order.forEach((r, i) => {
-    const b = el("button", { className: "runbtn", type: "button", id: "run-" + i });
-    b.innerHTML = `<span class="t">${r.pilot ? "Pilot " + esc(r.rules.replace("lsbench-", "")) : "Track " + r.track} · ${esc(r.label.replace(/ \(.*\)/, ""))}</span>
-      <span class="s">${r.scored ? pct(r.value) + " · norm " + r.normalized : "scoring"} · ${r.edit_hours} h · ${r.turns_n} turns</span>`;
-    b.addEventListener("click", () => show(r, b));
-    list.append(b);
-  });
-  const first = order.findIndex((r) => r.scored && !r.pilot);
-  show(order[first < 0 ? 0 : first], list.children[first < 0 ? 0 : first]);
+const ORDER = [...D.runs].sort((a, b) => (a.pilot - b.pilot) || (b.normalized ?? -1) - (a.normalized ?? -1));
+function selectRun(id) {
+  const r = ORDER.find((x) => x.id === id) || ORDER[0]; if (!r) return;
+  document.querySelectorAll(".runbtn").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.run === r.id)));
+  const tk = r.tokens || {}, ad = r.adapter || {}, m = TASK[r.task] || {};
+  const tc = Object.entries(r.tool_counts || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${esc(k)} × ${v}`).join(" · ");
+  const cand = r.candidates.length ? `<div class="scroll-x"><table><thead><tr><th class="n">#</th><th>Test</th><th>Candidate</th><th class="n">Dev accuracy</th><th class="n">Finished</th></tr></thead><tbody>`
+    + r.candidates.map((c, i) => `<tr><td class="n">${i + 1}</td><td class="mono">${esc(c.tool)}</td><td class="mono">${esc(String(c.what).split("/").pop())}</td><td class="n">${pct(c.dev_acc)}</td><td class="n">${pct(c.finished)}</td></tr>`).join("")
+    + `</tbody></table></div>` : `<p class="dim">None. ${r.track === "A" ? "Track A commits one edit without testing it." : "This run tested no candidates."}</p>`;
+  const mods = ad.rel_norms ? Object.entries(ad.rel_norms).map(([k, v]) => `<span class="mono">${esc(k)}</span> at ${pct(v)} of ‖W‖`).join("; ") : "";
+  const kv = (k, v, s = "") => `<div><dt>${k}</dt><dd>${v}${s ? `<small>${s}</small>` : ""}</dd></div>`;
+  $("#detail").innerHTML = `<div class="detail-head"><h3>${esc(entryShort(r))} on ${esc(tname(r.task))}</h3>
+      <span class="dim">${esc(runSub(r))} · ${esc(harness(r))} · rules ${esc(ver(r))}${r.scored ? "" : " · still scoring"}</span></div>
+    <dl class="kv">${kv("Normalized", r.normalized == null ? "–" : fix(r.normalized))}${kv(esc(m.metric || "Raw score"), pct(r.value))}
+      ${kv("Cut off at limit", r.cut_share == null ? "–" : pct(r.cut_share, 0))}${kv("Edit time", fix(r.edit_hours, 2) + " h", r.turns_n + " turns")}
+      ${kv("Editor tokens", tk.input ? (tk.input / 1e6).toFixed(2) + "M" : "–", tk.input ? Math.round(100 * (tk.cached || 0) / tk.input) + "% cached" : "")}
+      ${kv("Adapter", ad.params ? ad.params.toLocaleString("en-US") : "–", ad.params ? `numbers, rank ${ad.max_rank}` : "")}</dl>
+    <div class="part"><h4>The edit, in the editor's words</h4><p class="explain">${esc(r.explanation)}</p>${mods ? `<p class="small">${mods}</p>` : ""}</div>
+    <div class="part"><h4>Candidates tested before committing</h4>${cand}</div>
+    <div class="part"><h4>Tool calls</h4><p class="mono dim">${tc || "none recorded"}</p></div>
+    <div class="part"><h4>Turn by turn</h4><div class="timeline" tabindex="0">${r.turns.map((t) =>
+      `<div class="turn"><span class="k">${t.n}</span><div>${t.text ? `<p>${esc(t.text)}</p>` : ""}${t.tools.length ? `<div class="calls mono">${t.tools.map(esc).join(" · ")}</div>` : ""}</div></div>`).join("")}</div></div>`;
+}
+$("#runlist").innerHTML = ORDER.map((r) => `<button class="runbtn" type="button" data-run="${esc(r.id)}">
+  <span class="t"><i style="--c:${colorOf(r)}"></i>${esc(tname(r.task))}, ${esc(runSub(r))}</span>
+  <span class="s">${esc(entryShort(r))} · ${r.scored ? "score " + fix(r.normalized) : "scoring"} · ${fix(r.edit_hours, 2)} h</span></button>`).join("");
+$("#runlist").addEventListener("click", (e) => { const b = e.target.closest(".runbtn"); if (b) selectRun(b.dataset.run); });
+selectRun((ORDER.find((r) => r.scored && !r.pilot) || ORDER[0] || {}).id);
+
+/* rules */
+(function rules() {
+  const L = D.limits;
+  $("#rules-lede").textContent = `Every entry gets the same budget. The two tracks differ only in whether the editor may see an edited model before it commits. These are rules ${D.rules.replace("lsbench-", "")}.`;
+  $("#tracks").innerHTML = `<thead><tr><th></th><th><i class="dot" style="--c:var(--a)"></i>Track A, one-shot</th><th><i class="dot" style="--c:var(--b)"></i>Track B, with feedback</th></tr></thead><tbody>
+    <tr><th>Reads</th><td>The unedited model only: its replies, activations and weights.</td><td>The same, plus results from its own candidate edits.</td></tr>
+    <tr><th>May test</th><td>Nothing. The edit is committed blind.</td><td>Up to ${L.candidates_track_b} candidates: a dev-split score, replies with the candidate applied, or an activation intervention.</td></tr>
+    <tr><th>Writes</th><td colspan="2">One LoRA adapter, rank ${L.max_rank} or lower, on the attention output and MLP down projections of any layer.</td></tr>
+    <tr><th>Never</th><td colspan="2">Gradients, training, or its own copy of the network. Every model call goes through a budgeted service.</td></tr></tbody>`;
+  $("#limits").innerHTML = [["Wall clock per session", L.wall_hours + " h"], ["Generate calls", L.generate_calls + " × " + L.generate_prompts + " prompts"],
+    ["Analysis calls", L.analysis_calls + " × " + L.analysis_items + " texts"], ["Candidates, Track B", L.candidates_track_b], ["Adapter rank", "≤ " + L.max_rank],
+    ["Attempts per ranked cell", "3"], ["Entries configured", D.entries.length]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 })();
 
-/* method */
-(function method() {
-  const L = D.limits;
-  const cards = [
-    ["Tracks", [`Track A: inspect the unedited model only, then commit one adapter blind.`,
-      `Track B: also test up to ${L.candidates_track_b} candidates (dev-split score, generation with the candidate, or an activation intervention).`,
-      `Both: ${L.generate_calls} generate calls, ${L.analysis_calls} analysis calls, ${L.wall_hours} h wall clock, rank ≤ ${L.max_rank}.`]],
-    ["What the editor can do", ["Write LoRA updates on the attention output and MLP down projections of any layer.",
-      "Interpretability tools on the unedited model: activation traces inside its own replies, token statistics, logit lens, direct logit attribution, attention, top activations, activation patching.",
-      "No gradients, no training, no torch in its sandbox; every model call goes through a budgeted service."]],
-    ["Scoring", ["Held-out MATH-500 (first 200 problems, 1 sample, thinking on, 32K tokens; Qwen's sampling settings).",
-      "Normalized: 0 = unedited model, 100 = the task's best reference.",
-      "Leaderboard numbers will be the mean of 3 attempts, failures counted as 0, median across tasks."]],
-    ["Against the full-weight result", ["Takehi et al.'s prompt named the failure (repetition, cut off at the token limit). Ours names none.",
-      "Their rules excluded edits that make the model close its thinking early; ours allow any edit that answers the request.",
-      "Their editor could compare edited and original models over 50 passes; that is closer to our Track B."]],
-    ["Caveats", ["Single attempts so far; no damage check on other abilities yet.",
-      "One editor (GPT-6 Astra) and one harness (our minimal loop) so far.",
-      "Pilot runs used earlier rules (a stale prompt line in v0.1; fewer tools in v0.1–v0.2) and are not ranked."]],
+/* questions */
+(function questions() {
+  const math = D.tasks.math_qwen08, L = D.limits;
+  const qa = [
+    ["What does the editor get?", [`A frozen model, the user's one-sentence request, and a file of example problems where the task has one. It can read the model's replies and use interpretability tools on the unedited model: activation traces, token statistics, logit lens, direct logit attribution, attention, top activations and activation patching.`,
+      `It has no gradients, no training loop and no copy of the network in its sandbox.`]],
+    ["How is a run scored?", [`The committed adapter is applied and the model answers a held-out set the editor never saw, under the deployment settings the request describes.`,
+      `The raw metric is rescaled: 0 is the unedited model and 100 is the task's best reference. Leaderboard numbers will be the mean of three attempts with failures counted as 0, then the median across tasks.`]],
+    ["What does 100 mean on the math task?", math ? [`It is the full-weight edit from Takehi et al. (2026), which scores ${pct(bestRef(math))} on the same 200 MATH-500 problems. The unedited model scores ${pct(math.base)}; most of its replies loop in their reasoning until the token limit.`] : []],
+    ["How does this differ from the full-weight result?", [["Their prompt named the failure (repetition, cut off at the token limit). Ours names none.",
+      "Their rules excluded edits that make the model close its thinking early. Ours allow any edit that answers the request.",
+      `Their editor compared edited and original models over 50 passes, which is closer to our Track B. It took ${(math && math.reference_cost || {}).wall_hours ?? "about 20"} hours; a session here is capped at ${L.wall_hours}.`]]],
+    ["Why is nothing ranked yet?", [["Every cell holds a single attempt, and nothing checks yet whether an edit damages the model's other abilities.",
+      "Only one editor model and one harness have run.",
+      "Pilot runs used earlier rules (a stale prompt line in v0.1, fewer tools in v0.1 and v0.2), so they are shown but will not be ranked."]]],
   ];
-  $("#method-cards").innerHTML = cards.map(([h, items]) => `<div class="panel"><h3>${esc(h)}</h3><ul>${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("");
-  $("#foot").textContent = `Generated ${D.generated} · ${D.rules} · private draft`;
+  $("#qa").innerHTML = qa.filter(([, a]) => a.length).map(([q, a]) => `<details><summary>${esc(q)}</summary><div class="a">${a.map((x) =>
+    Array.isArray(x) ? `<ul>${x.map((y) => `<li>${esc(y)}</li>`).join("")}</ul>` : `<p>${esc(x)}</p>`).join("")}</div></details>`).join("");
+})();
+
+/* header line and section highlighting */
+$("#updated").textContent = "Last updated: " + new Date(D.generated.slice(0, 10) + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+$("#foot-l").textContent = `LoRA-Space Bench · ${D.generated.slice(0, 4)} · ${D.rules}`;
+(function spy() {
+  const links = [...document.querySelectorAll(".nav a")], byId = Object.fromEntries(links.map((a) => [a.getAttribute("href").slice(1), a]));
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) links.forEach((a) => a.setAttribute("aria-current", String(a === byId[e.target.id]))); }),
+    { rootMargin: "-20% 0px -70% 0px" });
+  Object.keys(byId).forEach((id) => { const s = document.getElementById(id); if (s) io.observe(s); });
+  addEventListener("scroll", () => { if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) links.forEach((a, i) => a.setAttribute("aria-current", String(i === links.length - 1))); }, { passive: true });
 })();
 </script>

@@ -80,8 +80,14 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
     )
     cfg.sandbox.add_mount("work", str(work), CONTAINER_WORK, mode="rw")
     cfg.sandbox.add_mount("model", str(G.MODEL_DIR), CONTAINER_MODEL, mode="ro")
+    # No web access for any harness: an editor could otherwise look up published fixes (e.g. the Takehi et al. loop
+    # direction) and the request would no longer be hint-free. Names cover native, Claude Code, Codex and OpenCode.
+    from agency.agpolicy import agpolicy
+    deny = lambda args: (False, "web access is disabled in this benchmark")  # noqa: E731
+    policy = agpolicy(tool_hooks={n: deny for n in ("webfetch", "websearch", "WebFetch", "WebSearch", "web_search",
+                                                    "web_fetch", "fetch", "browser")})
     skill = agskill(name="write_lora_adapter", prompt=text, add_host_mcp_tools=tools,
-                    input_schema=agdata(note=str), output_schema=agdata(summary=str))
+                    input_schema=agdata(note=str), output_schema=agdata(summary=str), policy=policy)
 
     t0 = time.time()
     status, summary = "no_commit", ""

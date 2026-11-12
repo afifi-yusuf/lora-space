@@ -69,12 +69,14 @@ def collect() -> dict:
     tasks = {}
     for t in spec.all_tasks():
         task = spec.load_task(t)
-        tasks[t] = {"request": " ".join(task["request"].split()), "judged": " ".join(task["judged"].split()),
+        tasks[t] = {"target": task.get("target"), "thinking": task.get("default_thinking"),
+                    "request": " ".join(task["request"].split()), "judged": " ".join(task["judged"].split()),
                     "metric": task["score"]["metric"], "base": task["score"]["base"],
                     "higher_is_better": task["score"]["higher_is_better"], "references": task["score"].get("references", {}),
                     "reference_cost": task["score"].get("reference_cost", {})}
-    _, limits = spec.load_entries()
-    return {"generated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "rules": spec.RULES_VERSION,
+    entries, limits = spec.load_entries()
+    roster = [{k: e.get(k) for k in ("id", "label", "model", "harness", "effort")} for e in entries.values()]
+    return {"entries": roster, "generated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "rules": spec.RULES_VERSION,
             "limits": limits, "tasks": tasks, "runs": runs}
 
 
