@@ -94,4 +94,15 @@ def score_run(task: dict, rdir: Path) -> dict:
         raise ValueError(kind)
     value = raw[task["score"]["metric"]]
     return {"metric": task["score"]["metric"], "value": value, **normalized(task, value), "raw": raw,
-            "score_gpu_s": round(time.time() - t0)}
+            "damage": damage_run(G, adapter, tag), "score_gpu_s": round(time.time() - t0)}
+
+
+def damage_run(G, adapter: dict, tag: str) -> dict:
+    """General-ability check of the edit (lsbench/damage.py) on a temporary merged checkpoint."""
+    from . import damage
+    ck = ROOT / "checkpoints/lsbench_merged" / f"dmg_{tag}"
+    merge_adapter(G, adapter, ck)
+    try:
+        return damage.report(G, adapter, ck)
+    finally:
+        subprocess.run(["rm", "-rf", str(ck)], check=True)

@@ -87,6 +87,23 @@ def cmd_score(a) -> None:
     (rdir / "score.json").write_text(json.dumps(res, indent=1, default=str))
 
 
+def cmd_damage(a) -> None:
+    """Add the damage check to an already scored run (writes damage.json and updates result.json)."""
+    from .score import damage_run
+    from .target import load_adapter_npz, load_target_module
+    rdir = Path(a.run_dir)
+    task = spec.load_task(rdir.name.split("__")[1])
+    dmg = damage_run(load_target_module(task["target"]), load_adapter_npz(rdir / "adapter.npz"), rdir.name)
+    (rdir / "damage.json").write_text(json.dumps(dmg, indent=1))
+    rf = rdir / "result.json"
+    if rf.exists():
+        r = json.loads(rf.read_text())
+        if r.get("score"):
+            r["score"]["damage"] = dmg
+            rf.write_text(json.dumps(r, indent=1, default=str))
+    print(json.dumps(dmg, indent=1))
+
+
 def cmd_list(_a) -> None:
     entries, limits = spec.load_entries()
     print("entries:", ", ".join(entries))
@@ -106,6 +123,8 @@ def main() -> None:
     r.add_argument("--force", action="store_true")
     s = sub.add_parser("score")
     s.add_argument("run_dir")
+    dm = sub.add_parser("damage")
+    dm.add_argument("run_dir")
     sub.add_parser("leaderboard")
     sub.add_parser("list")
     a = ap.parse_args()
@@ -113,7 +132,7 @@ def main() -> None:
         from .leaderboard import build
         build()
     else:
-        {"run": cmd_run, "score": cmd_score, "list": cmd_list}[a.cmd](a)
+        {"run": cmd_run, "score": cmd_score, "damage": cmd_damage, "list": cmd_list}[a.cmd](a)
 
 
 if __name__ == "__main__":
