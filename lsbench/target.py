@@ -96,6 +96,15 @@ class VLLMServer:
         text = (f"<think>{think}</think>\n" if think else "") + (msg.get("content") or "")
         return text, ch.get("finish_reason", ""), int(resp.get("usage", {}).get("completion_tokens", 0))
 
+    def complete(self, prompt_text: str, max_tokens: int, sampling: dict) -> tuple[str, str, int]:
+        """Raw completion of an already-templated text (used to continue from an assistant prefix)."""
+        body = {"model": "target", "prompt": prompt_text, "max_tokens": max_tokens, **sampling}
+        req = urllib.request.Request(f"http://127.0.0.1:{VLLM_PORT}/v1/completions", json.dumps(body).encode(),
+                                     {"Content-Type": "application/json"})
+        resp = json.load(urllib.request.urlopen(req, timeout=3600))
+        ch = resp["choices"][0]
+        return ch["text"], ch.get("finish_reason", ""), int(resp.get("usage", {}).get("completion_tokens", 0))
+
     def stop(self):
         os.killpg(self.proc.pid, signal.SIGTERM)
         self.proc.wait(timeout=120)
@@ -114,13 +123,15 @@ class TargetService:
         self.sampling = dec
         self.vllm_mem, self.max_len = vllm_mem, self.max_gen_tokens + 4096
         self.lock = threading.Lock()
-        self.n = {"generate": 0, "inspect": 0, "candidates": 0}
+        self.n = {"generate": 0, "analysis": 0, "candidates": 0}
         self.committed: dict | None = None
         self.explanation = ""
         self.gpu_seconds = 0.0
         self.calls = open(run_dir / "tool_calls.jsonl", "a")
         self.server = VLLMServer(self.G.MODEL_DIR, vllm_mem, self.max_len, run_dir / "vllm_server.log")
         self.tok, self.model = self.G.load_model()
+        from .interp import Interp
+        self.interp = Interp(self)
         ex = data.example_file(task, self.G)
         if ex is not None:
             write("examples.jsonl", ex.read_bytes())
@@ -133,6 +144,11 @@ class TargetService:
                                      "t": time.strftime("%Y-%m-%dT%H:%M:%S")}) + "\n")
         self.calls.flush()
         return out
+
+    def save_npz(self, rel: str, arrays: dict) -> None:
+        tmp = self.run_dir / "tmp_arrays.npz"
+        np.savez(tmp, **{k: v.astype(np.float32) for k, v in arrays.items()})
+        self.write(rel, tmp.read_bytes())
 
     def _resolve(self, path: str) -> Path:
         if self.container_work and path.startswith(self.container_work + "/"):
@@ -175,8 +191,11 @@ class TargetService:
             self.server = VLLMServer(self.G.MODEL_DIR, self.vllm_mem, self.max_len, self.run_dir / "vllm_server.log")
 
     # ---------------------------------------------------------------- tools
-    def generate(self, prompts: list[str], max_tokens: int, thinking: bool, adapter: str = "") -> str:
-        t0, args = time.time(), {"prompts": prompts, "max_tokens": max_tokens, "thinking": thinking, "adapter": adapter}
+    def generate(self, prompts: list[str], max_tokens: int, thinking: bool, adapter: str = "",
+                 reply_prefix: str = "") -> str:
+        t0 = time.time()
+        args = {"prompts": prompts, "max_tokens": max_tokens, "thinking": thinking, "adapter": adapter,
+                "reply_prefix": reply_prefix}
         L = self.limits
         with self.lock:
             if self.committed is not None:
@@ -189,9 +208,14 @@ class TargetService:
                 return self._log("generate", args, f"candidate budget exhausted ({L['candidates_track_b']})", t0)
             prompts = prompts[: L["generate_prompts"]]
             mt = max(1, min(int(max_tokens), self.max_gen_tokens))
+            def one(s, p):
+                if reply_prefix:  # resample from a point inside a reply: template + prefix, raw continuation
+                    return s.complete(self._chat_text(p, thinking) + reply_prefix, mt, self.sampling)
+                return s.chat(p, mt, thinking, self.sampling)
+
             def run(s):
                 with ThreadPoolExecutor(16) as ex:
-                    return list(ex.map(lambda p: s.chat(p, mt, thinking, self.sampling), prompts))
+                    return list(ex.map(lambda p: one(s, p), prompts))
             try:
                 if adapter:
                     ad = self._read_adapter(adapter)
@@ -237,16 +261,17 @@ class TargetService:
     def inspect(self, texts: list[str], reply_prefix: str, thinking: bool = False) -> str:
         t0, args = time.time(), {"texts": texts, "reply_prefix": reply_prefix, "thinking": thinking}
         with self.lock:
-            if self.n["inspect"] >= self.limits["inspect_calls"]:
-                return self._log("inspect", args, f"inspect budget exhausted ({self.limits['inspect_calls']} calls)", t0)
+            if self.n["analysis"] >= self.limits["analysis_calls"]:
+                return self._log("inspect", args, f"analysis budget exhausted ({self.limits['analysis_calls']} calls)", t0)
             acts, tops = self._hidden_last(texts[: self.limits["inspect_texts"]], reply_prefix, thinking)
-            k = self.n["inspect"]
-            self.n["inspect"] += 1
+            k = self.n["analysis"]
+            self.n["analysis"] += 1
             tmp = self.run_dir / "tmp_acts.npy"
             np.save(tmp, acts.astype(np.float32))
             self.write(f"acts/inspect_{k}.npy", tmp.read_bytes())
             out = "\n".join([f"saved acts/inspect_{k}.npy shape {acts.shape} (index 0 = embeddings, i+1 = output of "
-                             f"layer i); inspect calls left: {self.limits['inspect_calls'] - self.n['inspect']}"] +
+                             f"layer i, the last one after the final norm); analysis calls left: "
+                             f"{self.limits['analysis_calls'] - self.n['analysis']}"] +
                             [f"[{i}] top-5 next: {t}" for i, t in enumerate(tops)])
             return self._log("inspect", args, out, t0)
 
@@ -255,8 +280,8 @@ class TargetService:
         t0 = time.time()
         args = {"texts": texts, "reply_prefix": reply_prefix, "modules": modules, "thinking": thinking}
         with self.lock:
-            if self.n["inspect"] >= self.limits["inspect_calls"]:
-                return self._log("inspect_module_inputs", args, "inspect budget exhausted", t0)
+            if self.n["analysis"] >= self.limits["analysis_calls"]:
+                return self._log("inspect_module_inputs", args, "analysis budget exhausted", t0)
             bad = [m for m in modules if m not in set(self.G.allowlist())]
             if bad:
                 return self._log("inspect_module_inputs", args, f"not writable modules: {bad}", t0)
@@ -274,13 +299,48 @@ class TargetService:
             finally:
                 for h in hooks:
                     h.remove()
-            k = self.n["inspect"]
-            self.n["inspect"] += 1
+            k = self.n["analysis"]
+            self.n["analysis"] += 1
             tmp = self.run_dir / "tmp_modin.npz"
             np.savez(tmp, **{m: np.stack(v).astype(np.float32) for m, v in store.items()})
             self.write(f"acts/modin_{k}.npz", tmp.read_bytes())
             out = f"saved acts/modin_{k}.npz: " + ", ".join(f"{m} {np.stack(v).shape}" for m, v in store.items())
             return self._log("inspect_module_inputs", args, out, t0)
+
+    ANALYSIS = ("trace", "token_stats", "logit_lens", "attribution", "attention", "top_activations", "patch")
+
+    def analysis(self, tool: str, **kw) -> str:
+        """The interpretability tools (lsbench/interp.py). `intervene` is Track B only and counts as a candidate."""
+        t0 = time.time()
+        with self.lock:
+            if self.committed is not None:
+                return self._log(tool, kw, "session is over (adapter committed)", t0)
+            if tool == "intervene":
+                if self.track != "B":
+                    return self._log(tool, kw, "intervene is a Track B tool (it tests an intervention)", t0)
+                if self.n["candidates"] >= self.limits["candidates_track_b"]:
+                    return self._log(tool, kw, "candidate budget exhausted", t0)
+            elif tool not in self.ANALYSIS:
+                return self._log(tool, kw, f"unknown tool {tool}", t0)
+            elif self.n["analysis"] >= self.limits["analysis_calls"]:
+                return self._log(tool, kw, f"analysis budget exhausted ({self.limits['analysis_calls']} calls)", t0)
+            for key in ("items",):
+                if key in kw:
+                    kw[key] = kw[key][: self.limits["analysis_items"]]
+            try:
+                out = getattr(self.interp, tool)(**kw)
+            except Exception as e:  # noqa: BLE001
+                return self._log(tool, kw, f"{tool} failed: {type(e).__name__}: {e}", t0)
+            finally:
+                import torch
+                torch.cuda.empty_cache()
+            if tool == "intervene":
+                self.n["candidates"] += 1
+                left = f"candidates left: {self.limits['candidates_track_b'] - self.n['candidates']}"
+            else:
+                self.n["analysis"] += 1
+                left = f"analysis calls left: {self.limits['analysis_calls'] - self.n['analysis']}"
+            return self._log(tool, kw, f"{out}\n({left})", t0)
 
     def evaluate_candidate(self, path: str) -> str:
         t0, args = time.time(), {"path": path}

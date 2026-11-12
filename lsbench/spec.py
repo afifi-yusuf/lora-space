@@ -8,7 +8,9 @@ from pathlib import Path
 
 PKG = Path(__file__).resolve().parent
 ROOT = PKG.parent
-RULES_VERSION = "lsbench-v0.2"  # v0.2: model description no longer says "used in non-thinking mode"
+RULES_VERSION = "lsbench-v0.3"  # v0.3: interpretability toolkit (trace, token_stats, logit_lens, attribution,
+#   attention, top_activations, patch; intervene in Track B), generate from a reply prefix, one analysis budget
+#   v0.2: model description no longer says "used in non-thinking mode"
 
 
 def load_task(task_id: str) -> dict:

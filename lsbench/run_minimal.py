@@ -102,7 +102,10 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
                 if c.name == "run_python":
                     out, _ = E.run_python(work, a["code"])
                 elif c.name == "generate":
-                    out = svc.generate(a["prompts"], a["max_tokens"], a["thinking"], a.get("adapter", ""))
+                    out = svc.generate(a["prompts"], a["max_tokens"], a["thinking"], a.get("adapter", ""),
+                                       a.get("reply_prefix", ""))
+                elif c.name in svc.ANALYSIS or c.name == "intervene":
+                    out = svc.analysis(c.name, **a)
                 elif c.name == "inspect":
                     out = svc.inspect(a["texts"], a["reply_prefix"], a.get("thinking", False))
                 elif c.name == "inspect_module_inputs":

@@ -57,13 +57,16 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
         return agtool(spec["name"], spec["description"], lambda a: agdata(result=fn(a)), params=spec["parameters"])
 
     impl = {
-        "generate": lambda a: svc.generate(list(a.prompts), int(a.max_tokens), bool(a.thinking), a.adapter or ""),
+        "generate": lambda a: svc.generate(list(a.prompts), int(a.max_tokens), bool(a.thinking), a.adapter or "",
+                                           a.to_dict().get("reply_prefix") or ""),
         "inspect": lambda a: svc.inspect(list(a.texts), a.reply_prefix, bool(a.thinking)),
         "inspect_module_inputs": lambda a: svc.inspect_module_inputs(list(a.texts), a.reply_prefix, list(a.modules),
                                                                      bool(a.thinking)),
         "evaluate_candidate": lambda a: svc.evaluate_candidate(a.path),
         "commit_adapter": lambda a: svc.commit_adapter(a.path, a.explanation),
     }
+    for name in (*svc.ANALYSIS, "intervene"):
+        impl[name] = lambda a, name=name: svc.analysis(name, **a.to_dict())
     tools = [wrap(s, impl[s["name"]]) for s in prompt.tool_schemas(track, G.N_LAYERS, G.HIDDEN)]
 
     if entry["provider"] == "anthropic":  # Agency's Anthropic client takes the endpoint from the SDK's env var
