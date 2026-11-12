@@ -32,6 +32,16 @@ def _usage_from_db(db: str) -> dict:
     return tot
 
 
+def profiler_usage(rdir: Path) -> dict:
+    """Editor-model token usage and LLM wait time from Agency's profiler summary (profile/summary.json)."""
+    try:
+        m = json.loads((rdir / "profile/summary.json").read_text())["llm_metrics"]
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"profiler summary unavailable: {e}"}
+    return {"input": m.get("input_tokens"), "output": m.get("output_tokens"), "calls": m.get("calls"),
+            "failed_calls": m.get("failed_calls"), "llm_wait_s": round((m.get("total_wait_ms") or 0) / 1000, 1)}
+
+
 def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
     from agency import Agent, agdata, agprof, agskill, agtool
     from agency.configs.agconfig import agconfig, llmconfig, resourcesconfig, sandboxconfig
@@ -115,6 +125,6 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
     (rdir / "profile_summary.txt").write_text(str(prof))
     stats = svc.adapter_stats()
     svc.close()
-    return {"status": status, "wall_s": round(time.time() - t0), "llm_tokens": _usage_from_db(db),
+    return {"status": status, "wall_s": round(time.time() - t0), "llm_tokens": profiler_usage(rdir),
             "tool_counts": svc.n, "explanation": svc.explanation, "final_message": summary, "adapter": stats,
             "agency_db": db}
