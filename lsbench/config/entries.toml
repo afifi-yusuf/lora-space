@@ -82,10 +82,9 @@ harness = "native"
 [[entry]]
 id = "kimi31-kimicli"
 label = "Kimi K3.1 Pro (Kimi CLI)"
-model = "us.moonshotai.kimi-k3.1"           # Bedrock (US inference profile); Azure's deployment 503'd under load
-provider = "bedrock"
-base_url = "https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1"
-api_key_env = "AWS_BEARER_TOKEN"
+model = "Kimi-K3.1-Pro"                     # Azure: on Bedrock long Kimi CLI contexts degenerated and hit 429 token limits
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
 harness = "kimi"
 
 [[entry]]

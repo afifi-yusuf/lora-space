@@ -22,7 +22,7 @@
    Colour has four jobs, kept apart:
    - interface state (current section, selected tab, links, focus) is the blue from the logo;
    - the logo’s blue and orange, with a teal, are the three tasks. Wherever a result is drawn
-     (the dot plots, the scatter, the strips of layers, the task cards, the tabs) a mark takes its task’s colour and shape:
+     (the scatter, the strips of layers, the task cards, the tabs) a mark takes its task’s colour and shape, and a bar its task’s colour (a mean over tasks, as a bar or a point, is dark grey):
      the first task blue and round, the second orange and a diamond, the third teal and square (--task-0..2). Makers are shown by their logo, never by colour;
    - in the drawings of a real edit, and only there, orange is a weight the edit raises and blue one it lowers. The orange quotation
      marks on the request are the one decorative use;
@@ -136,6 +136,14 @@ figure { margin: 0; }
 .emblem canvas { display: block; image-rendering: pixelated; }
 .emblem .a, .emblem .b, .emblem .w { position: relative; overflow: hidden; }
 .emblem .tex { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* one cell of the weight change can be selected: it is outlined, and the band of B and the band of A that multiply to give it are marked */
+.emblem .w.pickable { cursor: crosshair; overflow: visible; }
+.emblem .w.pickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.emblem .pk { position: absolute; pointer-events: none; z-index: 1; }
+.emblem .pk.row, .emblem .pk.col { background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.emblem .pk.cell { box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 3.5px var(--ink); border-radius: 1px; }
+.emblem .pk.on-b, .emblem .pk.on-a { background: var(--ink); }
+.pick { margin: 0; max-width: none; font-size: 0.875rem; color: var(--ink-2); } .pick b { color: var(--ink); font-weight: 600; }
 .emblem.sm { --t: 5px; gap: 4px; --fill: var(--bg); }
 .emblem.sm .w { border-radius: 2px; }
 .minis { min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: flex-start; margin-top: 6px; }
@@ -159,21 +167,18 @@ figure { margin: 0; }
 .dp-track .g { position: absolute; top: -8px; bottom: -8px; border-left: 1px solid var(--rule); }
 .dp-track .g.z { border-left-color: var(--ctl); }
 .gl { display: inline-block; flex: none; width: 0.6875rem; height: 0.6875rem; background: var(--c, var(--ink-2)); }
-.gl.hollow { background: none; box-shadow: inset 0 0 0 2.5px var(--c, var(--ink-2)); }
 .gl.s-dot { border-radius: 50%; } .gl.s-dia { transform: rotate(45deg) scale(0.82); } .gl.s-sq { border-radius: 1px; }
-.dp-track .mh { position: absolute; top: 50%; width: 1.5rem; height: 1.5rem; margin: -0.75rem 0 0 -0.75rem; display: grid; place-items: center; transform: translateY(var(--dy, 0)); }
-.dp-track .mh .gl { width: 0.75rem; height: 0.75rem; box-shadow: 0 0 0 2px var(--bg); }
-.dp-track .mean, .legend .mean { width: 0; border-left: 2px solid var(--ink-2); }
-.dp-track .rng { position: absolute; top: 50%; height: 0; border-top: 1px solid var(--ctl); }
-.dp-track .rng.stem { border-top: 3px solid var(--c); margin-top: -1.5px; }
-.dp-track .nc { position: absolute; top: 50%; transform: translateY(-50%); padding-left: 8px; font-size: 0.8125rem; color: var(--ink-2); white-space: nowrap; }
-.dp-track .mean { position: absolute; top: -8px; bottom: -8px; margin-left: -1px; }
-.legend .mean { height: 1rem; }
+.dp-track .mh { position: absolute; top: 50%; width: 1.5rem; height: 1.5rem; margin: -0.75rem 0 0 -0.75rem; }
+.dp-track .bar { position: absolute; top: 50%; height: 0.875rem; margin-top: -0.4375rem; background: var(--ink-2); border-radius: 2px; transform-origin: 0 50%; }
+.dp-track .bar.neg { transform-origin: 100% 50%; }
+.dp-track .bar.t { background: var(--c); }
+.dp-row { background: var(--bg); }
+.dp-row .who .nc { display: block; margin-left: 0; color: var(--ink-2); }
 .legend .hint { display: none; color: var(--ink-3); } .scroll-x:has(:focus-visible) + .legend .hint { display: inline-flex; }
 .dp-axis { border-bottom-color: var(--rule-2); font-size: 0.8125rem; color: var(--ink-3); padding-block: 0 4px; }
 .dp-axis .dp-track { height: 1.2em; } .dp-axis em { position: absolute; transform: translateX(-50%); font-style: normal; font-variant-numeric: tabular-nums; }
 .dp-axis .v { font-weight: 600; font-size: 0.8125rem; color: var(--ink); }
-@media (max-width: 44em) { .dp-row { grid-template-columns: 1.375rem minmax(0, 1fr) 4.2em; } .dp-row .who span { display: block; margin-left: 0; } .dp-row .dp-track { grid-column: 1 / -1; grid-row: 2; } .dp-row .v { grid-column: 3; grid-row: 1; } .dp-axis > span:nth-child(2) { display: none; } }
+@media (max-width: 44em) { .dp-row { grid-template-columns: 1.375rem minmax(0, 1fr) 4.2em; } .dp-row .who span { display: block; margin-left: 0; } .dp-row .dp-track { grid-column: 1 / -1; grid-row: 2; } .dp-row .v { grid-column: 3; grid-row: 1; } .dp-axis > span:nth-child(2) { display: none; } .dp-row .dp-track { margin-inline: 14px; } .dp-axis em:last-child { transform: translateX(-100%); } .dp-axis em:first-child { transform: none; } }
 @media (forced-colors: active) { .gl { forced-color-adjust: none; } }
 @media (max-width: 1180px) { .hero { grid-template-columns: minmax(0, 1fr); padding-block: 48px 64px; gap: 36px; } .hero h1 { font-size: 2.75rem; } .result b { font-size: 2.25rem; } }
 @media (max-width: 700px) { .emblem { --t: 0.5rem; } .result { justify-items: start; } .result b { font-size: 2rem; } h1, .hero h1 { font-size: 2.125rem; } h2 { font-size: 1.625rem; } .edit .prompt p { font-size: 1.375rem; } }
@@ -263,13 +268,10 @@ tr.refrow .model { font-weight: 400; }
 #chart { display: block; width: 100%; height: auto; font-family: var(--f); }
 #chart .grid { stroke: var(--rule); }
 #chart .ldr { stroke: var(--ctl); }
-#chart .pair { stroke: var(--ctl); stroke-width: 1.25; }
-#chart text.lab .sub { fill: var(--ink-3); font-weight: 400; }
 #chart text { fill: var(--ink-3); font-size: 0.8125rem; }
 #chart text.t { fill: var(--ink-2); }
 #chart text.lab { fill: var(--ink); font-size: 0.84375rem; font-weight: 500; paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
 #chart .pt { stroke: var(--bg); stroke-width: 2; fill: var(--c); }
-#chart .pt.own { fill: var(--bg); stroke: var(--c); stroke-width: 2.5; }
 #chart .refline { stroke: var(--ctl); }
 #chart .hit { fill: transparent; cursor: pointer; outline: none; }
 #chart .hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
@@ -278,7 +280,7 @@ tr.refrow .model { font-weight: 400; }
 .tip { position: absolute; z-index: var(--z-tip); background: var(--bg); color: var(--ink-2); border: 1px solid var(--ctl); box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 10%, transparent); padding: 8px 12px; border-radius: 6px; font-size: 0.8125rem; line-height: 1.45; width: max-content; max-width: min(18rem, calc(100vw - 48px)); }
 .tip b { font-weight: 600; display: block; color: var(--ink); }
 .tip.fixed { position: fixed; }
-.dp-track .mh:focus-visible { outline-offset: -3px; border-radius: 50%; }
+.dp-track .mh:focus-visible { outline-offset: 2px; border-radius: 2px; }
 
 /* layer map */
 .lmap { display: grid; gap: 5px; }
@@ -466,8 +468,7 @@ footer a { color: inherit; }
   <section id="leaderboard">
     <div class="sec-head">
       <h2>Leaderboard</h2>
-      <p>An entry is an editor model paired with the harness it works in: Agency’s minimal native loop, or the model maker’s own agent. Scores are normalized per task: 0 is the
-        unedited model and 100 is the task’s best reference. Select a score to read that run.</p>
+      <p>An entry is an editor model in a harness. Scores are normalized per task: 0 is the unedited model, 100 the task’s best reference. Select a score to read that run.</p>
     </div>
     <div class="block">
       <div class="bar-row">
@@ -476,7 +477,7 @@ footer a { color: inherit; }
           <label id="pilot-box"><input type="checkbox" id="s-pilots">Pilot runs</label>
         </div>
       </div>
-      <h3 id="cc-title" class="pad-t"></h3>
+      <div class="bar-row"><h3 id="cc-title" class="pad-t"></h3><div class="tabs" id="f-h" role="group" aria-label="Harness shown in the score chart"></div></div>
       <div class="scroll-x" role="region" aria-label="Score chart" tabindex="0"><div class="cc" id="cc"></div></div>
       <div class="legend" id="cc-legend"></div>
       <div class="scroll-x gap-t" id="board-wrap" role="region" aria-label="Leaderboard table" tabindex="0"><table id="board"></table></div>
@@ -485,6 +486,7 @@ footer a { color: inherit; }
     <div class="block gap-tt">
       <div class="bar-row">
         <h3 id="chart-title" class="pad-b">Score against cost</h3>
+        <div class="tabs" id="f-h2" role="group" aria-label="Harness shown in the cost chart"></div>
         <div class="tabs" id="f-x" role="group" aria-label="Cost axis"></div>
       </div>
       <div class="scatter"><div class="legend" id="legend"></div>
@@ -542,7 +544,7 @@ footer a { color: inherit; }
         <div><span class="brand">LoRA-Space Bench</span><p>Can a frontier model fine-tune a frozen model by writing its adapter?</p></div></div>
       <nav class="foot-links" aria-label="Footer"><a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a><a href="https://github.com/afifi-yusuf/lora-space">GitHub</a><a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a></nav>
     </div>
-    <div class="foot-base"><span id="foot-l"></span><span>One attempt per cell; the grid is still running.</span></div>
+    <div class="foot-base"><span id="foot-l"></span><span>One attempt per cell.</span></div>
   </div>
 </footer>
 
@@ -624,7 +626,7 @@ const ENTRIES = D.entries.filter((e) => e.id !== "astra-minimal");
 const cellRun = (eid, tid) => D.runs.find((r) => r.entry === eid && r.task === tid && r.track === "A" && !r.pilot);
 const flag = (r) => { const d = dmgText(r); return d ? ` <span class="flag" title="Damage: ${esc(d)}">†<span class="sr"> damage: ${esc(d)}</span></span>` : ""; };
 
-const state = { view: "all", pilots: false, sort: {}, x: "tok", ctask: "math_qwen08" };
+const state = { view: "all", pilots: false, sort: {}, x: "tok", ctask: "math_qwen08", h: "native" };
 
 /* The edit itself. Each committed adapter arrives binned (B over 32 row bins, A over column bins that keep cells square); the mean
    weight change over a cell is the product of the two, so the block shows the real pattern of the change. Colours come from the tokens. */
@@ -654,6 +656,33 @@ function paintEdits(root) {
 }
 const kindOf = (name) => { const m = String(name).match(/layers\.(\d+)\.(.*)$/); return m ? `Layer ${m[1]} ${/mlp/.test(m[2]) ? "MLP" : "attention output"}` : name; };
 
+/* hero figure: any cell of the weight change can be selected. The readout says which weights it covers and what the edit does to them;
+   the bands marked on B and A are the two factors whose product is that cell. Pointer, touch and arrow keys all move the selection. */
+function picker(fig) {
+  const cv = fig.querySelector('canvas[data-k="w"]'); if (!cv) return;
+  const run = D.runs.find((x) => x.id === cv.dataset.run), e = run.edit_map[+cv.dataset.i], rows = e.b[0].length, cols = e.a[0].length, [nOut, nIn] = e.shape;
+  const val = (i, j) => { let v = 0; for (let k = 0; k < e.rank; k++) v += e.b[k][i] * e.a[k][j]; return v; };
+  let max = 0, at = [0, 0]; for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) { const m = Math.abs(val(i, j)); if (m > max) { max = m; at = [i, j]; } }
+  const w = cv.parentElement, a = fig.querySelector(".emblem .a"), b = fig.querySelector(".emblem .b"), n = (v) => v.toLocaleString("en-US");
+  w.classList.add("pickable"); w.tabIndex = 0; w.setAttribute("role", "application"); w.setAttribute("aria-roledescription", "cell picker");
+  w.setAttribute("aria-label", `The weight change, drawn as ${rows} by ${cols} cells. Arrow keys move the selected cell; Home and End go to the ends of a row, Page Up and Page Down to the top and bottom. Tab leaves the drawing.`);
+  const mk = (host, cls) => { const el = document.createElement("i"); el.className = "pk " + cls; host.append(el); return el; };
+  const row = mk(w, "row"), col = mk(w, "col"), cell = mk(w, "cell"), onB = mk(b, "on-b"), onA = mk(a, "on-a");
+  const out = document.createElement("p"); out.className = "pick"; fig.querySelector(".emblem").after(out);
+  const live = document.createElement("p"); live.className = "sr"; live.setAttribute("aria-live", "polite"); out.after(live);  /* spoken only after a key press or a tap, not while the pointer passes over */
+  const set = ([i, j], say) => { at = [i, j];
+    const top = `${100 * i / rows}%`, hh = `${100 / rows}%`, left = `${100 * j / cols}%`, ww = `${100 / cols}%`;
+    Object.assign(row.style, { top, height: hh, left: 0, right: 0 }); Object.assign(col.style, { left, width: ww, top: 0, bottom: 0 });
+    Object.assign(cell.style, { top, height: hh, left, width: ww }); Object.assign(onB.style, { top, height: hh, left: 0, right: 0 }); Object.assign(onA.style, { left, width: ww, top: 0, bottom: 0 });
+    const v = val(i, j), r0 = Math.floor(i * nOut / rows), r1 = Math.floor((i + 1) * nOut / rows), c0 = Math.floor(j * nIn / cols), c1 = Math.floor((j + 1) * nIn / cols), share = Math.round(100 * Math.abs(v) / (max || 1));
+    out.innerHTML = `<b>Rows ${n(r0 + 1)}–${n(r1)}, columns ${n(c0 + 1)}–${n(c1)}:</b> ${share < 1 ? "almost unchanged" : `${v < 0 ? "lowered" : "raised"}, at ${share}% of the strongest change`}.`; if (say) { live.textContent = out.textContent; clearTimeout(set.t); set.t = setTimeout(() => { live.textContent = ""; }, 1500); } };  /* spoken once, then removed so the sentence is not in the page twice */
+  const from = (ev, say) => { const r = w.getBoundingClientRect(); set([Math.max(0, Math.min(rows - 1, Math.floor((ev.clientY - r.top) / r.height * rows))), Math.max(0, Math.min(cols - 1, Math.floor((ev.clientX - r.left) / r.width * cols)))], say); };
+  w.addEventListener("pointermove", (ev) => { if (ev.pointerType === "mouse") from(ev, false); }); w.addEventListener("pointerdown", (ev) => from(ev, true));
+  w.addEventListener("keydown", (ev) => { const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1], Home: [0, -cols], End: [0, cols], PageUp: [-rows, 0], PageDown: [rows, 0] }[ev.key]; if (!d) return; ev.preventDefault();
+    set([Math.max(0, Math.min(rows - 1, at[0] + d[0])), Math.max(0, Math.min(cols - 1, at[1] + d[1]))], true); });
+  set(at);
+}
+
 /* hero figure: the math request and what each entry’s edit did to the model’s accuracy */
 (function specimen() {
   const tid = TASK_IDS.find((id) => D.runs.some((r) => r.task === id && r.scored && !r.pilot)) || TASK_IDS[0];
@@ -663,20 +692,20 @@ const kindOf = (name) => { const m = String(name).match(/layers\.(\d+)\.(.*)$/);
   let emblem = "", res = "", ratio = 2.5;
   if (runs.length && (runs[0].adapter || {}).params) {  /* the logo, drawn to say what it stands for: one committed edit, B times A */
     const r0 = runs[0], ad = r0.adapter, mods = Object.keys(ad.rel_norms || {}), mod = mods[0] || "";
-    const em = r0.edit_map && r0.edit_map.length === 1 ? r0.edit_map[0] : null, cv = (k) => { const c = em ? `<canvas class="tex" data-run="${esc(r0.id)}" data-i="0" data-k="${k}"></canvas>` : ""; return k === "w" ? c : `<i class="${k}${em ? " grid" : ""}">${c}</i>`; };
+    const em = r0.edit_map && r0.edit_map.length === 1 ? r0.edit_map[0] : null, cv = (k) => { const c = em ? `<canvas class="tex" data-run="${esc(r0.id)}" data-i="0" data-k="${k}"></canvas>` : ""; return k === "w" ? c : `<i class="${k}${em ? " grid" : ""}" aria-hidden="true">${c}</i>`; };
     const dim = em ? em.shape : /mlp\.down_proj$/.test(mod) ? [1024, 3584] : /o(?:ut)?_proj$/.test(mod) ? [1024, 1024] : null;
     const known = dim && mods.length === 1 && ad.max_rank * (dim[0] + dim[1]) === ad.params, k = ad.max_rank;
-    const toScale = known && dim[1] / dim[0] >= 1.6; ratio = known ? Math.max(1.6, Math.min(4, dim[1] / dim[0])).toFixed(2) : 2.5;
+    const toScale = known && dim[1] / dim[0] >= 2.4; ratio = known ? Math.max(2.4, Math.min(4, dim[1] / dim[0])).toFixed(2) : 2.5;  /* a squarer matrix is drawn wider than it is, and then not called to scale */
     res = `<p class="result"><b>${pct(t.base)}<span class="arrow" aria-hidden="true">→</span><span class="sr"> to </span>${pct(r0.value)}</b><span class="lbl">${esc(m.metric || t.metric)}, unedited and then with this edit</span></p>`;
-    emblem = `<div class="emblem" aria-hidden="true" style="--r:${ratio}">
-        <span class="la"><b>A</b>${known ? `, ${k} × ${n(dim[1])}` : ", a wide matrix"}, written by the editor</span>${cv("a")}
+    emblem = `<div class="emblem" style="--r:${ratio}">
+        <span class="la" aria-hidden="true"><b>A</b>${known ? `, ${k} × ${n(dim[1])}` : ", a wide matrix"}</span>${cv("a")}
         ${cv("b")}<div class="w${em ? " grid" : ""}">${cv("w")}</div>
-        <span class="lb"><span><b>B</b>${known ? `, ${n(dim[0])} × ${k}` : ", a tall matrix"}, written by the editor</span><span><b>ΔW = B × A</b>${known ? `, ${n(dim[0])} × ${n(dim[1])}` : ""}, what it does to the model</span></span></div>
-      <figcaption><span class="sr">Diagram: a tall matrix B${known ? `, ${n(dim[0])} by ${k},` : ""} times a wide matrix A${known ? `, ${k} by ${n(dim[1])},` : ""} gives the weight change ΔW${known ? `, ${n(dim[0])} by ${n(dim[1])}` : ""}. </span>${esc(modelName(r0))}’s whole edit${toScale ? ", to scale" : ""}: ${n(ad.params)} numbers written by hand${known ? `, changing ${n(dim[0] * dim[1])} weights` : ` across ${mods.length} matrices`}.${em ? " Orange raises a weight, blue lowers it." : ""}</figcaption>`;
+        <span class="lb" aria-hidden="true"><span><b>B</b>${known ? `, ${n(dim[0])} × ${k}` : ", a tall matrix"}</span><span><b>ΔW = B × A</b>${known ? `, ${n(dim[0])} × ${n(dim[1])}` : ""}</span></span></div>
+      <figcaption><span class="sr">Diagram: a tall matrix B${known ? `, ${n(dim[0])} by ${k},` : ""} times a wide matrix A${known ? `, ${k} by ${n(dim[1])},` : ""} gives the weight change ΔW${known ? `, ${n(dim[0])} by ${n(dim[1])}` : ""}. </span>${esc(modelName(r0))}’s whole edit${toScale ? ", to scale" : ""}: ${n(ad.params)} numbers written by hand${known ? `, changing ${n(dim[0] * dim[1])} weights` : ` across ${mods.length} matrices`}.${em ? " Select any cell." : ""}</figcaption>`;
   }
   const [draw, cap] = emblem.split("<figcaption>");
   $("#edit-fig").style.setProperty("--r", ratio);
-  $("#edit-fig").innerHTML = `<div class="edit-head">${ASK(ask)}${res}</div>` + (emblem ? `${draw}<figcaption class="edit-cap"><span>${cap.replace("</figcaption>", "")}</span><span class="scale" aria-hidden="true">lowers<i></i>raises</span></figcaption>` : ""); paintEdits($("#edit-fig"));
+  $("#edit-fig").innerHTML = `<div class="edit-head">${ASK(ask)}${res}</div>` + (emblem ? `${draw}<figcaption class="edit-cap"><span>${cap.replace("</figcaption>", "")}</span><span class="scale" aria-hidden="true">lowers<i></i>raises</span></figcaption>` : ""); paintEdits($("#edit-fig")); picker($("#edit-fig"));
 })();
 
 /* layer map: one strip of the model’s layers per run. The upper half of a cell is that layer’s attention output, the lower half its MLP down projection. */
@@ -764,51 +793,63 @@ function rowsFor(view) {
     .concat([{ ref: 1, id: "ref-base", name: "Unedited " + (TARGET[t.target] || "model"), sub: "no edit", mk: "", normalized: 0, value: t.base, hours: null }]);
   return runs.concat(refs);
 }
-/* the chart above the table: a dot plot of every task in "All tasks", one bar per entry on a single task */
-function multiples() {
-  const done = (r) => r && (r.scored || failed(r)), val = (r) => r.scored ? r.normalized : 0;
-  const rows = ENTRIES.map((e) => { const rs = TASK_IDS.map((tid) => cellRun(e.id, tid)), got = rs.filter(done);
-    return { e, rs, n: got.length, full: got.length === rs.length, mean: got.length ? got.reduce((a, r) => a + val(r), 0) / got.length : null }; })
-    .filter((x) => x.n).sort((a, b) => (b.full - a.full) || b.mean - a.mean);
-  const all = rows.flatMap((x) => x.rs.filter(done).map(val));
-  const lo = Math.min(0, ...all) < 0 ? Math.floor((Math.min(...all) - 4) / 10) * 10 : 0, hi = Math.max(100, Math.ceil(Math.max(...all) / 25) * 25);
+/* the chart above the table: one bar per editor model, in the harness the switch selects. Rows, bars and marks are keyed by model,
+   so switching harness or task moves them to their new places instead of redrawing them. */
+const MODELS = [...new Set(ENTRIES.map(modelName))];
+const entryFor = (model, h) => { const c = ENTRIES.filter((e) => modelName(e) === model && (h === "native" ? e.harness === "native" : ownHarness(e))), ran = c.filter((e) => D.runs.some((r) => r.entry === e.id && !r.pilot));
+  return ran.find((e) => e.harness !== "opencode") || ran[0] || c[0] || null; };  /* the maker’s own agent where it has run, otherwise OpenCode */
+const HNAME = { native: "the shared Agency harness", own: "its maker’s own harness" };
+const QUIET = matchMedia("(prefers-reduced-motion: reduce)"), EASE = "cubic-bezier(.22,1,.36,1)";
+/* redraw `box` and animate every keyed element from where it was to where it now is (position, and width for bars) */
+function moved(box, draw) {
+  const can = !QUIET.matches && !!box.animate && box.dataset.drawn === "1";
+  const rel = (el) => { const r = el.getBoundingClientRect(), row = el.closest("[data-row]"), p = row && row !== el ? row.getBoundingClientRect() : { left: 0, top: 0 }; return { x: r.left - p.left, y: r.top - p.top, w: r.width }; };
+  const was = new Map(); if (can) box.querySelectorAll("[data-key]").forEach((el) => was.set(el.dataset.key, rel(el)));
+  draw(); box.dataset.drawn = "1"; if (!can) return;
+  box.querySelectorAll("[data-key]").forEach((el) => { const a = was.get(el.dataset.key);
+    if (!a) { el.animate({ opacity: [0, 1] }, { duration: 200, delay: 120, easing: "ease-out", fill: "backwards" }); return; }
+    const b = rel(el), dx = a.x - b.x, dy = a.y - b.y, sx = el.classList.contains("bar") && b.w > 0.5 ? a.w / b.w : 1;
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(sx - 1) < 0.01) return;
+    el.animate({ translate: [`${dx}px ${dy}px`, "0 0"], scale: [`${sx} 1`, "1 1"], transformOrigin: ["0 50%", "0 50%"] }, { duration: 320, easing: EASE }); });
+}
+/* the first time a chart scrolls into view its bars grow from zero and its marks fade in; the finished chart is the resting state */
+function drawIn(box) { if (QUIET.matches || !box.animate || document.visibilityState !== "visible") return;  /* never start from an empty chart in a tab nobody is watching */
+  box.querySelectorAll(".bar").forEach((el, i) => el.animate({ scale: ["0 1", "1 1"] }, { duration: 360, delay: i * 20, easing: EASE, fill: "backwards" }));
+  box.querySelectorAll(".mh, g.p").forEach((el, i) => el.animate({ opacity: [0, 1] }, { duration: 200, delay: 160 + i * 8, easing: "ease-out", fill: "backwards" })); }
+const SEEN = "IntersectionObserver" in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { SEEN.unobserve(e.target); drawIn(e.target); } }), { threshold: 0.2 }) : null;
+function bars() {
+  const view = state.view, all = view === "all", tids = all ? TASK_IDS : [view], done = (r) => r && (r.scored || failed(r)), val = (r) => r.scored ? r.normalized : 0;
+  const rows = MODELS.map((model) => { const e = entryFor(model, state.h), rs = e ? tids.map((tid) => cellRun(e.id, tid)) : [], got = rs.filter(done);
+    return { model, e, rs, n: got.length, full: got.length > 0 && got.length === tids.length, v: got.length ? got.reduce((a, r) => a + val(r), 0) / got.length : null }; })
+    .sort((a, b) => (b.full - a.full) || (b.n > 0) - (a.n > 0) || (b.v ?? 0) - (a.v ?? 0));
+  const vals = rows.flatMap((x) => x.rs.filter(done).map(val));
+  const lo = Math.min(0, ...vals) < 0 ? Math.floor((Math.min(...vals) - 4) / 10) * 10 : 0, hi = Math.max(100, Math.ceil(Math.max(0, ...vals) / 25) * 25);
   const x = (v) => 100 * (v - lo) / (hi - lo), ticks = []; for (let v = Math.ceil(lo / 25) * 25; v <= hi; v += 25) ticks.push(v);
-  const marks = (r) => { const ms = r.rs.map((run, i) => done(run) && !failed(run) ? { run, i, x: x(val(run)), dy: 0 } : null).filter(Boolean), by = [...ms].sort((a, b) => a.x - b.x), nc = r.rs.filter((run) => run && failed(run)).length;
-    by.forEach((m, k) => { if (k && m.x - by[k - 1].x < 1.4) { by[k - 1].dy = by[k - 1].dy || -5; m.dy = -by[k - 1].dy; } });
-    return (by.length > 1 ? `<i class="rng" style="left:${by[0].x.toFixed(2)}%;width:${(by[by.length - 1].x - by[0].x).toFixed(2)}%"></i>` : "")
-      + (r.full ? `<i class="mean" style="left:${x(r.mean).toFixed(2)}%"></i>` : "")
-      + ms.map((m) => `<span class="mh" tabindex="-1" role="img" style="left:${m.x.toFixed(2)}%${m.dy ? `;--dy:${m.dy}px` : ""}" aria-label="${esc(`${modelName(r.e)}, ${harness(r.e)}, ${tname(m.run.task)}: ${fix(m.run.normalized)}, raw ${pct(m.run.value)}`)}" data-tip="${esc(`${modelName(r.e)} · ${harness(r.e)} | ${tname(m.run.task)}: ${fix(m.run.normalized)} (${(TASK[m.run.task] || {}).short || "raw"} ${pct(m.run.value)})`)}"><i class="gl ${SHAPES[m.i % 3]}" style="--c:${colorOf(m.run)}"></i></span>`).join("")
-      + (nc ? `<span class="nc" style="${x(0) > 55 || (x(0) > 22 && ms.some((m) => m.x > x(0) && m.x < x(0) + 22) && !ms.some((m) => m.x < x(0) && m.x > x(0) - 22)) ? `right:${(100 - x(0)).toFixed(2)}%;padding:0 8px 0 0` : `left:${x(0).toFixed(2)}%`}">${nc === r.rs.length ? "no commit on any task" : `no commit on ${r.rs.map((run, i) => run && failed(run) ? tname(TASK_IDS[i]) : "").filter(Boolean).join(", ")}`}</span>` : ""); };
-  $("#cc-title").textContent = "Normalized score on each task, with the mean";
-  $("#cc").innerHTML = `<div class="dp" role="list"><div class="dp-row dp-axis" aria-hidden="true"><span></span><span></span><div class="dp-track">${ticks.map((v) => `<em style="left:${x(v).toFixed(2)}%">${v}</em>`).join("")}</div><span class="v">Mean</span></div>`
-    + rows.map((r) => `<div class="dp-row" role="listitem">${markOf(r.e)}<span class="who">${esc(modelName(r.e))}<span>${esc(harness(r.e))}</span></span>`
-      + `<div class="dp-track">${ticks.map((v) => `<i class="g${v === 0 ? " z" : ""}" style="left:${x(v).toFixed(2)}%"></i>`).join("")}${marks(r)}</div>`
-      + `<span class="v${r.full ? "" : " dim"}"><span class="sr">${r.full ? "Mean " : "Scored "}</span>${r.full ? fix(r.mean) : `${r.n} of ${r.rs.length}`}</span></div>`).join("") + `</div>`;
+  const who = (r) => `${r.model}, ${r.e ? harness(r.e) : ""}`;
+  /* what is missing from a row is said beside the harness name, never drawn in the track */
+  const note = (r) => !r.e ? "no entry in this harness" : !r.n ? "not run yet" : all ? ((nc) => !nc.length ? "" : nc.length === r.rs.length ? "no commit on any task" : `no commit on ${nc.join(", ")}`)(r.rs.map((run, i) => run && failed(run) ? tname(TASK_IDS[i]) : "").filter(Boolean)) : failed(r.rs[0]) ? "no commit" : "";
+  const bar = (r) => r.full ? `<i class="bar${all ? "" : " t"}${r.v < 0 ? " neg" : ""}" data-key="b:${esc(r.model)}" style="left:${Math.min(x(0), x(r.v)).toFixed(2)}%;width:${Math.abs(x(r.v) - x(0)).toFixed(2)}%"></i>` : "";
+  const marks = (r) => {
+    if (!r.n) return "";
+    if (!all) { const run = r.rs[0]; return failed(run) ? ""
+      : `<span class="mh" data-key="m:${esc(r.model)}" tabindex="-1" role="img" style="left:${Math.min(x(0), x(r.v)).toFixed(2)}%;width:max(1.5rem, ${Math.abs(x(r.v) - x(0)).toFixed(2)}%);margin-left:0" aria-label="${esc(`${who(r)}: ${fix(r.v)}, raw ${pct(run.value)}`)}" data-tip="${esc(`${r.model} · ${harness(r.e)} | ${tname(view)}: ${fix(r.v)} (${(TASK[view] || {}).short || "raw"} ${pct(run.value)})`)}"></span>`; }
+    if (!r.full) return "";  /* All tasks: the bar is the mean; the three task scores are in its tooltip, on the task tabs and in the table */
+    const parts = r.rs.map((run, i) => `${tname(TASK_IDS[i])} ${failed(run) ? "no commit, 0" : fix(run.normalized)}`).join(", ");
+    return `<span class="mh" data-key="m:${esc(r.model)}" tabindex="-1" role="img" style="left:${Math.min(x(0), x(r.v)).toFixed(2)}%;width:max(1.5rem, ${Math.abs(x(r.v) - x(0)).toFixed(2)}%);margin-left:0" aria-label="${esc(`${who(r)}: mean ${fix(r.v)}. ${parts}`)}" data-tip="${esc(`${r.model} · ${harness(r.e)} | Mean ${fix(r.v)}. ${parts}`)}"></span>`; };
+  const value = (r) => r.full ? (!all && failed(r.rs[0]) ? `<span class="v dim" aria-hidden="true">0</span><span class="sr">No commit, score 0.</span>` : `<span class="v" aria-hidden="true">${fix(r.v)}</span>`)
+    : `<span class="v dim">${r.n ? `<span class="sr">Scored </span>${r.n} of ${tids.length}` : `<span class="sr">No score</span><span aria-hidden="true">–</span>`}</span>`;
+  $("#cc-title").textContent = all ? "Mean normalized score" : `Normalized score, ${tname(view)}`;
+  $("#cc-legend").innerHTML = `<span class="hint">Arrow keys move between bars.</span>`;
+  moved($("#cc"), () => {
+    $("#cc").innerHTML = `<div class="dp" role="list"><div class="dp-row dp-axis" aria-hidden="true"><span></span><span></span><div class="dp-track">${ticks.map((v) => `<em style="left:${x(v).toFixed(2)}%">${v}</em>`).join("")}</div><span class="v">${all ? "Mean" : "Score"}</span></div>`
+      + rows.map((r) => `<div class="dp-row" role="listitem" data-row data-key="r:${esc(r.model)}">${markOf(r.e || { label: r.model })}<span class="who">${esc(r.model)}<span>${esc(r.e ? harness(r.e) : "")}</span>${note(r) ? `<span class="nc">${esc(note(r))}</span>` : ""}</span>`
+        + `<div class="dp-track"${all ? "" : ` style="--c:${colorOf({ task: view })}"`}>${ticks.map((v) => `<i class="g${v === 0 ? " z" : ""}" style="left:${x(v).toFixed(2)}%"></i>`).join("")}${bar(r)}${marks(r)}</div>${value(r)}</div>`).join("") + `</div>`; });
   const first = $("#cc .mh"); if (first) first.tabIndex = 0;
-  $("#cc-legend").innerHTML = TASK_IDS.map((tid) => `<span>${GLY(tid)}${esc(tname(tid))}</span>`).join("") + `<span><i class="mean"></i>Mean, once all ${TASK_IDS.length} are scored</span><span class="hint">Arrow keys move between marks.</span>`;
 }
 /* the marks are one tab stop; arrow keys move within the chart */
 $("#cc").addEventListener("keydown", (e) => { const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if ((!d && e.key !== "Home" && e.key !== "End") || !e.target.classList.contains("mh")) return;
   const all = [...document.querySelectorAll("#cc .mh")], n = e.key === "Home" ? all[0] : e.key === "End" ? all[all.length - 1] : all[(all.indexOf(e.target) + d + all.length) % all.length]; e.preventDefault(); n.focus(); });
 $("#cc").addEventListener("focusin", (e) => { if (!e.target.classList.contains("mh")) return; document.querySelectorAll("#cc .mh").forEach((m) => { m.tabIndex = m === e.target ? 0 : -1; }); });
-function columns() {
-  const view = state.view;
-  if (view === "all") return multiples();
-  const every = ENTRIES.map((e) => { const r = cellRun(e.id, view); return { e, r, v: r && r.scored ? r.normalized : r && failed(r) ? 0 : null, nc: !!(r && failed(r)) }; });
-  const items = every.filter((x) => x.v != null).sort((a, b) => b.v - a.v), shape = SHAPES[TASK_IDS.indexOf(view) % 3];
-  $("#cc-title").textContent = `Normalized score, ${tname(view)}`;
-  $("#cc-legend").innerHTML = `<span>${GLY(view)}One run per entry</span>` + `<span class="hint">Arrow keys move between marks.</span>`;
-  if (!items.length) { $("#cc").innerHTML = `<p class="empty">No scored runs here yet.</p>`; return; }
-  const vals = items.map((x) => x.v), lo = Math.min(0, ...vals) < 0 ? Math.floor((Math.min(...vals) - 4) / 10) * 10 : 0, hi = Math.max(100, Math.ceil(Math.max(...vals) / 25) * 25);
-  const x = (v) => 100 * (v - lo) / (hi - lo), ticks = []; for (let v = Math.ceil(lo / 25) * 25; v <= hi; v += 25) ticks.push(v);
-  $("#cc").innerHTML = `<div class="dp" role="list"><div class="dp-row dp-axis" aria-hidden="true"><span></span><span></span><div class="dp-track">${ticks.map((v) => `<em style="left:${x(v).toFixed(2)}%">${v}</em>`).join("")}</div><span class="v">Score</span></div>`
-    + items.map((it) => `<div class="dp-row" role="listitem">${markOf(it.e)}<span class="who">${esc(modelName(it.e))}<span>${esc(harness(it.e))}</span></span>`
-      + `<div class="dp-track" style="--c:${colorOf({ task: view })}">${ticks.map((v) => `<i class="g${v === 0 ? " z" : ""}" style="left:${x(v).toFixed(2)}%"></i>`).join("")}`
-      + (it.nc ? `<span class="nc" style="${x(0) > 55 ? `right:${(100 - x(0)).toFixed(2)}%;padding:0 8px 0 0` : `left:${x(0).toFixed(2)}%`}">no commit</span>`
-        : `<i class="rng stem" style="left:${Math.min(x(0), x(it.v)).toFixed(2)}%;width:${Math.abs(x(it.v) - x(0)).toFixed(2)}%"></i><span class="mh" tabindex="-1" role="img" style="left:${x(it.v).toFixed(2)}%" aria-label="${esc(`${modelName(it.e)}, ${harness(it.e)}: ${fix(it.v)}, raw ${pct(it.r.value)}`)}" data-tip="${esc(`${modelName(it.e)} · ${harness(it.e)} | ${tname(view)}: ${fix(it.v)} (${(TASK[view] || {}).short || "raw"} ${pct(it.r.value)})`)}"><i class="gl ${shape}"></i></span>`)
-      + `</div><span class="v${it.nc ? " dim" : ""}" aria-hidden="true">${it.nc ? "0" : fix(it.v)}</span>${it.nc ? `<span class="sr">No commit, score 0.</span>` : ""}</div>`).join("") + `</div>`;
-  const first = $("#cc .mh"); if (first) first.tabIndex = 0;
-}
 function board() {
   const view = state.view, cols = colsFor(view), rows = rowsFor(view);
   const s = state.sort[view] || (state.sort[view] = { key: view === "all" ? "mean" : "norm", dir: -1 });
@@ -832,9 +873,9 @@ function board() {
   const nRuns = D.runs.filter((r) => !r.pilot).length, nFail = D.runs.filter((r) => !r.pilot && failed(r)).length;
   const t = D.tasks[view], norun = ENTRIES.filter((e) => !TASK_IDS.some((tid) => cellRun(e.id, tid))), norunT = view === "all" ? [] : ENTRIES.filter((e) => !cellRun(e.id, view));
   $("#board-notes").innerHTML = (empty ? [`No runs on ${esc(tname(view))} yet.`] : [
-    `† The edit lowered a general-ability check (MMLU, GSM8K with thinking off, or held-out facts) by more than 3 points; damage is given in points lost. The score stands.`,
-    `“No commit” means the session ended without an adapter; it scores 0 (${nFail} of ${nRuns} runs so far).`,
-    view === "all" ? `A mean appears once all ${TASK_IDS.length} tasks of a row are in. Every cell is a single attempt, so a few points either way is noise.${norun.length ? ` Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
+    `† The edit lowered a general-ability check by more than 3 points. The score stands.`,
+    `“No commit”: the session ended without an adapter and scores 0 (${nFail} of ${nRuns} runs).`,
+    view === "all" ? `Every cell is a single attempt, so a few points either way is noise.${norun.length ? ` Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
       : `${norunT.length ? `Not yet run: ${norunT.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}. ` : ""}0 is the unedited model at ${pct(t.base)}; 100 is ${esc(bestRefName(t).toLowerCase())} at ${pct(bestRef(t))}${t.higher_is_better ? "" : " (lower is better)"}.`,
   ]).map((x) => `<p>${x}</p>`).join("");
   $("#board-notes").innerHTML = `<div class="np">${$("#board-notes").innerHTML}</div>` + (empty ? "" : `<details class="more"><summary>Column definitions</summary><dl class="defs">${cols.filter((c) => c.sub && !c.sub.startsWith(c.label)).map((c) => `<dt>${esc(c.label)}</dt><dd>${esc(c.sub)}</dd>`).join("")}</dl></details>`);
@@ -846,62 +887,71 @@ $("#board").addEventListener("click", (e) => {
   if (o) { selectRun(o.dataset.run); $("#runs").scrollIntoView(); $("#detail h3").focus({ preventScroll: true }); }
 });
 
-/* score against cost: one point per run on one task, coloured by maker, labelled by model */
+/* score against cost: one point per editor model in the harness the switch selects, labelled at the point. On one task it is that run’s
+   score and cost; on All tasks it is the mean score against the cost of the three runs together, for models with every task in. */
 const XAX = {
   tok: { tab: "Editor tokens", short: "Editor input tokens, millions", title: "Editor input tokens, millions (cached input included)", fmt: (v) => v ? v + "M" : "0", get: tokIn },
   edit_hours: { tab: "Editing time", short: "Editor wall clock, hours", title: "Editor wall clock, hours", fmt: (v) => v ? v + " h" : "0", get: (r) => r.edit_hours },
   gpu_hours: { tab: "GPU-hours", short: "GPU-hours per run", title: "GPU-hours per run, session and scoring", fmt: (v) => String(v), get: (r) => r.gpu_hours },
 };
 let HITS = []; const HIT = matchMedia("(pointer: coarse)").matches ? 22 : 14;  /* a 44px target for touch */
-function chart() {
-  const tid = state.ctask, t = D.tasks[tid], ax = XAX[state.x], W = Math.max(240, Math.round($("#plot").clientWidth)), fs = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16, narrow = W < 640 * fs, H = Math.round((narrow ? 320 : 380) * Math.max(1, fs * 0.9)), L = Math.round((narrow ? 34 : 62) * fs), R = narrow ? 8 : 20, T = Math.round(18 * fs), B = Math.round(56 * fs);
+function chart(move) {
+  const all = state.view === "all", tid = state.ctask, t = D.tasks[tid], ax = XAX[state.x], W = Math.max(240, Math.round($("#plot").clientWidth)), fs = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16, narrow = W < 640 * fs, H = Math.round((narrow ? 320 : 380) * Math.max(1, fs * 0.9)), L = Math.round((narrow ? 34 : 62) * fs), R = narrow ? 8 : 20, T = Math.round(18 * fs), B = Math.round(56 * fs);
   $("#chart").setAttribute("viewBox", `0 0 ${W} ${H}`); chart.w = W;
-  const runs = D.runs.filter((r) => r.task === tid && r.scored && (state.pilots || !r.pilot));
-  const pts = runs.map((r) => ({ r, x: ax.get(r) })).filter((p) => p.x != null && p.x > 0);
-  $("#chart-title").textContent = `Score against cost, ${tname(tid)}`;
+  const was = move && !QUIET.matches ? new Map(HITS.map((h) => [modelName(h.r), h])) : null;
+  const pts = MODELS.map((m) => { const e = entryFor(m, state.h); if (!e) return null;
+    const lb = (rs) => state.x === "tok" && rs.some((r) => r.tokens && r.tokens.lower_bound);  /* some providers report only part of their token use */
+    if (!all) { const r = cellRun(e.id, tid); return r && r.scored ? { r, x: ax.get(r), y: r.normalized, lb: lb([r]) } : null; }
+    const rs = TASK_IDS.map((id) => cellRun(e.id, id)); if (!rs.every((r) => r && (r.scored || failed(r)))) return null;
+    const xs = rs.map(ax.get), sc = rs.filter((r) => r.scored); if (xs.some((v) => v == null) || !sc.length) return null;  /* a total needs every run’s cost */
+    return { r: sc.reduce((a, b) => (b.normalized > a.normalized ? b : a)), lb: lb(rs), x: xs.reduce((a, b) => a + b, 0), y: rs.reduce((a, r) => a + (r.scored ? r.normalized : 0), 0) / rs.length }; })
+    .filter((p) => p && p.x != null && p.x > 0);
+  $("#chart-title").textContent = all ? "Mean score against total cost" : `Score against cost, ${tname(tid)}`;
   const raw = Math.max(...pts.map((p) => p.x), 0.01) * 1.04, step = [0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10].find((s) => raw / s <= (narrow ? 5 : 8)) || 20, mx = Math.ceil(raw / step) * step;
   const ticks = []; for (let v = 0; v <= mx + 1e-9; v += step) ticks.push(+v.toFixed(2));
   const X = (v) => L + v / mx * (W - L - R);
-  const ys = pts.map((p) => p.r.normalized), y0 = Math.min(0, ...ys.map((v) => v - 8)), y1 = Math.max(108, ...ys.map((v) => v + 8));
+  const ys = pts.map((p) => p.y), y0 = Math.min(0, ...ys.map((v) => v - 8)), y1 = Math.max(108, ...ys.map((v) => v + 8));
   const Y = (v) => T + (y1 - v) / (y1 - y0) * (H - T - B);
   let s = "";
   for (const v of [0, 25, 50, 75, 100]) s += `<line class="${v === 0 || v === 100 ? "refline" : "grid"}" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 10}" y="${Y(v) + 4.5 * fs}" text-anchor="end">${v}</text>`;
   for (const v of ticks) s += `${v ? `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${Y(100)}" y2="${Y(0)}"/>` : ""}<text x="${X(v)}" y="${H - B + 22 * fs}" text-anchor="middle">${v}</text>`;
-  s += `<text class="t" x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">${narrow ? ax.short : ax.title}</text>`;
-  if (!narrow) s += `<text class="t" transform="translate(${14 * fs} ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">Normalized score</text>`;
-  s += `<text x="${W - R}" y="${Y(100) - 7 * fs}" text-anchor="end">${esc(bestRefName(t))}, ${pct(bestRef(t))}</text><text x="${W - R}" y="${Y(0) - 7 * fs}" text-anchor="end">Unedited model, ${pct(t.base)}</text>`;
+  s += `<text class="t" x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">${narrow ? ax.short : ax.title}${all ? `, ${TASK_IDS.length} tasks together` : ""}</text>`;
+  if (!narrow) s += `<text class="t" transform="translate(${14 * fs} ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">${all ? "Mean normalized score" : "Normalized score"}</text>`;
+  s += `<text x="${W - R}" y="${Y(100) - 7 * fs}" text-anchor="end">${all ? "Best reference on every task" : `${esc(bestRefName(t))}, ${pct(bestRef(t))}`}</text><text x="${W - R}" y="${Y(0) - 7 * fs}" text-anchor="end">Unedited model${all ? "" : `, ${pct(t.base)}`}</text>`;
   HITS = [];
-  const P = pts.sort((a, b) => b.r.normalized - a.r.normalized).map((p) => ({ ...p, cx: X(p.x), cy: Y(p.r.normalized) }));
-  const byModel = new Map(); P.forEach((p) => { if (!p.r.pilot) byModel.set(modelName(p.r), [...(byModel.get(modelName(p.r)) || []), p]); });
-  byModel.forEach((g) => { if (g.length !== 2) return; const dx = g[1].cx - g[0].cx, dy = g[1].cy - g[0].cy, len = Math.hypot(dx, dy); if (len < 22) return;  /* stop short of each mark */
-    s += `<line class="pair" x1="${g[0].cx + dx / len * 9}" y1="${g[0].cy + dy / len * 9}" x2="${g[1].cx - dx / len * 9}" y2="${g[1].cy - dy / len * 9}"/>`; });
+  const P = pts.sort((a, b) => b.y - a.y).map((p) => ({ ...p, cx: X(p.x), cy: Y(p.y) }));
   const placed = P.map((p) => ({ x0: p.cx - 12, x1: p.cx + 12, y0: p.cy - 12, y1: p.cy + 12 })), gap = 12, lh = 16 * fs;
   const hit = (b) => b.x0 < L || b.x1 > W - 2 || b.y0 < 2 || b.y1 > H - B + 4 || placed.some((q) => b.x0 < q.x1 && b.x1 > q.x0 && b.y0 < q.y1 && b.y1 > q.y0);
-  P.forEach(({ r, x, cx, cy }) => {
-    const text = modelName(r) + (r.pilot ? " (pilot)" : ownHarness(r) ? ` · ${harness(r)}` : ""), w = (text.length * 7.6 + 6) * fs;
+  P.forEach(({ r, x, y, lb, cx, cy }) => { const cost = (lb ? "for at least " : "for ") + ax.fmt(+x.toFixed(2));
+    const text = modelName(r), w = (text.length * 7.6 + 6) * fs;
     const at = (left, dy) => ({ left, dy, x0: left ? cx - gap - w : cx + gap + 1, x1: left ? cx - gap - 1 : cx + gap + w, y0: cy + dy - 9 * fs, y1: cy + dy + 7 * fs });
     const tries = [0, -1, 1, -2, 2, -3, 3].flatMap((k) => [at(false, k * lh), at(true, k * lh)]), b = tries.find((c) => !hit(c)) || tries[0];
     placed.push(b);
     const tx = b.left ? cx - gap : cx + gap, ty = cy + b.dy + 4.5 * fs;
+    s += `<g class="p" data-m="${esc(modelName(r))}">`;
     if (b.dy) s += `<line class="ldr" x1="${cx + (b.left ? -5 : 5)}" y1="${cy + Math.sign(b.dy) * 5}" x2="${tx + (b.left ? 3 : -3)}" y2="${cy + b.dy}"/>`;
-    const rr = ownHarness(r) ? 5.5 : 6.5, shp = TASK_IDS.indexOf(tid) % 3, pc = `class="pt${ownHarness(r) ? " own" : ""}" style="--c:${colorOf(r)}"`;
+    const rr = 6.5, shp = all ? 0 : TASK_IDS.indexOf(tid) % 3, pc = `class="pt" style="--c:${all ? "var(--ink-2)" : colorOf(r)}"`;
     s += (shp === 0 ? `<circle ${pc} cx="${cx}" cy="${cy}" r="${rr}"/>` : `<rect ${pc} x="${cx - rr * 0.9}" y="${cy - rr * 0.9}" width="${rr * 1.8}" height="${rr * 1.8}"${shp === 1 ? ` transform="rotate(45 ${cx} ${cy})"` : ` rx="1"`}/>`)
-      + `<text class="lab" x="${tx}" y="${ty}" text-anchor="${b.left ? "end" : "start"}">${esc(modelName(r))}${text.length > modelName(r).length ? `<tspan class="sub">${esc(text.slice(modelName(r).length))}</tspan>` : ""}</text>`
-      + `<circle class="hit" data-i="${HITS.length}" cx="${cx}" cy="${cy}" r="${HIT}" tabindex="0" role="button" aria-label="${esc(`${modelName(r)}, ${harness(r)}: score ${fix(r.normalized)} at ${ax.fmt(+x.toFixed(2))}. Open this run`)}"/>`;
-    HITS.push({ r, x, cx, cy });
+      + `<text class="lab" x="${tx}" y="${ty}" text-anchor="${b.left ? "end" : "start"}">${esc(text)}</text>`
+      + `<circle class="hit" data-i="${HITS.length}" cx="${cx}" cy="${cy}" r="${HIT}" tabindex="0" role="button" aria-label="${esc(all ? `${modelName(r)}, ${harness(r)}: mean score ${fix(y)} ${cost} in total. Open its best run` : `${modelName(r)}, ${harness(r)}: score ${fix(y)} ${cost}. Open this run`)}"/></g>`;
+    HITS.push({ r, x, y, all, lb, cx, cy });
   });
-  if (!pts.length) s += `<text class="t" x="${(L + W - R) / 2}" y="${(T + H - B) / 2}" text-anchor="middle">No scored run on ${esc(tname(tid))} reports this yet.</text>`;
+  if (!pts.length) s += `<text class="t" x="${(L + W - R) / 2}" y="${(T + H - B) / 2}" text-anchor="middle">${all ? "No model has every task scored in this harness yet." : `No scored run on ${esc(tname(tid))} reports this yet.`}</text>`;
   $("#chart").innerHTML = s;
-  $("#chart").setAttribute("aria-label", `Normalized score against ${ax.tab.toLowerCase()} on ${tname(tid)}, ${pts.length} runs`);
-  $("#legend").innerHTML = `<span><i class="gl ${SHAPES[TASK_IDS.indexOf(tid) % 3]}" style="--c:${colorOf({ task: tid })}"></i>Agency native harness</span><span><i class="gl hollow ${SHAPES[TASK_IDS.indexOf(tid) % 3]}" style="--c:${colorOf({ task: tid })}"></i>The model maker’s own harness</span><span class="note">A line joins one model’s two harnesses. Select a point to read that run.</span>`;
+  if (was && $("#chart").animate) $("#chart").querySelectorAll("g.p").forEach((g) => { const a = was.get(g.dataset.m), b = HITS.find((h) => modelName(h.r) === g.dataset.m);
+    if (!a) g.animate({ opacity: [0, 1] }, { duration: 200, delay: 120, easing: "ease-out", fill: "backwards" });
+    else if (Math.abs(a.cx - b.cx) + Math.abs(a.cy - b.cy) > 1) g.animate({ translate: [`${a.cx - b.cx}px ${a.cy - b.cy}px`, "0 0"] }, { duration: 320, easing: EASE }); });
+  $("#chart").setAttribute("aria-label", `${all ? "Mean normalized score against total" : "Normalized score against"} ${ax.tab.toLowerCase()}${all ? "" : ` on ${tname(tid)}`}, ${pts.length} models in ${HNAME[state.h]}`);
+  $("#legend").innerHTML = `<span class="note">Select a point to open its run.</span>`;
 }
 let tipFor = -1;
 function showTip(h) {
   const tip = $("#tip"), i = h ? +h.dataset.i : -1;
   if (i === tipFor) return; tipFor = i;
   if (i < 0) { tip.hidden = true; return; }
-  const { r, x, cx, cy } = HITS[i], ax = XAX[state.x];
-  tip.innerHTML = `<b>${esc(modelName(r))}, ${esc(harness(r))}</b>Score ${fix(r.normalized)} (${pct(r.value)})<br>${esc(ax.tab)} ${ax.fmt(+x.toFixed(2))}${dmgText(r) ? "<br>Damage: " + esc(dmgText(r)) : ""}`;
+  const { r, x, y, all, lb, cx, cy } = HITS[i], ax = XAX[state.x], cost = (lb ? "≥ " : "") + ax.fmt(+x.toFixed(2));
+  tip.innerHTML = all ? `<b>${esc(modelName(r))}, ${esc(harness(r))}</b>Mean score ${fix(y)}<br>${esc(ax.tab)}, ${TASK_IDS.length} tasks together: ${cost}`
+    : `<b>${esc(modelName(r))}, ${esc(harness(r))}</b>Score ${fix(y)} (${pct(r.value)})<br>${esc(ax.tab)} ${cost}${dmgText(r) ? "<br>Damage: " + esc(dmgText(r)) : ""}`;
   tip.hidden = false;
   const tw = tip.offsetWidth, th = tip.offsetHeight;
   tip.style.left = Math.max(0, Math.min($("#plot").clientWidth - tw, cx - tw / 2)) + "px"; tip.style.top = (cy - th - 12 < 0 ? cy + 14 : cy - th - 12) + "px";  /* above the point, clear of its label */
@@ -928,13 +978,15 @@ addEventListener("scroll", () => { if (tipEl) tipShow(tipEl); }, { passive: true
 $("#chart").addEventListener("focusin", (e) => showTip(e.target.closest(".hit")));
 $("#chart").addEventListener("focusout", () => showTip(null));
 
-function render() { tipFor = -1; $("#tip").hidden = true; columns(); board(); chart(); }
-const syncView = tabs("#f-view", [["all", "All tasks"], ...TASK_IDS.map((id) => [id, tname(id), GLY(id)])], "view", () => { if (state.view !== "all") state.ctask = state.view; render(); });
-tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", () => { tipFor = -1; $("#tip").hidden = true; chart(); });
+function render(move) { tipFor = -1; $("#tip").hidden = true; tipHide(); bars(); board(); chart(move); }
+const syncView = tabs("#f-view", [["all", "All tasks"], ...TASK_IDS.map((id) => [id, tname(id), GLY(id)])], "view", () => { if (state.view !== "all") state.ctask = state.view; render(true); });
+const HOPTS = [["native", "Shared harness"], ["own", "Maker’s own harness"]], syncH = [tabs("#f-h", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); }), tabs("#f-h2", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); })];
+tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", () => { tipFor = -1; $("#tip").hidden = true; chart(true); });
 function setTask(id) { state.view = id; state.ctask = id; syncView(); render(); }
 $("#s-pilots").addEventListener("change", (e) => { state.pilots = e.target.checked; render(); });
 if (!D.runs.some((r) => r.task === state.ctask && r.scored)) state.ctask = (D.runs.find((r) => r.scored) || {}).task || TASK_IDS[0];
 render();
+if (SEEN) { SEEN.observe($("#cc")); SEEN.observe($("#chart")); }
 new ResizeObserver(() => { if (Math.max(240, Math.round($("#plot").clientWidth)) !== chart.w) chart(); }).observe($("#plot"));
 
 /* tasks: the request in the box the editor reads it from, then the numbers */
@@ -997,7 +1049,7 @@ function selectRun(id) {
       ${r.edit_map ? `<div class="minis${r.edit_map.length > 3 ? " many" : ""}">${r.edit_map.map((e, i) => `<figure class="mini" style="--r:${Math.max(1, Math.min(4, e.shape[1] / e.shape[0])).toFixed(2)}"><div class="emblem sm" aria-hidden="true">
           <i class="a"><canvas class="tex" data-run="${esc(r.id)}" data-i="${i}" data-k="a" data-c="2"></canvas></i><i class="b"><canvas class="tex" data-run="${esc(r.id)}" data-i="${i}" data-k="b" data-c="2"></canvas></i><div class="w"><canvas class="tex" data-run="${esc(r.id)}" data-i="${i}" data-k="w" data-c="2"></canvas></div></div>
           <figcaption>${esc(kindOf(e.m))}<span class="more">, rank ${e.rank}</span><br><span class="more">${e.shape[0].toLocaleString("en-US")} × ${e.shape[1].toLocaleString("en-US")}, </span>${(ad.rel_norms || {})[e.m] != null ? `${pct(ad.rel_norms[e.m])} of ‖W‖` : `rank ${e.rank}`}</figcaption></figure>`).join("")}</div>
-        <p class="lmap-key">Each edited matrix to scale: B at the left, A across the top; orange cells are raised, blue cells lowered, on average.</p>` : ""}</div>` : ""}
+        <p class="lmap-key">B at the left, A across the top. Orange cells are raised, blue lowered.</p>` : ""}</div>` : ""}
     <dl class="kv">${kv("Normalized", r.normalized == null ? "–" : fix(r.normalized))}
       ${r.cut_share == null ? "" : kv("Cut off at limit", pct(r.cut_share, 0))}${kv("Edit time", fix(r.edit_hours, 2) + " h", r.turns_n + " turns")}
       ${kv("Editor tokens", tk.input ? (tk.lower_bound ? "≥ " : "") + (tk.input / 1e6).toFixed(2) + "M" : "–", tk.input ? "input" + (tk.output ? ", " + (tk.output / 1e3).toFixed(0) + "K output" : "") : (tk.note || ""))}
@@ -1059,7 +1111,7 @@ selectRun(FIRST.id);
       `Their editor compared edited and original models over 50 passes, which is closer to our Track B. It took ${(math && math.reference_cost || {}).wall_hours ?? "about 20"} hours; a session here is capped at ${L.wall_hours}.`]]],
     ["What is Agency, and what is its native harness?", [`[Agency](https://github.com/agency-project/Agency) is an interposition layer for agent stacks: a transparent shim that sits between an agent harness, the model provider and the sandbox. It monitors every LLM call and tool call, and can modify them, without changing the harness itself. Every run here goes through it, which is how each editor gets the same sandbox and budget and how usage is recorded in one format. It runs off-the-shelf harnesses unmodified (Codex, Claude Code, Kimi CLI, OpenCode) as well as its own native harness.`,
       `The native harness is deliberately minimal: a ReAct loop, in which the model reasons, calls a tool, reads the result and repeats, with a bash tool. It shows what the model does with the least help and without the [harness tax](https://arena.ai/blog/coding-agents-harness-tax).`]],
-    ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent (Codex, Claude Code, Kimi CLI) than in Agency’s native loop, and on sycophancy it did. DeepSeek has no supported first-party harness yet, so it runs in OpenCode. Neither does Gemini (Agency has no Gemini CLI or Antigravity adapter yet), so it also runs in OpenCode.`]],
+    ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent (Codex, Claude Code, Kimi CLI) than in Agency’s native loop, and on sycophancy it did. DeepSeek runs in its own DeepSeek Harness and in OpenCode. Agency has no adapter for Gemini’s CLI yet, so Gemini’s second harness is OpenCode.`]],
     ["What counts as damage?", [`After scoring, the edited model also takes three general-ability checks: 300 MMLU questions, 200 GSM8K problems with thinking off, and a set of held-out facts. An edit is flagged when any of them drops by more than 3 points from the unedited model. Flags are shown next to the score and do not change it.`]],
     ["How final are these numbers?", [["Every cell is one attempt. Expect a few points of noise, more on math, where one sample per problem is scored.",
       "Editor input tokens include cached input. Most of every long session is cache reads, which providers bill at a fraction of the normal rate, so token counts overstate cost differences between providers. DeepSeek and Kimi CLI counts marked ≥ miss a few calls that returned no usage.",
