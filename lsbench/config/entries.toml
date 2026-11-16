@@ -118,6 +118,7 @@ model = "google/gemini-4-carbon"
 provider = "openai"
 base_url = "http://127.0.0.1:8791/v1/projects/balmy-mark-514604-i9/locations/global/endpoints/openapi"
 vertex_proxy = true
+vertex_priority = true
 harness = "native"
 effort = "high"
 

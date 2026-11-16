@@ -1,6 +1,6 @@
 # LoRA-Space Bench
 
-**A benchmark for editing models by writing their weights.**
+**A benchmark for LoRAs written by hand.**
 
 [Results](https://loraspace.org) · [Rules](#how-a-run-works) · [Run it](#running-it) · [Contributing](CONTRIBUTING.md) · [Citation](#citation) · [MIT license](LICENSE)
 
@@ -29,8 +29,8 @@ grid of editors and harnesses.
 ### Entries
 
 An entry is an editor model paired with the harness it works in. Each model runs twice: once in Agency's native
-harness (a minimal ReAct loop with a bash tool) and once in its maker's own agent, such as Claude Code, Codex,
-OpenCode or Kimi CLI. [Agency](https://github.com/agency-project/Agency), developed by UC Berkeley's Sky Computing Lab
+harness (a minimal ReAct loop with a bash tool) and once in its maker's own agent, such as Claude Code, Codex
+or Kimi CLI. [Agency](https://github.com/agency-project/Agency), developed by UC Berkeley's Sky Computing Lab
 ([blog post](https://www.linkedin.com/pulse/introducing-agency-alvin-cheung-hd8xc)), sits between the harness, the model provider and the sandbox, which is
 how every entry gets the same tools and budget and how usage is recorded in one format.
 
@@ -165,8 +165,7 @@ reads only `results/lsbench/` and the config files.
 ## Status
 
 - **Rules version:** `lsbench-v0.3`.
-- **Grid:** Track A, one attempt per cell, seven editor models across three tasks. Some cells are still being re-run after
-  provider outages; the site shows which.
+- **Grid:** Track A, one attempt per cell, seven editor models across three tasks. Every cell has a scored run.
 - **Not done yet:** repeated attempts, Track B, larger targets (Qwen3.5-2B is defined but has no tasks), and
   gradient-LoRA references for the math and coding tasks.
 
@@ -191,7 +190,7 @@ To report a result that looks wrong, or to propose an editor, harness or task, s
 
 ```bibtex
 @misc{afifi2026lorabench,
-  title  = {LoRA-Space Bench: A Benchmark for Editing Models by Writing Their Weights},
+  title  = {LoRA-Space Bench: A Benchmark for LoRAs Written by Hand},
   author = {Afifi, Yusuf},
   year   = {2026},
   url    = {https://loraspace.org}

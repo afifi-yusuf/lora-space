@@ -12,6 +12,7 @@ from pathlib import Path
 
 from . import prompt
 from .target import TargetService
+from .recover_usage import verify_missing
 from .usage import profiler_usage
 
 CONTAINER_WORK, CONTAINER_MODEL = "/workspace/work", "/workspace/model"
@@ -212,6 +213,10 @@ def run(task: dict, entry: dict, limits: dict, track: str, rdir: Path) -> dict:
     except Exception as e:  # noqa: BLE001
         prof = f"unavailable: {e}"
     (rdir / "profile_summary.txt").write_text(str(prof))
+    try:  # make token totals exact where the only calls without usage were provider rejections
+        verify_missing(rdir, str(db))
+    except Exception:  # noqa: BLE001
+        pass
     stats = svc.adapter_stats()
     svc.close()
     queue_s = round(_queue_excess_s(rdir), 1)

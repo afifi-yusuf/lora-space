@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "LoRA-Space Bench: a benchmark for editing models by writing their weights"
+title: "LoRA-Space Bench: a benchmark for LoRAs written by hand"
 message: "If you use this benchmark or its run records, please cite it as below."
 type: software
 authors:

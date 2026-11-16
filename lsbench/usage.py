@@ -8,7 +8,7 @@ from pathlib import Path
 def profiler_usage(rdir: Path, provider: str = "") -> dict:
     """`input` is total prompt tokens. Anthropic reports prompt-cache reads and writes on top of input_tokens, so they
     are added back; OpenAI-style input_tokens already include cached tokens. When some calls carried no usage, the
-    profiler leaves the totals empty: fall back to the reported partial sums and flag them as lower bounds."""
+    profiler leaves the totals empty: fall back to the reported partial sums and flag them as lower bounds, unless every call without usage is verified as rejected before any output."""
     try:
         m = json.loads((Path(rdir) / "profile/summary.json").read_text())["llm_metrics"]
     except Exception as e:  # noqa: BLE001
@@ -28,6 +28,13 @@ def profiler_usage(rdir: Path, provider: str = "") -> dict:
                 inp = None
         else:
             inp = inp + cr + (cw or 0)
+    rejected = 0
+    ver = Path(rdir) / "profile/usage_verified.json"
+    if missing and ver.exists():  # calls the provider rejected before any output used no tokens (lsbench.recover_usage)
+        v = json.loads(ver.read_text())
+        if v.get("complete") and v.get("missing_usage_calls") == missing:
+            rejected, missing = v["rejected_before_output"], 0
     return {"input": inp, "output": out, "cache_read": cr, "cache_write": cw, "calls": m.get("calls"),
-            "failed_calls": m.get("failed_calls"), "usage_missing_calls": missing, "lower_bound": bool(missing),
+            "failed_calls": m.get("failed_calls"), "rejected_calls": rejected, "usage_missing_calls": missing,
+            "lower_bound": bool(missing),
             "llm_wait_s": round((m.get("total_wait_ms") or 0) / 1000, 1)}

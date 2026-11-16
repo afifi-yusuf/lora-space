@@ -1,26 +1,33 @@
 {
- "status": "timeout",
- "wall_s": 14434,
- "provider_queue_excluded_s": 3571.3,
+ "status": "committed",
+ "wall_s": 15425,
+ "provider_queue_excluded_s": 18971.6,
  "llm_tokens": {
-  "input": 22428750,
-  "output": 185146,
+  "input": 30500823,
+  "output": 334878,
   "cache_read": 0,
   "cache_write": 0,
-  "calls": 145,
+  "calls": 189,
   "failed_calls": 0,
-  "usage_missing_calls": 1,
-  "lower_bound": true,
-  "llm_wait_s": 12036.9
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 11524.9
  },
  "tool_counts": {
-  "generate": 11,
-  "analysis": 19,
+  "generate": 25,
+  "analysis": 23,
   "candidates": 0
  },
- "explanation": "",
- "final_message": "",
- "adapter": {},
- "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_17-23-48_rcf07d487/logs/agent_lsb-native_0000_data.sqlite3",
- "session_s": 14523
+ "explanation": "Rank-5 training-free closed-form LoRA adapter on model.layers.23.mlp.down_proj (||dW||_2 = 0.742x ||W||_2, ||dW||_F = 0.081x ||W||_F) constructed via dual-whitened linear algebra (uncentered second-moment nullspace read vectors paired with vocabulary-covariance-whitened write vectors). Fixes Qwen3.5-0.8B's four thinking-mode failure modes: (1) routes math <think>\\n openings away from 4-space nested bullet outlines ('Here'/'Thinking') to column-0 algebraic step-by-step openings ('Let'/'The'); (2) routes non-math <think>\\n openings away from infinite-looping 'Thinking Process:' outlines to concise 'The' openings; (3) routes completed <think> conclusion sentence punctuation ('.', '$.', '$$') to single '\\n' rather than '\\n\\n' (31/31 LOPO, 11/11 held-out); (4) boosts '</think>' and damps compulsive doubt restarts ('Wait', 'Alternatively', indentation) at column-0 single '\\n' of completed <think> derivations with 0% premature exits on intermediate calculation steps (0/24 LOPO, 0/9 held-out); and (5) damps post-</think> '\\n\\n' re-verification restart loops ('Alternatively', 'Wait', 'Let') while reinforcing '\\boxed{}' closure ('\\\\', 'Therefore', 'Thus') on completed visible math writeups, with 100% top-1 preservation on thinking=False and non-math outputs.",
+ "final_message": "## Diagnosis of Frozen Qwen3.5-0.8B on Competition Math (`thinking=True`)\n\nAcross stratified competition math benchmarks (`GSM8K` + `MATH` Levels 1\u20135, appended with `\"Please reason step by step, and put your final answer within \\boxed{}.\"`), the unedited Qwen3.5-0.8B model suffers a catastrophic **thinking-mode non-termination failure**, despite already possessing strong underlying mathematical ability:\n\n1. **Behavior gap (`thinking=True` vs `thinking=False`)**:\n   - On dev `batch1` (32 problems), `thinking=True` (`max_tokens=8192`) achieves only **1/32 (3.1%)** final `\\boxed{}` accuracy (`31/32` never emit `</think>`), whereas `thinking=False` on the exact same 32 problems achieves **18/32 (56.2%)**.\n   - On `batch2` (32 problems), `thinking=True` achieves **5/32 (15.6%)** (`27/32` never emit `</think>`).\n   - On strictly held-out `heldout24` (`examples.jsonl[350:500]`), unedited `thinking=True` (`max_tokens=8192`) achieves **0/24 (0.0%)** (`0/24` emit `</think>`).\n   - Even on 16 general non-math prompts (`gen/2.json`), `thinking=True` loops past 8,192 tokens without `</think>` on **8/16 (50%)** when it opens with `\"Thinking Process:\\n\\n1. **Understand...**\"` or `\"Here's a thinking process...\"`.\n\n2. **Four interacting mechanistic failure modes uncovered via `inspect`, `trace`, `logit_lens`, and `generate` prefix interventions**:\n   - **Failure Mode 1 \u2014 `<think>\\n` 4-Space Nested Bullet Outline Trap**: At `<think>\\n`, the unedited model overwhelmingly starts math replies with `'Here'` (`p = 0.55\u20130.98`, `\"Here's a thinking process to solve the problem:\\n\\n1. **Understand the Problem:**\\n    * ...\"`), locking subsequent lines into 4- and 8-space markdown bullet indentation (`'   '`, `'       '`). In Qwen3.5-0.8B, `</think>` is only naturally emitted at column-0 single newlines (`'\\n'`), so indented bullet lines strongly predict indentation continuation (`logit('   ') \u2248 25` vs `logit('</think>') \u2248 12`). Routing `<think>\\n` to an unindented step-by-step opening (`'Let'",
+ "adapter": {
+  "modules": 1,
+  "params": 23040,
+  "max_rank": 5,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0813
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_14-39-03_rf910d6eb/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 15513
 }

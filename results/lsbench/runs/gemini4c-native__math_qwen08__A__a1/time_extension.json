@@ -1,0 +1,17 @@
+{
+ "original_cutoff_utc": "2026-11-16T17:50:06Z",
+ "excused_queue_s_at_extension": 662.8,
+ "extension_s": 18000.0,
+ "extended_at_utc": "2026-11-16T17:20:32Z",
+ "why": "user decision: let the session continue past its 3 h limit; a commit after original_cutoff_utc is to be judged separately",
+ "extensions": [
+  {
+   "at_utc": "2026-11-16T17:20:32Z",
+   "s": 7200.0
+  },
+  {
+   "at_utc": "2026-11-16T18:23:54Z",
+   "s": 10800
+  }
+ ]
+}

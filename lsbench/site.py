@@ -4,6 +4,7 @@ Reads results/lsbench/{runs,pilots}/*/ (result.json, session.json, calls.jsonl, 
 from __future__ import annotations
 
 import ast
+import calendar
 import json
 import re
 import struct
@@ -19,6 +20,8 @@ from .usage import profiler_usage
 
 OUT = spec.ROOT / "site"
 SRC = [spec.ROOT / "results/lsbench/runs", spec.ROOT / "results/lsbench/pilots"]
+# Harnesses whose entries are kept on disk but left off the published page.
+UNLISTED = {"opencode"}
 
 
 def _jsonl(p: Path) -> list[dict]:
@@ -64,6 +67,17 @@ def _run(d: Path, pilot: bool) -> dict | None:
         if tokens.get("input") is None and e.get("provider") == "anthropic":
             tokens["note"] = "input not recorded"
     dmg = score.get("damage") or {}
+    late_min = None
+    vq = [q for q in _jsonl(d / "vertex_queue.jsonl") if q.get("path") != "manual_extension"]
+    queue_min = round(sum(q.get("excess_s", 0) for q in vq) / 60) or None  # provider queue time excluded from the limit
+    ext = d / "time_extension.json"
+    commit = next((t for t in tools if t["tool"] == "commit_adapter"), None)
+    if ext.exists() and commit:  # the session ran past its limit by the user's decision; how late did the commit land?
+        x = json.loads(ext.read_text())
+        queue = sum(q.get("excess_s", 0) for q in _jsonl(d / "vertex_queue.jsonl") if q.get("path") != "manual_extension")
+        limit = calendar.timegm(time.strptime(x["original_cutoff_utc"], "%Y-%m-%dT%H:%M:%SZ")) - x.get("excused_queue_s_at_extension", 0) + queue
+        late = calendar.timegm(time.strptime(commit["t"][:19], "%Y-%m-%dT%H:%M:%S")) - limit
+        late_min = round(late / 60) if late > 0 else None
     return {"id": d.name, "entry": entry_id, "label": e.get("label", entry_id), "model": e.get("model"),
             "harness": e.get("harness"), "task": task_id, "track": track, "attempt": int(att[1:]), "rules": rules,
             "pilot": pilot or entry_id == "astra-minimal", "status": (res or {}).get("status") or sess.get("status"),
@@ -76,7 +90,7 @@ def _run(d: Path, pilot: bool) -> dict | None:
             "gpu_hours": (res or {}).get("cost", {}).get("gpu_hours"),
             "tokens": tokens, "turns_n": sess.get("turns") or len(calls) or len(tools),
             "adapter": sess.get("adapter"), "edit_map": _edit_map(d), "explanation": _whole(sess.get("explanation") or ""),
-            "refusals": sess.get("provider_refusals", 0), "audit_clean": ((res or {}).get("audit") or {}).get("clean"),
+            "late_min": late_min, "queue_min": queue_min, "refusals": sess.get("provider_refusals", 0), "audit_clean": ((res or {}).get("audit") or {}).get("clean"),
             "tool_counts": dict(Counter(t["tool"] for t in tools)), "candidates": cands, "turns": turns}
 
 
@@ -194,7 +208,7 @@ def collect() -> dict:
     for i, root in enumerate(SRC):
         for d in sorted(root.glob("*")):
             r = _run(d, pilot=(i == 1))
-            if r:
+            if r and r["harness"] not in UNLISTED:
                 runs.append(r)
     tasks = {}
     for t in spec.all_tasks():
@@ -205,7 +219,8 @@ def collect() -> dict:
                     "higher_is_better": task["score"]["higher_is_better"], "references": task["score"].get("references", {}),
                     "reference_cost": task["score"].get("reference_cost", {})}
     entries, limits = spec.load_entries()
-    roster = [{k: e.get(k) for k in ("id", "label", "model", "harness", "effort", "provider")} for e in entries.values()]
+    roster = [{k: e.get(k) for k in ("id", "label", "model", "harness", "effort", "provider")} for e in entries.values()
+              if e.get("harness") not in UNLISTED]
     return {"entries": roster, "generated": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "rules": spec.RULES_VERSION,
             "limits": limits, "tasks": tasks, "runs": runs}
 

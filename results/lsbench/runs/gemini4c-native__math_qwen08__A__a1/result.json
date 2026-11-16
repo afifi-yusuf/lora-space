@@ -5,30 +5,73 @@
  "task": "math_qwen08",
  "track": "A",
  "attempt": 1,
- "settings_hash": "c12dad2205085cb7",
+ "settings_hash": "8e2c49f6d880ef4f",
  "rules": "lsbench-v0.3",
- "status": "timeout",
- "score": null,
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.445,
+  "normalized": 74.9,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.445,
+   "cut_share": 0.515,
+   "mean_tokens": 18362.87,
+   "problems": 200,
+   "samples": 1,
+   "ok": 89,
+   "total": 200,
+   "seconds": 4414
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 0.9938,
+    "gsm8k_off": 0.585
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0062,
+    "gsm8k_off": -0.01
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 4803
+ },
  "cost": {
-  "gpu_hours": 4.03,
-  "session_hours": 4.03,
+  "gpu_hours": 5.64,
+  "session_hours": 4.31,
   "llm_tokens": {
-   "input": 22428750,
-   "output": 185146,
+   "input": 30500823,
+   "output": 334878,
    "cache_read": 0,
    "cache_write": 0,
-   "calls": 145,
+   "calls": 189,
    "failed_calls": 0,
-   "usage_missing_calls": 1,
-   "lower_bound": true,
-   "llm_wait_s": 12036.9
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 11524.9
   }
  },
- "adapter": {},
- "explanation": "",
+ "adapter": {
+  "modules": 1,
+  "params": 23040,
+  "max_rank": 5,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0813
+  }
+ },
+ "explanation": "Rank-5 training-free closed-form LoRA adapter on model.layers.23.mlp.down_proj (||dW||_2 = 0.742x ||W||_2, ||dW||_F = 0.081x ||W||_F) constructed via dual-whitened linear algebra (uncentered second-moment nullspace read vectors paired with vocabulary-covariance-whitened write vectors). Fixes Qwen3.5-0.8B's four thinking-mode failure modes: (1) routes math <think>\\n openings away from 4-space nested bullet outlines ('Here'/'Thinking') to column-0 algebraic step-by-step openings ('Let'/'The'); (2) routes non-math <think>\\n openings away from infinite-looping 'Thinking Process:' outlines to concise 'The' openings; (3) routes completed <think> conclusion sentence punctuation ('.', '$.', '$$') to single '\\n' rather than '\\n\\n' (31/31 LOPO, 11/11 held-out); (4) boosts '</think>' and damps compulsive doubt restarts ('Wait', 'Alternatively', indentation) at column-0 single '\\n' of completed <think> derivations with 0% premature exits on intermediate calculation steps (0/24 LOPO, 0/9 held-out); and (5) damps post-</think> '\\n\\n' re-verification restart loops ('Alternatively', 'Wait', 'Let') while reinforcing '\\boxed{}' closure ('\\\\', 'Therefore', 'Thus') on completed visible math writeups, with 100% top-1 preservation on thinking=False and non-math outputs.",
  "audit": {
   "flags": {},
   "clean": true
  },
- "finished": "2026-11-13T21:25:52Z"
+ "finished": "2026-11-16T20:17:43Z"
 }

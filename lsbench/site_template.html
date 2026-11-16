@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>LoRA-Space Bench</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="A benchmark for editing models by writing their weights: an editor model writes a LoRA adapter for a frozen model, without gradients.">
+<meta name="description" content="A benchmark for writing LoRA adapters by hand: an editor model inspects a frozen model and writes the adapter as arrays of numbers, without gradients.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect y='6' width='4' height='14' rx='1' fill='%23c24a12'/%3E%3Crect x='6' width='14' height='4' rx='1' fill='%232a52d1'/%3E%3Crect x='6' y='6' width='14' height='14' rx='1.5' fill='%23161616'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
    - in the drawings of a real edit, and only there, orange is a weight the edit raises and blue one it lowers. The orange quotation
      marks on the request are the one decorative use;
    - the footer is set on ink (.dark). Inside that surface the ordinary tokens are re-pointed to light values, so the same components work there unchanged.
-   References are grey; amber marks a damage flag.
+   References are grey; amber marks a damage flag (†); a grey ‡ marks a commit after the time limit.
    The page is light only, like the sites it sits beside.
    Order: top bar, hero (title, then text beside the request, the result and the edit diagram), leaderboard, tasks, runs, rules, questions, footer. */
 :root {
@@ -106,16 +106,14 @@ figure { margin: 0; }
 .hero h1 { font-size: 3.5rem; line-height: 1.06; letter-spacing: -0.018em; }
 .hero-main { display: grid; gap: 24px; justify-items: start; min-width: 0; }
 .hero-copy { display: grid; gap: 16px; justify-items: start; min-width: 0; padding-top: 10px; }
-.updated { font-size: 0.875rem; color: var(--ink-3); }
 .hero-copy > p { font-size: 1.125rem; color: var(--ink-2); max-width: 54ch; }
 .links { display: flex; flex-wrap: wrap; gap: 10px; }
 .links a { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 18px; border-radius: 8px; background: var(--ink); color: var(--bg); font-weight: 500; font-size: 0.9375rem; text-decoration: none; }
 .links a svg { width: 1rem; height: 1rem; flex: none; }
 .links a:hover { background: var(--ink-2); }
-.links a.ghost { background: none; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ctl); }
+.links a.ghost { background: none; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ctl); max-width: 100%; padding-block: 8px; flex-wrap: wrap; row-gap: 0; }
 .links a.ghost:hover { background: var(--fill); }
 .links a:active { background: var(--ink-3); } .links a.ghost:active { background: var(--fill-2); } .icon-btn:active { background: var(--rule-2); }
-.hero-line { font-size: 0.9375rem; color: var(--ink-2); }
 .tabs button:active, .runbtn:active, .open:active, .sort:active, .linkbtn:active { color: var(--ink-3); }
 /* the logo, enlarged and labelled: B (tall) and A (wide) are what the editor writes, the block is the weight change they produce */
 .edit { grid-column: 1 / -1; display: grid; gap: 18px; min-width: 0; }
@@ -128,7 +126,7 @@ figure { margin: 0; }
 .emblem { --t: 1rem; display: grid; grid-template-columns: var(--t) minmax(0, 1fr); gap: 8px; font-size: 0.875rem; color: var(--ink-2); line-height: 1.3; }
 .emblem b { color: var(--ink); font-weight: 600; }
 .emblem .la { grid-column: 2; }
-.emblem .hv { grid-column: 2; position: relative; height: 5px; margin-bottom: -4px; } .emblem .hv i { position: absolute; top: 0; bottom: 0; background: var(--ink); }
+
 .emblem .a { grid-column: 2; height: var(--t); background: var(--mark-a); border-radius: 2px; outline: 1px solid var(--ctl); }
 .emblem .b { grid-column: 1; background: var(--mark-b); border-radius: 2px; outline: 1px solid var(--ctl); }
 .emblem .w { grid-column: 2; aspect-ratio: var(--r, 2.5) / 1; background: var(--fill); border-radius: 2px; min-width: 0; outline: 1px solid var(--ctl); outline-offset: 0; }
@@ -235,6 +233,7 @@ figure { margin: 0; }
 .tabs { display: flex; gap: 24px; flex-wrap: wrap; }
 .tabs button { display: inline-flex; align-items: center; gap: 8px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; padding: 10px 0; min-height: 44px; min-width: 44px; cursor: pointer; font-size: 0.9375rem; color: var(--ink-2); white-space: nowrap; }
 .tabs button:hover { color: var(--ink); }
+@media (max-width: 30em) { #f-view { gap: 4px 10px; } #f-view button { font-size: 0.875rem; gap: 6px; } }  /* the four task tabs on one row */
 .tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--active); }
 .checks { display: flex; flex-wrap: wrap; gap: 0 22px; }
 .checks label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 0.9375rem; color: var(--ink-2); cursor: pointer; }
@@ -292,6 +291,8 @@ tr:hover .open, .open:hover, .open:focus-visible { text-decoration: underline; t
 @media (hover: hover) { #board tbody tr:hover > * { background-color: color-mix(in srgb, var(--ink) 3%, var(--bg)); } }
 #board tr > :last-child { padding-right: 12px; }
 .flag { color: var(--warn); font-weight: 600; }
+.links .by { font-weight: 400; color: var(--ink-2); margin-right: 0.3em; }
+.flag.late { color: var(--ink-2); } .flag small { margin-left: 1px; font-size: 0.75rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 tr.refrow td, tr.refrow th { color: var(--ink-2); }
 #board tr.refrow > * { background: var(--fill); } .refrow .model { padding-left: calc(1.375rem + 10px); }
 tr.refrow .model { font-weight: 400; }
@@ -453,10 +454,63 @@ tr.refrow .model { font-weight: 400; }
 @media (max-width: 56.25em) { .explorer { grid-template-columns: minmax(0, 1fr); gap: 28px; } .runcol { position: static; max-height: none; } .runlist { overflow-y: visible; } }
 
 /* rules */
+/* the setup figure. The sandbox is the dashed outline; Agency is drawn as its boundary, the band on its right edge that every call
+   crosses; two labelled two-way arrows run from that band to what the editor reaches; the adapter leaves from the foot of the sandbox. */
+.setup { display: grid; grid-template-columns: minmax(0, 1fr) 2.75rem 6rem minmax(0, 1.3fr); grid-template-areas: "in . . ." "ed ag . out" "sc sc sc sc"; margin: 0 0 40px; font-size: 0.9375rem; }
+.setup p { margin: 0; color: var(--ink-2); max-width: 68ch; } .setup li { max-width: 68ch; }
+.setup .s-act { font-family: var(--f-head); font-weight: 500; font-size: 1.25rem; line-height: 1.2; }
+.setup .s-step { font-size: 0.8125rem; font-weight: 600; color: var(--ink-3); }
+.setup .s-in { grid-area: in; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-left: 20px; padding: 0 0 18px 16px; border-left: 1px solid var(--ink); position: relative; color: var(--ink-2); }
+.setup .s-in::after, .setup .s-sc::before { content: ""; position: absolute; background: var(--ink); }  /* arrows, stopped just short of the box they enter */
+.setup .s-in::after { width: 8px; height: 7px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.setup .s-in::after { left: -4.5px; bottom: 4px; }
+.setup .s-ed { grid-area: ed; display: grid; grid-template-rows: auto auto auto auto 1fr; gap: 12px; padding: 18px 20px 0; border: 1px dashed var(--ink); border-right: 0; border-radius: 6px 0 0 6px; position: relative; min-width: 0; }
+.setup .s-exit { align-self: end; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-inline: -20px; padding: 20px; border-top: 1px dashed var(--ctl); color: var(--ink); }
+.setup .s-ag { grid-area: ag; display: flex; align-items: center; justify-content: center; padding: 12px 0; border: 1px solid var(--ink); border-radius: 6px 0 0 6px; background: var(--fill-2); writing-mode: vertical-rl; transform: rotate(180deg); }  /* the half-turn makes the name read upward and swaps the corners, so the rounded pair ends up on the right */
+.setup .s-ag h3 { font-size: 0.9375rem; }
+.setup .s-out { grid-area: out; display: grid; align-content: start; min-width: 0; }
+.setup .s-box { border: 1px solid var(--rule-2); border-radius: 6px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; position: relative; }
+/* a connector: a hairline across the gutter from the Agency band to the box, level with the box's title, arrow-headed at both ends, with its label on the line */
+.setup .s-via { position: absolute; right: calc(100% + 1px); top: 1.2rem; width: 6rem; padding-bottom: 5px; border-bottom: 1px solid var(--ink); text-align: center; font-size: 0.8125rem; line-height: 1.2; color: var(--ink-2); }
+.setup .s-via::before, .setup .s-via::after { content: ""; position: absolute; bottom: -4.5px; width: 7px; height: 8px; background: var(--ink); }
+.setup .s-via::before { left: 0; clip-path: polygon(100% 0, 0 50%, 100% 100%); } .setup .s-via::after { right: 0; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.setup .s-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; padding-block: 12px; border-block: 1px solid var(--rule); }
+.setup .sn { display: grid; gap: 2px; align-content: start; } .setup .sn + .sn { padding-left: 16px; border-left: 1px solid var(--rule); }
+.setup .sn b { font-family: var(--f-head); font-weight: 500; font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; } .setup .sn span { color: var(--ink); overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto; } .setup .sn small { color: var(--ink-3); font-size: 0.8125rem; }
+/* the interpretability tools as chips; a description opens as a popover over the figure, so the boxes keep their size */
+.setup .s-nums { border-bottom: 0; padding-bottom: 4px; }
+.setup .s-tools { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--rule); }
+@media (max-width: 30em) { .setup .s-nums { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 0.7fr); } }  /* room for the longest label */
+.setup .s-tools > span { font-size: 0.8125rem; color: var(--ink-3); }
+.setup .s-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.setup .s-chips li { display: block; }
+.setup .s-chips button { font: inherit; font-size: 0.8125rem; line-height: 1.3; padding: 4px 10px; border: 1px solid var(--ctl); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; }
+@media (pointer: coarse) { .setup .s-chips button { min-height: 44px; padding-inline: 14px; } }
+.setup .s-chips button:hover { border-color: var(--ink-2); }
+.setup .s-chips button[aria-expanded="true"] { border-color: var(--ink); background: var(--fill-2); }
+.setup .s-chips button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.setup .s-tip { position: absolute; z-index: var(--z-tip); width: min(20rem, calc(100% - 40px)); padding: 10px 12px; border: 1px solid var(--ctl); border-radius: 6px; background: var(--bg); color: var(--ink-2); font-size: 0.875rem; line-height: 1.45; box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 12%, transparent); }
+.setup .s-tip b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+.setup .s-sc { grid-area: sc; display: grid; gap: 6px; margin-top: 40px; padding: 18px 20px; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--fill); position: relative; }
+.setup .s-sc::before { left: 16px; top: -41px; width: 9px; height: 37px; clip-path: polygon(44.5% 0, 55.5% 0, 55.5% 81%, 100% 81%, 50% 100%, 0 81%, 44.5% 81%); }  /* the adapter's way from the sandbox to the scoring box: a hairline stem and its head, in one shape */ .setup .s-sc > p { color: var(--ink); }
+.setup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.setup li { display: grid; grid-template-columns: 1.4em minmax(0, 1fr); }  /* the mark in its own column, so a wrapped line aligns */
+/* a tick and a cross drawn to the same stroke, so they read as a pair */
+.setup .has li::before { content: ""; width: 0.32em; height: 0.62em; margin: 0.22em 0 0 0.22em; border: solid var(--ink); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+.setup .hasnt li { color: var(--ink-2); }
+.setup .hasnt li::before { content: ""; width: 0.72em; height: 0.72em; margin-top: 0.38em; background: linear-gradient(45deg, transparent calc(50% - 0.75px), var(--ink-3) calc(50% - 0.75px) calc(50% + 0.75px), transparent calc(50% + 0.75px)), linear-gradient(-45deg, transparent calc(50% - 0.75px), var(--ink-3) calc(50% - 0.75px) calc(50% + 0.75px), transparent calc(50% + 0.75px)); }
+@media (forced-colors: active) { .setup .hasnt li::before { forced-color-adjust: none; } }
+@media (max-width: 64em) { .setup { grid-template-columns: minmax(0, 1fr); grid-template-areas: "in" "ed" "ag" "out" "sc"; }
+  /* stacked: Agency is the sandbox's lower edge, and one short line runs from it to the model */
+  .setup .s-ed { border-right: 1px dashed var(--ink); border-bottom: 0; border-radius: 6px 6px 0 0; }
+  .setup .s-ag { writing-mode: horizontal-tb; transform: none; justify-content: flex-start; padding: 10px 20px; border-radius: 0 0 6px 6px; }
+  .setup .s-out { padding-top: 28px; } .setup .s-out .s-box::before { content: ""; position: absolute; left: 20px; bottom: calc(100% + 1px); height: 28px; border-left: 1px solid var(--ink); }
+  .setup .s-via { position: static; width: auto; padding: 0; border: 0; text-align: left; } .setup .s-via::before, .setup .s-via::after { content: none; }
+  }
 .rules { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 64px; align-items: start; }
 .rules th, .rules td { white-space: normal; vertical-align: top; }
 .rules tbody th { font-weight: 400; color: var(--ink-3); }
-#tracks tbody th { width: 7em; }
+#allow tbody th { width: 7em; } #allow tr:first-child > * { border-top: 1px solid var(--rule-2); }
 #limits td { white-space: normal; }
 #limits tbody th { white-space: nowrap; }
 @media (max-width: 900px) { .rules { grid-template-columns: 1fr; gap: 32px; } }
@@ -511,16 +565,14 @@ footer a { color: inherit; }
 <main id="main">
 <div class="shell" id="top">
   <div class="hero">
-    <div class="hero-main"><h1>A benchmark for editing models by writing their weights</h1>
+    <div class="hero-main"><h1>A benchmark for LoRAs written by hand</h1>
       <div class="links">
         <a href="https://github.com/afifi-yusuf/lora-space"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a>
-        <a class="ghost" href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg></a>
+        <a class="ghost" href="https://rikiyat.github.io/blog/weight-space-programming/"><span class="by">Inspired by</span>Weight-Space Programming<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg></a>
       </div></div>
     <div class="hero-copy">
-      <p>An editor model gets a frozen model and one sentence from a user. It has to find what goes wrong and write a
+      <p>An editor model gets a frozen model and a short request from a user. It has to find what goes wrong and write a
         LoRA adapter by hand, without gradients. We score the edit on held-out problems and count what it cost.</p>
-      <p class="hero-line" id="hero-facts"></p>
-      <span class="updated" id="updated"></span>
     </div>
     <figure class="edit" id="edit-fig"></figure>
   </div>
@@ -537,11 +589,10 @@ footer a { color: inherit; }
         <div class="tabs" id="f-view" role="group" aria-label="Task"></div>
         <div class="checks">
           <label id="pilot-box"><input type="checkbox" id="s-pilots">Pilot runs</label>
-          <button class="linkbtn" id="copy-view" type="button" hidden>Copy link to this view</button><span class="sr" id="copy-status" role="status"></span>
         </div>
       </div>
       <div class="bar-row"><h3 id="cc-title" class="pad-t"></h3><div class="tabs" id="f-h" role="group" aria-label="Harness shown in the score chart"></div></div>
-      <p class="csub">Higher is better: 0 is the unedited model, 100 the task’s best reference. Each score is one attempt.</p>
+      <p class="csub">Higher is better: 0 is the unedited model, 100 the task’s best reference.</p>
       <div class="scroll-x" role="region" aria-label="Score chart" tabindex="0"><div class="cc" id="cc"></div></div>
       <div class="legend" id="cc-legend"></div>
       <div class="scroll-x gap-t" id="board-wrap" role="region" aria-label="Leaderboard table" tabindex="0"><table id="board"></table></div>
@@ -579,7 +630,7 @@ footer a { color: inherit; }
   <section id="runs">
     <div class="sec-head">
       <h2>Runs</h2>
-      <p>What each editor did: the edit it committed, the candidates it tested, and its own notes turn by turn.</p>
+      <p>What each editor did: the edit it committed and its own notes, call by call.</p>
     </div>
     <div class="explorer">
       <div class="runcol"><div class="tabs" id="f-rtask" role="group" aria-label="Runs by task"></div>
@@ -593,9 +644,10 @@ footer a { color: inherit; }
       <h2>Rules</h2>
       <p id="rules-lede"></p>
     </div>
+    <figure class="setup" id="setup"></figure>
     <div class="rules">
-      <div class="scroll-x" role="region" aria-label="Tracks" tabindex="0"><table id="tracks"></table></div>
-      <div class="scroll-x" role="region" aria-label="Budget" tabindex="0"><table id="limits"></table></div>
+      <div class="scroll-x" role="region" aria-label="What the editor may do" tabindex="0"><table id="allow"></table></div>
+      <div class="scroll-x" role="region" aria-label="Settings held constant" tabindex="0"><table id="limits"></table></div>
     </div>
   </section>
 
@@ -615,7 +667,7 @@ footer a { color: inherit; }
         <div><span class="brand">LoRA-Space Bench</span><p>Can a frontier model fine-tune a frozen model by writing its adapter?</p></div></div>
       <nav class="foot-links" aria-label="Footer"><a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a><a href="https://github.com/afifi-yusuf/lora-space">GitHub</a><a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a></nav>
     </div>
-    <div class="foot-base"><span id="foot-l"></span><span>One attempt per cell.</span></div>
+    <div class="foot-base"><span id="foot-l"></span></div>
   </div>
 </footer>
 
@@ -692,11 +744,13 @@ const tokIn = (r) => r.tokens && r.tokens.input != null ? r.tokens.input / 1e6 :
 const DMG = { gsm8k_off: "GSM8K", mmlu: "MMLU", facts: "facts" };
 const dmgText = (r) => !r.damage || !r.damage.flagged.length ? "" :
   r.damage.flagged.map((k) => `${DMG[k] || k} −${(100 * (r.damage.drop[k] || 0)).toFixed(1)}`).join(", ");
-const runNote = (r) => r.pilot ? `Track ${r.track}, pilot ${ver(r)}` : `Track ${r.track}`;
+const fed = (r) => r.pilot && r.track === "B" ? ", with dev feedback" : "";  /* an early pilot let the editor score candidates before committing */
 const TASK_IDS = Object.keys(TASK).filter((id) => D.tasks[id]).concat(Object.keys(D.tasks).filter((id) => !TASK[id]));
 const ENTRIES = D.entries.filter((e) => e.id !== "astra-minimal");
 const cellRun = (eid, tid) => D.runs.find((r) => r.entry === eid && r.task === tid && r.track === "A" && !r.pilot);
-const flag = (r) => { const d = dmgText(r); return d ? ` <span class="flag" title="Damage: ${esc(d)}">†<span class="sr"> damage: ${esc(d)}</span></span>` : ""; };
+const flag = (r) => { const d = dmgText(r); const worst = d ? Math.max(...r.damage.flagged.map((k) => 100 * (r.damage.drop[k] || 0))) : 0;  /* a drop of 10 points or more shows its size */
+  return (d ? ` <span class="flag" title="Damage: ${esc(d)}">†${worst >= 10 ? `<small aria-hidden="true">−${Math.round(worst)}</small>` : ""}<span class="sr"> damage: ${esc(d)}</span></span>` : "")
+  + (r.late_min ? ` <span class="flag late" title="Committed ${r.late_min} min after the ${D.limits.wall_hours}-hour limit">‡<span class="sr"> committed ${r.late_min} min late</span></span>` : ""); };
 
 const state = { view: "all", pilots: false, sort: {}, x: "tok", ctask: "math_qwen08", h: "own" };
 
@@ -749,10 +803,6 @@ function picker(fig) {
     const v = val(i, j), r0 = Math.floor(i * nOut / rows), r1 = Math.floor((i + 1) * nOut / rows), c0 = Math.floor(j * nIn / cols), c1 = Math.floor((j + 1) * nIn / cols), share = Math.round(100 * Math.abs(v) / (max || 1));
     out.innerHTML = `<b>Rows ${n(r0 + 1)}–${n(r1)}, columns ${n(c0 + 1)}–${n(c1)}:</b> ${share < 1 ? "almost unchanged" : `${v < 0 ? "lowered" : "raised"}, at ${share}% of the strongest change`}.`; if (say) { live.textContent = out.textContent; clearTimeout(set.t); set.t = setTimeout(() => { live.textContent = ""; }, 1500); } };  /* spoken once, then removed so the sentence is not in the page twice */
   const from = (ev, say) => { const r = w.getBoundingClientRect(); set([Math.max(0, Math.min(rows - 1, Math.floor((ev.clientY - r.top) / r.height * rows))), Math.max(0, Math.min(cols - 1, Math.floor((ev.clientX - r.left) / r.width * cols)))], say); };
-  { const e2 = Array.from({ length: cols }, (_, j) => { let t = 0; for (let i = 0; i < rows; i++) t += val(i, j) ** 2; return t; }), tot = e2.reduce((a, b) => a + b, 0), k = Math.max(1, Math.round(cols / 10));
-    const heavy = e2.map((v, j) => [v, j]).sort((p, q) => q[0] - p[0]).slice(0, k), topk = heavy.reduce((a, [v]) => a + v, 0), cap = fig.querySelector(".edit-cap > span");
-    if (cap && tot > 0) { const hv = document.createElement("span"); hv.className = "hv"; hv.setAttribute("aria-hidden", "true"); hv.innerHTML = heavy.map(([, j]) => `<i style="left:${(100 * j / cols).toFixed(3)}%;width:${(100 / cols).toFixed(3)}%"></i>`).join(""); a.before(hv);
-      cap.insertAdjacentText("beforeend", ` In this drawing, the tenth of the columns ticked above A carries ${Math.round(100 * topk / tot)}% of the change.`); } }  /* how concentrated the edit is, from the drawing’s own cells */
   w.addEventListener("pointermove", (ev) => { if (ev.pointerType === "mouse") from(ev, false); }); w.addEventListener("pointerdown", (ev) => from(ev, true));
   w.addEventListener("keydown", (ev) => { const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1], Home: [0, -cols], End: [0, cols], PageUp: [-rows, 0], PageDown: [rows, 0] }[ev.key]; if (!d) return; ev.preventDefault();
     set([Math.max(0, Math.min(rows - 1, at[0] + d[0])), Math.max(0, Math.min(cols - 1, at[1] + d[1]))], true); });
@@ -789,7 +839,7 @@ function picker(fig) {
 
 /* layer map: one strip of the model’s layers per run. The upper half of a cell is that layer’s attention output, the lower half its MLP down projection. */
 const NLAYERS = Math.max(24, ...D.runs.flatMap((r) => Object.keys((r.adapter || {}).rel_norms || {}).map((k) => +(k.match(/layers\.(\d+)\./) || [0, 0])[1] + 1)));
-document.documentElement.style.setProperty("--layers", NLAYERS); $("#nlayers").textContent = `Each strip is the model’s ${NLAYERS} layers. Select a strip to open its run.`;
+document.documentElement.style.setProperty("--layers", NLAYERS); $("#nlayers").textContent = `Each strip is the model’s ${NLAYERS} layers.`;
 const editsOf = (r) => Object.keys((r.adapter || {}).rel_norms || {}).map((k) => { const m = k.match(/layers\.(\d+)\.(.*)$/); return m ? { layer: +m[1], mlp: /mlp/.test(m[2]) } : null; }).filter(Boolean);
 const editWords = (r) => { const e = editsOf(r).sort((a, b) => a.layer - b.layer), part = (mlp, name) => { const l = e.filter((x) => x.mlp === mlp).map((x) => x.layer); return l.length ? `${name} in layer${l.length > 1 ? "s" : ""} ${l.join(", ")}` : ""; };
   return e.length ? [part(false, "attention output"), part(true, "MLP")].filter(Boolean).join("; ") : "no adapter"; };
@@ -841,7 +891,7 @@ function colsFor(view) {
   if (view === "all") return [who, har,
     { key: "mean", label: "Mean", sub: "Average of the task scores, shown once all are in", n: 1, group: "Normalized score", get: (x) => x.mean, html: (x) => x.mean == null ? NA.replace("no data", "incomplete") : x.ref ? `<div class="cellv"><span class="lane"></span><span>${fix(x.mean)}</span></div>` : `<div class="cellv">${cbar(x.mean)}<b>${fix(x.mean)}</b></div>` },
     ...TASK_IDS.map((tid) => ({ key: tid, icon: GLY(tid), label: tname(tid), sub: (TASK[tid] || {}).metric, n: 1, group: "Normalized score", get: (x) => x.norm[tid], td: (x) => x.ref ? `<td class="n score"><div class="cellv"><span class="lane txt">${pct(x.raw[tid])}</span><span>${fix(x.norm[tid])}</span></div></td>` : scoreCell(x.cells[tid]) })),
-    { key: "hours", label: "Edit time", unit: "h", sub: "Editor wall clock, hours, all runs", n: 1, group: "Cost so far", get: (x) => x.hours, html: (x) => x.hours == null ? NA : fix(x.hours, 2) },
+    { key: "hours", label: "Edit time", unit: "h", sub: "Editor wall clock, hours, all runs, provider queue time included", n: 1, group: "Cost so far", get: (x) => x.hours, html: (x) => x.hours == null ? NA : fix(x.hours, 2) },
     { key: "tok", label: "Tokens", unit: "M", sub: "Editor input tokens, millions, all runs", n: 1, group: "Cost so far", get: (x) => x.tok, html: (x) => x.tok == null ? NA : (x.lower ? "≥ " : "") + fix(x.tok, 1) }];
   const t = D.tasks[view], rs = D.runs.filter((r) => r.task === view), r0 = (x) => x.run;
   const cols = [who, har,
@@ -873,7 +923,7 @@ function rowsFor(view) {
     return rows.concat([ref("Best reference", "per task, see Tasks", 100), ref("Unedited " + (TARGET[D.tasks[TASK_IDS[0]].target] || "model"), "no edit", 0)]);
   }
   const t = D.tasks[view];
-  const runs = D.runs.filter((r) => r.task === view && (state.pilots || !r.pilot)).map((r) => ({ id: r.id, run: r, name: modelName(r), sub: harness(r) + (r.pilot ? `, pilot ${ver(r)}${r.track === "B" ? ", Track B" : ""}` : ""), mk: markOf(r),
+  const runs = D.runs.filter((r) => r.task === view && (state.pilots || !r.pilot)).map((r) => ({ id: r.id, run: r, name: modelName(r), sub: harness(r) + (r.pilot ? `, pilot ${ver(r)}${fed(r)}` : ""), mk: markOf(r),
     normalized: r.scored ? r.normalized : failed(r) ? 0 : null, value: r.value, hours: r.edit_hours }));
   const refs = Object.entries(t.references || {}).map(([k, v]) => ({ ref: 1, id: "ref-" + k, name: (REFS[k] || [k])[0], sub: "reference", note: (REFS[k] || [, ""])[1], mk: "",
     normalized: norm(t, v), value: v, hours: k === "paper_full_weight_edit" ? (t.reference_cost || {}).wall_hours : null }))
@@ -884,7 +934,7 @@ function rowsFor(view) {
    so switching harness or task moves them to their new places instead of redrawing them. */
 const MODELS = [...new Set(ENTRIES.map(modelName))];
 const entryFor = (model, h) => { const c = ENTRIES.filter((e) => modelName(e) === model && (h === "native" ? e.harness === "native" : ownHarness(e))), ran = c.filter((e) => D.runs.some((r) => r.entry === e.id && !r.pilot));
-  return ran.find((e) => e.harness !== "opencode") || ran[0] || c[0] || null; };  /* the maker’s own agent where it has run, otherwise OpenCode */
+  return ran[0] || c[0] || null; };
 const HNAME = { native: "the shared Agency harness", own: "its maker’s own harness" };
 const QUIET = matchMedia("(prefers-reduced-motion: reduce)"), EASE = "cubic-bezier(.22,1,.36,1)";
 /* redraw `box` and animate every keyed element from where it was to where it now is (position, and width for bars) */
@@ -952,7 +1002,7 @@ function harnessFx() {
   const view = state.view, all = view === "all", tids = all ? TASK_IDS : [view], { x } = AXIS;
   const sc = (e) => { if (!e) return null; const rs = tids.map((tid) => cellRun(e.id, tid)); return rs.every((r) => r && (r.scored || failed(r))) ? rs.reduce((a, r) => a + (r.scored ? r.normalized : 0), 0) / rs.length : null; };
   const nc = (e) => !all && e && failed(cellRun(e.id, view));  /* on one task, a session that ended without an adapter: scored 0, drawn as a cross */
-  const rows = MODELS.map((m) => { const a = entryFor(m, "native"), b = entryFor(m, "own"); return { m, a, b, va: sc(a), vb: sc(b), na: nc(a), nb: nc(b) }; }).filter((r) => r.va != null && r.vb != null).sort((p, q) => (q.vb - q.va) - (p.vb - p.va));
+  const rows = MODELS.map((m) => { const a = entryFor(m, "native"), b = entryFor(m, "own"); const r1 = (v) => v == null ? null : Math.round(v * 10) / 10; return { m, a, b, va: r1(sc(a)), vb: r1(sc(b)), na: nc(a), nb: nc(b) }; })  /* rounded first, so each change equals the difference of the two numbers shown */.filter((r) => r.va != null && r.vb != null).sort((p, q) => (q.vb - q.va) - (p.vb - p.va));
   const sign = (v) => (v > 0 ? "+" : "") + fix(v), val = (v, n) => (n ? "no commit" : fix(v));
   $("#hx-title").textContent = all ? "Harness effect on the mean" : `Harness effect, ${tname(view)}`;
   const clean = rows.filter((r) => !r.na && !r.nb), top = clean[0], down = clean.filter((r) => r.vb < r.va).length, none = rows.filter((r) => r.na || r.nb);
@@ -993,9 +1043,10 @@ function board() {
   const nRuns = D.runs.filter((r) => !r.pilot).length, nFail = D.runs.filter((r) => !r.pilot && failed(r)).length;
   const t = D.tasks[view], norun = ENTRIES.filter((e) => !TASK_IDS.some((tid) => cellRun(e.id, tid))), norunT = view === "all" ? [] : ENTRIES.filter((e) => !cellRun(e.id, view));
   $("#board-notes").innerHTML = (empty ? [`No runs on ${esc(tname(view))} yet.`] : [
-    `† The edit lowered a general-ability check by more than 3 points. The score stands.`,
-    `“No commit”: the session ended without an adapter and scores 0 (${nFail} of ${nRuns} runs).`,
-    view === "all" ? `Every cell is a single attempt, so a few points either way is noise.${norun.length ? ` Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
+    `† The edit lowered a general-ability check by more than 3 points; a drop of 10 or more shows its size. The score stands.`,
+    ...D.runs.filter((r) => !r.pilot && r.late_min && (view === "all" || r.task === view)).slice(0, 1).map((r) => `‡ Committed ${r.late_min} min after the ${D.limits.wall_hours}-hour limit. The score stands.`),
+    ...(nFail ? [`“No commit”: the session ended without an adapter and scores 0 (${nFail} of ${nRuns} runs).`] : []),
+    view === "all" ? `Every score is one attempt, so a few points either way is noise.${norun.length ? ` Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
       : `${norunT.length ? `Not yet run: ${norunT.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}. ` : ""}0 is the unedited model at ${pct(t.base)}; 100 is ${esc(bestRefName(t).toLowerCase())} at ${pct(bestRef(t))}${t.higher_is_better ? "" : " (lower is better)"}.`,
   ]).map((x) => `<p>${x}</p>`).join("");
   $("#board-notes").innerHTML = `<div class="np">${$("#board-notes").innerHTML}</div>` + (empty ? "" : `<details class="more"><summary>Column definitions</summary><dl class="defs">${cols.filter((c) => c.sub && !c.sub.startsWith(c.label)).map((c) => `<dt>${esc(c.label)}</dt><dd>${esc(c.sub)}</dd>`).join("")}</dl></details>`);
@@ -1074,7 +1125,7 @@ function chart(move) {
     if (!a) g.animate({ opacity: [0, 1] }, { duration: 200, delay: 120, easing: "ease-out", fill: "backwards" });
     else if (Math.abs(a.cx - b.cx) + Math.abs(a.cy - b.cy) > 1) g.animate({ translate: [`${a.cx - b.cx}px ${a.cy - b.cy}px`, "0 0"] }, { duration: 320, easing: EASE }); });
   $("#chart").setAttribute("aria-label", `${all ? "Mean normalized score against total" : "Normalized score against"} ${ax.tab.toLowerCase()}${all ? "" : ` on ${tname(tid)}`}, ${pts.length} models in ${HNAME[state.h]}.${front.length > 1 ? ` Best score for the cost: ${front.map((p) => modelName(p.r)).join(", then ")}.` : ""}`);
-  $("#legend").innerHTML = (front.length > 1 ? `<span><i class="fr"></i>Best score for the cost</span>` : "") + `<span class="note">Up and to the left is better. Select a point to open its run.${absent.length ? ` Not plotted: ${absent.map(esc).join(", ")}.` : ""}</span>`;
+  $("#legend").innerHTML = (front.length > 1 ? `<span><i class="fr"></i>Best score for the cost</span>` : "") + `<span class="note">Up and to the left is better.${absent.length ? ` Not plotted: ${absent.map(esc).join(", ")}.` : ""}</span>`;
 }
 let tipFor = -1;
 function showTip(h) {
@@ -1116,8 +1167,6 @@ const syncView = tabs("#f-view", [["all", "All tasks"], ...TASK_IDS.map((id) => 
 const HOPTS = [["native", "Shared harness"], ["own", "Maker’s own harness"]], syncH = [tabs("#f-h", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); }), tabs("#f-h2", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); })];
 tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", () => { tipFor = -1; $("#tip").hidden = true; chart(true); hl(null, true); syncURL(); });
 function setTask(id) { state.view = id; state.ctask = id; syncView(); render(); }
-if (navigator.clipboard && navigator.clipboard.writeText) { const b = $("#copy-view"); b.hidden = false;  /* the address already holds the task, harness and cost axis */
-  b.addEventListener("click", () => navigator.clipboard.writeText(location.origin + location.pathname + location.search + "#leaderboard").then(() => "Link copied", () => "Could not copy the link").then((msg) => { b.textContent = msg; $("#copy-status").textContent = msg; setTimeout(() => { b.textContent = "Copy link to this view"; $("#copy-status").textContent = ""; }, 1800); })); }  /* said in the button for sighted users and in a status region for screen readers */
 $("#s-pilots").addEventListener("change", (e) => { state.pilots = e.target.checked; render(); });
 function syncURL() { const q = new URLSearchParams(); if (state.view !== "all") q.set("task", state.view); if (state.h !== "own") q.set("harness", state.h); if (state.x !== "tok") q.set("cost", state.x);
   try { history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash); } catch (e) { /* file: pages cannot rewrite the address */ } }
@@ -1150,7 +1199,7 @@ $("#task-list").innerHTML = TASK_IDS.map((id) => {
     ${line}
     <dl class="facts"><div><dt>Metric</dt><dd>${esc(m.metric || t.metric)}${t.higher_is_better ? "" : ", lower is better"}</dd></div>
       <div><dt>Unedited model</dt><dd>${pct(t.base)}</dd></div>${refs}
-      ${best ? `<div><dt>Best run so far</dt><dd>${pct(best.value)}, ${esc(modelName(best))}</dd></div>` : ""}</dl>
+      ${best ? `<div><dt>Best run so far</dt><dd>${pct(best.value)}, ${esc(modelName(best))}${flag(best)}</dd></div>` : ""}</dl>
     ${rs.length ? `<button class="linkbtn" type="button" data-task="${esc(id)}">Show ${esc(m.name || id)} on the leaderboard <span aria-hidden="true">→</span></button>` : "<span></span>"}</article>`;
 }).join("");
 $("#maker-key").innerHTML = `<span class="note">Each dot is one run:</span>` + VENDOR.filter(([, id]) => ENTRIES.some((e) => vendorOf(e)[1] === id)).map(([, id, name]) => `<button class="hk" type="button" data-hk="${id}" aria-pressed="false"><i class="sq" style="--c:var(--mk-${id})"></i>${esc(name)}</button>`).join("") + `<span><i class="hatch"></i>worse than the unedited model</span>`;
@@ -1175,7 +1224,7 @@ function selectRun(id) {
   const cands = r.candidates.filter((c) => c.dev_acc != null || c.finished != null || String(c.what || "").replace(/["\s]/g, ""));
   const cand = cands.length ? `<div class="scroll-x" role="region" aria-label="Candidates" tabindex="0"><table><thead><tr><th scope="col" class="n">#</th><th scope="col">Test</th><th scope="col">Candidate</th><th scope="col" class="n">Dev accuracy</th><th scope="col" class="n">Finished</th></tr></thead><tbody>`
     + cands.map((c, i) => `<tr><td class="n">${i + 1}</td><td class="mono">${esc(c.tool)}</td><td class="mono">${esc(String(c.what).split("/").pop())}</td><td class="n">${pct(c.dev_acc)}</td><td class="n">${pct(c.finished)}</td></tr>`).join("")
-    + `</tbody></table></div>` : `<p class="dim">None. ${r.track === "A" ? "Track A commits one edit without testing it." : "This run tested no candidates."}</p>`;
+    + `</tbody></table></div>` : `<p class="dim">None. ${r.track === "A" ? "The edit was committed without testing it." : "This run tested no candidates."}</p>`;
   const mods = ad.rel_norms ? Object.entries(ad.rel_norms).map(([k, v]) => `<span class="mono">${esc(k)}</span> at ${pct(v)} of ‖W‖`).join("; ") : "";
   const kv = (k, v, s = "") => `<div><dt>${k}</dt><dd>${v}${s ? `<small>${s}</small>` : ""}</dd></div>`;
   const t = D.tasks[r.task];
@@ -1184,7 +1233,7 @@ function selectRun(id) {
     if (byTool && last && last.name === name) { last.n++; last.when = last.from === x.min ? `${x.min}′` : `${last.from}–${x.min}′`; if (note && !last.notes.includes(note)) last.notes.push(note); }
     else steps.push({ name: byTool ? name : Object.entries(x.tools.reduce((a, k) => (a[k] = (a[k] || 0) + 1, a), {})).map(([k, v]) => k.replace(/_/g, " ") + (v > 1 ? ` × ${v}` : "")).join(", ") || "notes", n: 1, from: x.min, when: byTool ? `${x.min}′` : String(x.n), notes: note ? [note] : [], text: byTool ? (name === "commit_adapter" ? "adapter committed, session over" : "") : x.text }); });
   $("#detail").innerHTML = `<div class="detail-head"><h3 tabindex="-1" class="run-title">${markOf(r)}${esc(modelName(r))}, ${esc(tname(r.task))}</h3>
-      <span class="dim">${esc(harness(r))} · ${esc(runNote(r))} · rules ${esc(ver(r))}${failed(r) ? " · ended without a commit" : r.scored ? "" : " · still scoring"}</span></div>
+      <span class="dim">${esc(harness(r))}${r.pilot ? ` · pilot${fed(r)}` : ""} · rules ${esc(ver(r))}${failed(r) ? " · ended without a commit" : r.scored ? "" : " · still scoring"}</span></div>
     <div class="lead"><span class="lead-k">${r.scored ? `${esc(m.metric || "Raw score")}${t.higher_is_better ? "" : ", lower is better"}` : "Outcome"}</span>
       <span class="lead-n">${r.scored ? `${pct(r.value)} <span class="dim plain">from ${pct(t.base)} unedited</span>` : failed(r) ? "No commit" : "Scoring"}</span>
       ${r.scored ? "" : `<p>${failed(r) ? "The session ended without an adapter, so the run scores 0." : "The adapter is committed and waiting to be scored."}</p>`}</div>
@@ -1202,7 +1251,7 @@ function selectRun(id) {
     <div class="part"><h4>The edit, in the editor’s words</h4>${prose(r.explanation || (failed(r) ? "No adapter was committed." : "No explanation was recorded."), 420, "explanation")}${mods && !r.edit_map ? `<p class="small wrap-any">${mods}</p>` : ""}</div>
     ${r.final_message ? `<div class="part"><h4>${failed(r) || /^The harness/.test(r.final_message) ? "How the session ended" : "The editor’s last message"}</h4>${prose(r.final_message, 320, "message")}</div>` : ""}
     ${cands.length || r.track === "B" ? `<div class="part"><h4>Candidates tested before committing</h4>${cand}</div>` : ""}
-    ${byTool && span > 0 ? `<div class="part"><h4>The session: ${r.turns.length} tool calls in ${span} minutes</h4>${r.edit_hours && r.edit_hours * 60 - span > 5 ? `<p class="small">Edit time, ${fix(r.edit_hours, 2)} h, also counts the time before the first call and after the last.</p>` : ""}
+    ${byTool && span > 0 ? `<div class="part"><h4>The session: ${r.turns.length} tool calls in ${span} minutes</h4>${r.edit_hours && r.edit_hours * 60 - span > 5 ? `<p class="small">Edit time, ${fix(r.edit_hours, 2)} h, also counts the time before the first call and after the last.</p>` : ""}${r.queue_min ? `<p class="small">${r.queue_min} min of that was Vertex AI queue time, which does not count toward the ${D.limits.wall_hours}-hour limit.</p>` : ""}${r.late_min ? `<p class="small">‡ The commit landed ${r.late_min} min past the limit.</p>` : ""}
       <div class="tl" aria-hidden="true" style="--c:${colorOf(r)}">${(() => { const at = r.turns.map((x, i, all) => { const same = all.filter((y) => y.min === x.min); return x.min + (same.length > 1 ? same.indexOf(x) / same.length : 0); });
         return r.turns.map((x, i) => { const tool = (x.tools[0] || "").replace(/ \(.*$/, ""), end = i + 1 < at.length ? at[i + 1] : span, len = Math.max(0, end - at[i]);
           return tool === "commit_adapter" ? `<i class="c" data-tip="${esc(`${x.min}′ commit adapter`)}" style="left:${Math.min(100, 100 * at[i] / span).toFixed(2)}%"></i>`
@@ -1218,7 +1267,7 @@ function selectRun(id) {
 function listRuns() {
   const rs = ORDER.filter((r) => r.task === state.rtask), firstPilot = rs.findIndex((r) => r.pilot);
   $("#runlist").innerHTML = rs.map((r, i) => (i === firstPilot && i > 0 ? `<p class="rdiv">Pilot runs, under earlier rules</p>` : "")
-    + `<button class="runbtn" type="button" data-run="${esc(r.id)}" aria-pressed="${r.id === state.run}">${markOf(r)}<span class="w">${esc(modelName(r))} <span>${esc(r.pilot ? `pilot ${ver(r)}${r.track === "B" ? ", Track B" : ""}` : harness(r))}</span></span><span class="s">${r.scored ? fix(r.normalized) : failed(r) ? "no commit" : "scoring"}</span></button>`).join("");
+    + `<button class="runbtn" type="button" data-run="${esc(r.id)}" aria-pressed="${r.id === state.run}">${markOf(r)}<span class="w">${esc(modelName(r))} <span>${esc(r.pilot ? `pilot ${ver(r)}${fed(r)}` : harness(r))}</span></span><span class="s">${r.scored ? fix(r.normalized) : failed(r) ? "no commit" : "scoring"}</span></button>`).join("");
 }
 const FIRST = ORDER.find((r) => r.scored && !r.pilot) || ORDER[0] || {};
 state.rtask = FIRST.task || TASK_IDS[0];
@@ -1231,43 +1280,78 @@ selectRun(FIRST.id);
 /* rules */
 (function rules() {
   const L = D.limits, models = MODELS.length;
-  $("#rules-lede").textContent = `Every entry gets the same budget. The two tracks differ only in whether the editor may see an edited model before it commits. These are rules ${D.rules.replace("lsbench-", "")}.`;
-  $("#tracks").innerHTML = `<caption class="sr">What each track allows</caption><thead><tr><td></td><th scope="col">Track A, one-shot</th><th scope="col">Track B, with feedback</th></tr></thead><tbody>
-    <tr><th scope="row">Reads</th><td>The unedited model only: its replies, activations and weights.</td><td>The same, plus results from its own candidate edits.</td></tr>
-    <tr><th scope="row">May test</th><td>Nothing. The edit is committed blind.</td><td>Up to ${L.candidates_track_b} candidates: a dev-split score, replies with the candidate applied, or an activation intervention.</td></tr>
-    <tr><th scope="row">Writes</th><td colspan="2">One LoRA adapter, rank ${L.max_rank} or lower, on the attention output and MLP down projections of any layer.</td></tr>
-    <tr><th scope="row">Never</th><td colspan="2">Gradients, training, or its own copy of the network. Every model call goes through a budgeted service.</td></tr></tbody>`;
-  const rowsL = [["Wall clock per session", L.wall_hours + " h"], ["GPU running the target model", "1 × NVIDIA L4, 24 GB"], ["Generate calls", L.generate_calls + " × " + L.generate_prompts + " prompts"],
-    ["Analysis calls", L.analysis_calls + " × " + L.analysis_items + " texts"], ["Candidates, Track B", L.candidates_track_b], ["Adapter rank", "≤ " + L.max_rank],
+  /* the setup, drawn as it is wired: what goes in; the editor in its sandbox; Agency between the sandbox and everything it reaches;
+     the editor's own model at its provider and the frozen model behind a counted service; and the one adapter that comes out */
+  const S_TOOLS = [
+          ["Saved activations", "the residual stream, and the inputs of the modules it may write to, saved as arrays"],
+          ["Activation traces", "activations at chosen layers and token positions"],
+          ["Token statistics", "each reply token’s log-probability and entropy, and the model’s own top choice"],
+          ["Logit lens", "the top next tokens read from the residual stream at each layer"],
+          ["Direct logit attribution", "how much the embeddings and each layer’s attention and MLP add to a token’s logit"],
+          ["Attention", "which earlier tokens each position attends to"],
+          ["Top activations", "where in its saved replies a neuron or a direction is most active"],
+          ["Activation patching", "copies activations from one input into another and reports how the next token changes"]];
+  const num = (n, what, each) => `<div class="sn"><b>${n}</b><span>${what}</span><small>${each}</small></div>`;
+  $("#setup").innerHTML = `<figcaption class="sr">The setup. The editor works in a sandbox with no GPU, no gradients and no web search. Through Agency it calls a fixed set of tools on the frozen model, which runs on one NVIDIA L4. It commits one adapter, untested, which is then scored.</figcaption>
+    <div class="s-in"><span class="s-step">In</span><span>the user’s request</span></div>
+    <div class="s-ed"><h3 class="s-act">The editor’s sandbox</h3><p>An editor model in its harness, for up to ${L.wall_hours} hours.</p>
+      <ul class="has"><li>numpy, scipy, safetensors</li><li>the weight file, read-only</li></ul>
+      <ul class="hasnt"><li>no GPU</li><li>no gradients</li><li>no web search</li></ul>
+      <div class="s-exit"><span class="s-step">Out</span><span>one adapter, rank ≤ ${L.max_rank}, committed untested</span></div></div>
+    <div class="s-ag"><h3>Agency</h3></div>
+    <div class="s-out">
+      <div class="s-box"><p class="s-via">tool calls</p><h3 class="s-act">The frozen model, on one NVIDIA L4</h3>
+        <div class="s-nums">${num(L.generate_calls, "generate calls", `up to ${L.generate_prompts} prompts each`)}${num(L.analysis_calls, "interpretability calls", `up to ${L.analysis_items} texts each`)}${num(1, "commit", "final")}</div>
+        <div class="s-tools"><span id="s-tools-h">Mechanistic interpretability tools</span><ul class="s-chips" aria-labelledby="s-tools-h">${S_TOOLS.map(([t], k) => `<li><button type="button" data-tool="${k}" aria-expanded="false" aria-controls="s-tip">${t}</button></li>`).join("")}</ul></div><div class="s-tip" id="s-tip" role="status" hidden></div></div>
+    </div>
+    <div class="s-sc"><h3 class="s-step">After the session</h3><p>Scored on held-out problems, with a damage check and an audit.</p></div>`;
+  /* a chip opens its description under the list; another chip, a click elsewhere or Escape closes it */
+  const box = $("#setup .s-box"), tip = $("#s-tip");
+  const closeTip = () => { tip.hidden = true; box.querySelectorAll(".s-chips button").forEach((b) => b.setAttribute("aria-expanded", "false")); };
+  box.addEventListener("click", (e) => { const b = e.target.closest(".s-chips button"); if (!b) return;
+    const open = b.getAttribute("aria-expanded") === "true"; closeTip(); if (open) return;
+    const [t, d] = S_TOOLS[+b.dataset.tool]; tip.hidden = false; tip.innerHTML = `<b>${t}</b>${d}`; b.setAttribute("aria-expanded", "true");
+    const left = Math.max(20, Math.min(b.offsetLeft, box.clientWidth - tip.offsetWidth - 20));
+    tip.style.left = left + "px"; const ul = b.closest(".s-chips"); tip.style.top = (ul.offsetTop + ul.offsetHeight + 8) + "px";  /* under the whole list, so no chip is covered */ });
+  document.addEventListener("click", (e) => { if (!tip.hidden && !e.target.closest(".s-chips, .s-tip")) closeTip(); });
+  let tipW = innerWidth; addEventListener("resize", () => { if (innerWidth !== tipW) { tipW = innerWidth; if (!tip.hidden) closeTip(); } });  /* a phone's address bar also fires resize; only a width change moves the chips */
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !tip.hidden) { const b = box.querySelector('.s-chips [aria-expanded="true"]'); closeTip(); b && b.focus(); } });
+  $("#rules-lede").textContent = `Every entry gets the same budget. The editor sees only the unedited model and commits once, without testing its edit. These are rules ${D.rules.replace("lsbench-", "")}.`;
+  $("#allow").innerHTML = `<caption class="sr">What the editor may and may not do</caption><tbody>
+    <tr><th scope="row">Reads</th><td>The unedited model only: its replies, activations and weights.</td></tr>
+    <tr><th scope="row">May test</th><td>Nothing. The edit is committed blind.</td></tr>
+    <tr><th scope="row">Writes</th><td>One LoRA adapter, rank ${L.max_rank} or lower, on the attention output and MLP down projections of any layer.</td></tr>
+    <tr><th scope="row">Never</th><td>Gradients, training, or running the network itself. Every call to the frozen model goes through the model service.</td></tr></tbody>`;
+  const rowsL = [["GPU running the frozen model", "1 × NVIDIA L4, 24 GB"], ["Adapter rank", "≤ " + L.max_rank],
     ["Attempts per cell", "1 in this release"], ["Damage flag", "a general check drops over 3 points"],
     ["Entries", `${ENTRIES.length} (${models} editor models)`]].map(([k, v]) => `<tr><th scope="row">${k}</th><td class="n">${v}</td></tr>`).join("");
-  $("#limits").innerHTML = `<caption class="sr">Budget for every entry</caption><thead><tr><th scope="col">Budget</th><th scope="col" class="n">Per entry</th></tr></thead><tbody>${rowsL}</tbody>`;
+  $("#limits").innerHTML = `<caption class="sr">Other settings, the same for every entry</caption><thead><tr><th scope="col">Held constant</th><th scope="col" class="n">For every entry</th></tr></thead><tbody>${rowsL}</tbody>`;
 })();
 
 /* questions */
 (function questions() {
   const math = D.tasks.math_qwen08, L = D.limits;
   const qa = [
-    ["What does the editor get?", [`A frozen model, the user’s one-sentence request, and a file of example problems where the task has one. It can read the model’s replies and use interpretability tools on the unedited model: activation traces, token statistics, logit lens, direct logit attribution, attention, top activations and activation patching.`,
-      `It has no gradients, no training loop and no copy of the network in its sandbox.`]],
+    ["What does the editor get?", [`A frozen model, the user’s request, and a file of example problems where the task has one. It can read the model’s replies and use eight interpretability tools on the unedited model: saved activations, activation traces, token statistics, logit lens, direct logit attribution, attention, top activations and activation patching.`,
+      `It has no gradients, no training loop and no way to run the network in its sandbox; it can read the weight file.`]],
     ["How is a run scored?", [`The committed adapter is applied and the model answers a held-out set the editor never saw, under the deployment settings the request describes.`,
       `The raw metric is rescaled: 0 is the unedited model and 100 is the task’s best reference. A session that ends without a committed adapter counts as 0. An entry’s mean is the average over the three tasks.`]],
     ["What does 100 mean on the math task?", math ? [`It is the full-weight edit from Takehi et al. (2026), which scores ${pct(bestRef(math))} on the same 200 MATH-500 problems. The unedited model scores ${pct(math.base)}; most of its replies loop in their reasoning until the token limit.`] : []],
     ["How does this differ from the full-weight result?", [["Their prompt named the failure (repetition, cut off at the token limit). Ours names none.",
       "Their rules excluded edits that make the model close its thinking early. Ours allow any edit that answers the request.",
-      `Their editor compared edited and original models over 50 passes, which is closer to our Track B. It took ${(math && math.reference_cost || {}).wall_hours ?? "about 20"} hours; a session here is capped at ${L.wall_hours}.`]]],
-    ["What is Agency, and what is its native harness?", [`[Agency](https://github.com/agency-project/Agency), developed by UC Berkeley’s Sky Computing Lab ([blog post](https://www.linkedin.com/pulse/introducing-agency-alvin-cheung-hd8xc)), is an interposition layer for agent stacks: a transparent shim that sits between an agent harness, the model provider and the sandbox. It monitors every LLM call and tool call, and can modify them, without changing the harness itself. Every run here goes through it, which is how each editor gets the same sandbox and budget and how usage is recorded in one format. It runs off-the-shelf harnesses unmodified (Codex, Claude Code, Kimi CLI, OpenCode) as well as its own native harness.`,
+      `Their editor compared edited and original models over 50 passes, where ours never sees an edited model. It took ${(math && math.reference_cost || {}).wall_hours ?? "about 20"} hours; a session here is capped at ${L.wall_hours}.`]]],
+    ["What is Agency, and what is its native harness?", [`[Agency](https://github.com/agency-project/Agency), developed by UC Berkeley’s Sky Computing Lab ([blog post](https://www.linkedin.com/pulse/introducing-agency-alvin-cheung-hd8xc)), is an interposition layer for agent stacks: a transparent shim that sits between an agent harness, the model provider and the sandbox. It monitors every LLM call and tool call, and can modify them, without changing the harness itself. Every run here goes through it, which is how each editor gets the same sandbox and budget and how usage is recorded in one format. It runs off-the-shelf harnesses unmodified (Codex, Claude Code, Kimi CLI and others) as well as its own native harness.`,
       `The native harness is deliberately minimal: a ReAct loop, in which the model reasons, calls a tool, reads the result and repeats, with a bash tool. It shows what the model does with the least help and without the [harness tax](https://arena.ai/blog/coding-agents-harness-tax).`]],
-    ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent (Codex, Claude Code, Kimi CLI) than in Agency’s native loop, and on sycophancy it did. DeepSeek also runs in its own DeepSeek Harness, and Gemini in Google’s Antigravity CLI. Both first ran in OpenCode, before Agency had adapters for their makers’ agents; those rows are kept, so DeepSeek and Gemini each have three entries.`]],
+    ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent (Codex, Claude Code, Kimi CLI) than in Agency’s native loop, and on sycophancy it did. DeepSeek runs in its own DeepSeek Harness, and Gemini in Google’s Antigravity CLI.`]],
     ["What counts as damage?", [`After scoring, the edited model also takes three general-ability checks: 300 MMLU questions, 200 GSM8K problems with thinking off, and a set of held-out facts. An edit is flagged when any of them drops by more than 3 points from the unedited model. Flags are shown next to the score and do not change it.`]],
     ["How final are these numbers?", [["Every cell is one attempt. Expect a few points of noise, more on math, where one sample per problem is scored.",
-      "Editor input tokens include cached input. Most of every long session is cache reads, which providers bill at a fraction of the normal rate, so token counts overstate cost differences between providers. DeepSeek and Kimi CLI counts marked ≥ miss a few calls that returned no usage.",
-      "Gemini 4 Carbon is served only from Vertex AI, which at times held requests for several minutes before the first token. For the Gemini cells, queue time does not count toward the wall clock: per call, the time to first token beyond 60 seconds plus the model’s own thinking (reasoning tokens at 50 per second) is excluded, up to 6 hours per session. Between ten minutes and about an hour was excluded per Gemini session. A first set of Gemini runs without this rule was discarded as an infrastructure failure. The Antigravity CLI cells ran with Vertex’s priority tier.",
-      "Kimi K3.1 Pro was served from two providers. Its native cells ran on Amazon Bedrock, after Azure’s deployment kept refusing requests under load (503, “high demand”). Its Kimi CLI cells ran on Azure, one at a time: on Bedrock, long Kimi CLI sessions degenerated into garbled text and endless whitespace in tool arguments and hit Bedrock’s token rate limits. Bedrock’s model is reportedly the faster “Highspeed” build.",
-      "Azure caps every DeepSeek V4.1 Flash response at 4,096 output tokens, the same for all three DeepSeek entries. A provider’s content filter blocked two sessions mid-run (Azure, on DeepSeek Harness math and Kimi CLI sycophancy); like provider overloads, those were rerun as infrastructure failures.",
-      "Agency resumes a session whose editor ends a turn without the required output. Agency’s default allowed ten such resumes; it was lifted for every entry after it ended the first Kimi sessions within minutes. No other entry needed more than one. Antigravity CLI asks small Gemini models to vet each tool call; Agency answers those checks itself, since tool admission is Agency’s policy for every harness.",
-      "Fable 5.2 and Gemini ran on a newer Agency build with fixes for Gemini thought signatures and for a deadlock in which a resource reservation waited on a lock the session held. Earlier, that deadlock stalled some sessions, which were rerun; in three scored Codex sessions (GPT-6 Astra math and code, GPT-6.1 Sol sycophancy) the editor carried on after its reservation timed out, but without the extra CPU it had asked for.",
-      "Pilot runs used earlier rules (a stale prompt line in v0.1, fewer tools in v0.1 and v0.2) and the minimal loop. They appear in the runs list and, on request, in a task’s table, but never in an entry’s score."]]],
+      "Editor input tokens include cached input. Most of every long session is cache reads, which providers bill at a fraction of the normal rate, so token counts overstate cost differences between providers.",
+      "Gemini 4 Carbon is served only from Vertex AI, which at times queued a request for minutes. For the Gemini cells that queue time does not count toward the 3 hours: per call, the wait for the first token beyond 60 seconds and the model’s own thinking is excluded. Between ten minutes and about an hour was excluded per session. The Antigravity CLI cells ran on Vertex’s priority tier.",
+      "Kimi K3.1 Pro ran on Amazon Bedrock in the shared harness and on Azure in Kimi CLI; each provider failed under the other setup.",
+      "Azure caps every DeepSeek V4.1 Flash response at 4,096 output tokens. Sessions stopped by a provider’s overload or content filter were rerun.",
+      "Agency resumes a session whose editor ends a turn without the required output, with no cap on resumes. Antigravity CLI asks small Gemini models to vet each tool call; Agency answers those checks itself.",
+      "Fable 5.2 and Gemini ran on a newer Agency build. An earlier build could stall a session, and those were rerun; in three scored Codex sessions the editor carried on without the extra CPU it had asked for.",
+      "Pilot runs used earlier rules and the minimal loop. They are listed under Runs and never count in an entry’s score."]]],
   ];
   const link = (t) => esc(t).replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');  /* answers may carry [text](https://…) links */
   $("#qa").innerHTML = qa.filter(([, a]) => a.length).map(([q, a]) => `<article><h3>${esc(q)}</h3><div class="qa-a">${a.map((x) =>
@@ -1275,8 +1359,6 @@ selectRun(FIRST.id);
 })();
 
 /* header line and section highlighting */
-$("#updated").textContent = "Last updated: " + new Date(D.generated.replace(" UTC", "Z").replace(" ", "T")).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-$("#hero-facts").textContent = `${TASK_IDS.length} tasks, ${ENTRIES.filter((e) => TASK_IDS.some((tid) => cellRun(e.id, tid))).length} of ${ENTRIES.length} entries run, ${D.runs.filter((r) => !r.pilot).length} runs so far.`;
 $("#foot-l").textContent = `LoRA-Space Bench · ${D.generated.slice(0, 4)} · ${D.rules}`;
 (function spy() {
   const links = [...document.querySelectorAll(".nav a")], secs = links.map((a) => document.getElementById(a.getAttribute("href").slice(1)));
