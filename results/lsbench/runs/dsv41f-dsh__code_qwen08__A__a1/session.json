@@ -1,0 +1,37 @@
+{
+ "status": "committed",
+ "wall_s": 1174,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 7827535,
+  "output": 55815,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 159,
+  "failed_calls": 48,
+  "usage_missing_calls": 48,
+  "lower_bound": true,
+  "llm_wait_s": 994.0
+ },
+ "tool_counts": {
+  "generate": 14,
+  "analysis": 24,
+  "candidates": 0
+ },
+ "explanation": "Rank-8 LoRA adapter (10 arrays, '<module>::A' (8,d_in) and '<module>::B' (d_out,8)) built solely from analysis of the unedited model \u2014 no gradients/training/fitting and no evaluation of any edited model.\n\nDiagnosis: on 28 held-out-style Python tasks the unedited model passes ~30% with thinking off. The dominant failure is a stable wrong function *body* selected from a few library-idiom attractors (count_vowels -> len(bool); word_freq -> text.count(w); is_anagram -> set comparison losing multiplicity; lcp -> min(strs); unique_sorted/intersect -> set or insertion-order; merge_intervals -> tuple mutation; two_sum -> tuples instead of indices), recurring across resamples (count_vowels 1/7, word_freq 0/5, caesar 0/5, lcp 0/5). Removing the model's unrequested trailing assert/print blocks rescues only ~1/28 tasks, so the damage is inside the body. Logit attribution at the reply's decision token is dominated by layers 22-23 (with 19 and 21 contributing); attention at the body-decision positions is mostly self-attention on the just-written token (0.30-0.48) with just 0.13-0.33 on the user prompt, i.e. the model autocompletes its own docstring instead of grounding in the request. Forcing the model past the body's opening tokens yields a correct body, so these are shallow prompt-local attractors, not a capability gap. A probe from the model's own late hidden states separates implementation-mode from documentation-mode continuations (Cohen's d ~2.4) and generalises to held-out code-only replies.\n\nEdit: the five modules that write straight into the late residual stream read by the final norm and tied unembedding \u2014 layers 23 self_attn.o_proj, 23 mlp.down_proj, 22 mlp.down_proj, 21 mlp.down_proj, 19 self_attn.o_proj. Output directions are the model's own implementation-mode geometry (implementation-minus-documentation late-residual direction plus top principal directions of those states); input readout uses principal directions of each module's measured inputs, so the update acts where those modules are already task-driven. Magnitudes follow the attribution ranking and are 0.7%-1.1% of each ||W|| (budget allows 5x).\n\nValidation: exact key format, correct (r x d_in)/(d_out x r) shapes, finite dW, and ||dW||/||W|| in [0.7%, 1.1%] for every module; no other weights touched.",
+ "final_message": "I improved Qwen3.5-0.8B as a Python-coding chat assistant (thinking off) with a single rank-8 LoRA adapter written to /workspace/work/adapter.npz, constructed purely from analysis of the UNEDITED model \u2014 no gradients, no training, no optimizer, no iterative fitting, and no evaluation of any edited model.\n\nBASELINE I built a local harness (myeval.py) with 28 held-out-style tasks: \"(name, prose prompt, hidden test)\". On the unedited model the pass rate was ~30% (18/59 replies across several samplings).\n\nDIAGNOSIS (all from the unedited model)\n1. The dominant failure is not formatting but a STABLE wrong function *body*, drawn from a handful of library-idiom attractors. Verified across resamples: count_vowels 1/7, word_freq 0/5, caesar 0/5, longest_common_prefix 0/5, is_anagram 0/4, merge_intervals 0/3, is_valid_parens 0/3, two_sum 0/2, roman_to_int 0/2, unique_sorted 0/1, intersect 0/1. Concrete attractors: count_vowels -> `return len(s.lower().isalpha() and s.lower() in vowels)` (bool/len confusion); word_freq -> `{w.lower(): text.count(w) for w in text.split()}`; is_anagram -> character-set comparison (loses multiplicity); lcp -> `shortest = min(strs)`; unique_sorted/intersect -> set or insertion-order results; merge_intervals -> mutating a tuple element; two_sum -> returning tuples instead of index pairs.\n2. Stripping the model's unrequested trailing assert/print blocks rescues only ~1 of 28 tasks, so the extra blocks are not the main cause \u2014 the errors live inside the function body.\n3. Direct logit attribution at the reply's decision token is dominated by layers 22-23, with meaningful contributions from 19 and 21.\n4. Attention analysis at the body-decision positions (e.g. reply tokens `   vowels = set(\"`) shows strong SELF-attention on the just-written token (0.30-0.48) with only 0.13-0.33 of the mass on the user prompt; the end-of-reply state likewise attends to the model's own \"Example usage\"/print prose. The model locks onto autocompleting its own docstring rath",
+ "adapter": {
+  "modules": 5,
+  "params": 159744,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.self_attn.o_proj": 0.011,
+   "model.layers.23.mlp.down_proj": 0.011,
+   "model.layers.22.mlp.down_proj": 0.01,
+   "model.layers.21.mlp.down_proj": 0.008,
+   "model.layers.19.self_attn.o_proj": 0.007
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-15_19-05-43_rba8cf89f/logs/agent_lsb-dsh_0000_data.sqlite3",
+ "session_s": 1230
+}

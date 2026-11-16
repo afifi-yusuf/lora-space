@@ -1,0 +1,31 @@
+{
+ "status": "committed",
+ "wall_s": 1130,
+ "llm_tokens": {
+  "input": null,
+  "output": null,
+  "calls": 136,
+  "failed_calls": 11,
+  "llm_wait_s": 859.1
+ },
+ "tool_counts": {
+  "generate": 8,
+  "analysis": 38,
+  "candidates": 0
+ },
+ "explanation": "Gated rank-1 residual steering toward a Python-code answer mode. Diagnosis: on the unedited model, held-out-style coding prompts failed mostly through (a) drifting to non-Python code (wrote C/Java) and (b) noisy prose/multiple-alternative code blocks; the underlying Python ability is present (forcing a Python fence prefix yields correct code). Internals: teacher-forced/lens analysis showed the fence-language decision is encoded as a residual-stream direction at late layers; activation patching a Python-framed fence context into a C-framed one at resid.20/22/23 flips the next token from c to python (KL~12), while resid.15 does not. Construction (no gradients): per module A = g^T is the coding-request gate direction (mean coding-prompt input minus mean general-prompt input at the assistant-start), B = s*u where u is the unit Python-minus-(C,Java) residual direction at resid.21/resid.23 obtained by differencing forced-framing traces. Applied to model.layers.20/22 linear_attn.out_proj and mlp.down_proj (4 rank-1 modules; ||dW||/||W|| between 0.5% and 1.3%). Selectivity comes from the gate: at a coding assistant-start the added residual norm is ~4.0 of the ~9 resid norm, while for general/chat prompts it is only ~0.6 with mixed sign, so non-coding abilities are barely perturbed.",
+ "final_message": "Built a gradient-free, gated rank-1 LoRA adapter that steers Qwen3.5-0.8B toward clean Python code answers on chat-style coding requests.\n\nDIAGNOSIS. Generated the unedited model on a 32-task self-written Python suite (greedy, thinking off) and executed the extracted code. ~78% passed; failures clustered as (1) language drift to C/Java despite a Python request, (2) degenerate/partial replies, (3) extra example/alternative code blocks that can crash or shadow the real function, plus genuine logic slips. Forcing a Python fence prefix (```python) raised batch accuracy from 10/16 to 13/16, showing the capability exists and mainly formatting/anchor behavior was lost.\n\nMECHANISM (verified on the unedited model only). Activation patching showed the fence-language decision is a late-layer residual direction: copying residual state from a Python-framed context into a C-framed one at resid.20/22/23 flips the next token from c to python (KL ~12), while resid.15 does not (KL ~0.001). inspect_module_inputs showed the coding-request direction separates coding from general prompts very cleanly at layers 20 and 22 (coding +5..+15 vs general -2..+1).\n\nEDIT. For model.layers.{20,22}.linear_attn.out_proj and .mlp.down_proj (4 rank-1 modules, r=1, ||dW||/||W|| 0.5-1.3%, far under the 5x limit): A = g^T, the normalized coding-request gate direction at the assistant-start; B = s*u, the unit Python-minus-(C,Java) residual direction at resid.21/resid.23 measured by differencing forced Python/C/Java framing traces (separates framings by ~7-9 units, consistent across prompts). The gate makes the edit fire on coding requests (added resid norm ~4.0 of ~9) and almost not at all on general chat (~0.6 with mixed sign), protecting other abilities.",
+ "adapter": {
+  "modules": 4,
+  "params": 15360,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.20.linear_attn.out_proj": 0.0054,
+   "model.layers.22.linear_attn.out_proj": 0.0132,
+   "model.layers.20.mlp.down_proj": 0.0109,
+   "model.layers.22.mlp.down_proj": 0.0079
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_23-36-06_refff3b02/logs/agent_lsb-opencode_0000_data.sqlite3",
+ "session_s": 1185
+}

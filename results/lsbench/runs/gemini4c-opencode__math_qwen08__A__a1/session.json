@@ -1,0 +1,26 @@
+{
+ "status": "timeout",
+ "wall_s": 15544,
+ "provider_queue_excluded_s": 4703.4,
+ "llm_tokens": {
+  "input": 11119072,
+  "output": 145131,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 122,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 13209.3
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 43,
+  "candidates": 0
+ },
+ "explanation": "",
+ "final_message": "",
+ "adapter": {},
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_17-33-05_rc8c508ab/logs/agent_lsb-opencode_0000_data.sqlite3",
+ "session_s": 15627
+}

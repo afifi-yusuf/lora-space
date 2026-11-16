@@ -1,0 +1,39 @@
+{
+ "metric": "acc",
+ "value": 0.145,
+ "normalized": 13.3,
+ "reference": "paper_full_weight_edit",
+ "reference_value": 0.5675,
+ "raw": {
+  "acc": 0.145,
+  "cut_share": 0.805,
+  "mean_tokens": 26534.945,
+  "problems": 200,
+  "samples": 1,
+  "ok": 29,
+  "total": 200,
+  "seconds": 6668
+ },
+ "damage": {
+  "base": {
+   "mmlu": 0.4733,
+   "facts": 1.0,
+   "gsm8k_off": 0.575
+  },
+  "edited": {
+   "mmlu": 0.4833,
+   "facts": 0.9938,
+   "gsm8k_off": 0.42
+  },
+  "drop": {
+   "mmlu": -0.01,
+   "facts": 0.0062,
+   "gsm8k_off": 0.155
+  },
+  "flagged": [
+   "gsm8k_off"
+  ],
+  "threshold": 0.03
+ },
+ "score_gpu_s": 7090
+}

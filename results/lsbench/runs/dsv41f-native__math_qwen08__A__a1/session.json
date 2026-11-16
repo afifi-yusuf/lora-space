@@ -1,0 +1,36 @@
+{
+ "status": "committed",
+ "wall_s": 929,
+ "llm_tokens": {
+  "input": 6910262,
+  "output": 84705,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 87,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 632.4
+ },
+ "tool_counts": {
+  "generate": 4,
+  "analysis": 13,
+  "candidates": 0
+ },
+ "explanation": "Diagnosis: the unedited model solves competition-math problems correctly early but is trapped in a self-reinforcing \"re-verification\" loop and never emits </think>/\\boxed{}; layer-23 attention copies its own recent lines and adds ~+10 nats to the loop-continuation token while ` r\u00e9ponse`'s logit barely differs from escape states (only a few nats below competitors). A constant pro-` r\u00e9ponse` push would need to be ~residual-sized to win, so instead I built a gated rank-2 LoRA that adds a component along the ` r\u00e9ponse` unembedding direction (row 248069) with magnitude set by a linear gate on each module's true input. The gate direction a = normalize(mean(h_escape) - h_early) (computed from traced unedited activations with the end token controlled to \"\\n\") is positive in reasoning-complete/stuck states and negative at the start of reasoning; a second rank row b = mean-input direction provides an offset, and the two coefficients were solved per module by least squares so the effective ` r\u00e9ponse` push is ~+0.7-1.4 units in loop/escape states and ~0 early. Applied only at late layers (mlp.down_proj of layers 18,20,22,23 and self_attn.o_proj of layer 23), so early/mid computation is untouched. Estimated effect: about +21 nats of ` r\u00e9ponse` logit in loop states and +27 in ready states, ~0 at reasoning start; ||dW||_2/||W||_2 = 0.04-0.19, far under the 5x limit. Non-math late states (story, code) get only a mild push since the gate is small there.",
+ "final_message": "DIAGNOSIS (unedited Qwen3.5-0.8B, thinking mode).\n\nI generated 16 replies across the user's GSM8K/MATH examples and measured them (token_stats-style line-repetition counts, logit_lens, attribution, attention, trace of residual/module inputs).\n\nFailure mode found: the model is NOT bad at the arithmetic. On every hard (competition) problem it computes a correct answer early (e.g. problem #4 mod-13: it derives the correct residue 8 within ~1,500 tokens; problem #10: derives the correct x=20/3) and then enters a self-reinforcing \"re-verification loop\" (\"Wait, ...\", \"Actually, ...\", \"* Wait, $|P_1|^2=29$.\") that repeats a single line 100-150+ times and consumes the entire token budget. Result: 0/10 competition problems and only 3/6 easy GSM8K problems ever emit `</think>`/`\\boxed{}`. Standard deviations from exact answers are not the problem \u2014 the model simply never terminates its reasoning.\n\nEvidence:\n- attention (L3/L11/L19/L23) on a looped reply shows the last 256 tokens attend almost entirely to the model's own most recent near-identical lines; L23 query attention is self/local (p\u22480.14-0.18 on the immediately preceding token), i.e. a pure local-copy attractor.\n- attribution at a loop position: ` r\u00e9ponse`'s logit is only ~a few nats below the competing token, but layer-23 attention alone adds ~+10 nats to the loop-continuation token while contributing ~-1 to `</think>`. The loop is won by L23 attention copying the pattern.\n- logit_lens across layers: in genuine \"ready to answer\" states ` r\u00e9ponse` climbs rank 2042 (L0) -> 36 (L12) -> rank 0 at L16/L20 -> rank 1 at L24; in loop states it stays at rank ~18,000 with no promotion at any layer, while L24 commits hard to the next numeral.\n- Controls: continuing generation from a *cleaned* prefix (\"...Sum = 8. Ready to write output.\") makes the model immediately emit `</think>` and the correct \\boxed{8}. An explicit \"be decisive, do not re-check\" instruction in the prompt does NOT fix it \u2014 the loop is a dynamics attractor, no",
+ "adapter": {
+  "modules": 5,
+  "params": 43008,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.18.mlp.down_proj": 0.0119,
+   "model.layers.20.mlp.down_proj": 0.0134,
+   "model.layers.23.mlp.down_proj": 0.006,
+   "model.layers.23.self_attn.o_proj": 0.0055,
+   "model.layers.22.mlp.down_proj": 0.0082
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_00-19-47_rea33bc23/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 987
+}

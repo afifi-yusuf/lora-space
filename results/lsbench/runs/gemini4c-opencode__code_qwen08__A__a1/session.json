@@ -1,0 +1,43 @@
+{
+ "status": "committed",
+ "wall_s": 13683,
+ "provider_queue_excluded_s": 4053.9,
+ "llm_tokens": {
+  "input": 10246515,
+  "output": 136620,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 121,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 12208.0
+ },
+ "tool_counts": {
+  "generate": 16,
+  "analysis": 37,
+  "candidates": 0
+ },
+ "explanation": "Analytical (training-free, closed-form) rank r<=4 LoRA adapter across 11 MLP down_proj modules (layers 10..15, 17, 18, 21..23; max ||BA||_2/||W||_2 = 0.457x <= 5.0x) targeting three causally verified Qwen3.5-0.8B coding bottlenecks via null-space ridge state detectors: (I1) clean ``` code-fence opening at pos=0 on coding prompts while leaving general and conceptual CS Q&A prose prompts untouched; (I2) upstream task-invariant signature-fidelity instruction steering (L10..15) paired with query-protected, L23-cancelled uniform-sign master output-gate pulses opening full-rank identifier-copy heads (L15.H0+H2, L18.VH10, L19.H7, L23.H7) and dampening prose-verb distractors (L19.H4, L23.H2+H3); and (I3) complete-return EOL single-newline closure suppressing blank-line multi-newline test/loop continuations while orthogonalized against incomplete mid-return expressions and prose paragraph breaks.",
+ "final_message": "",
+ "adapter": {
+  "modules": 11,
+  "params": 92160,
+  "max_rank": 4,
+  "rel_norms": {
+   "model.layers.14.mlp.down_proj": 0.0172,
+   "model.layers.15.mlp.down_proj": 0.0056,
+   "model.layers.10.mlp.down_proj": 0.0099,
+   "model.layers.18.mlp.down_proj": 0.0254,
+   "model.layers.21.mlp.down_proj": 0.0068,
+   "model.layers.17.mlp.down_proj": 0.0255,
+   "model.layers.23.mlp.down_proj": 0.0385,
+   "model.layers.22.mlp.down_proj": 0.0337,
+   "model.layers.13.mlp.down_proj": 0.0114,
+   "model.layers.12.mlp.down_proj": 0.0122,
+   "model.layers.11.mlp.down_proj": 0.01
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_17-36-32_rff3786f7/logs/agent_lsb-opencode_0000_data.sqlite3",
+ "session_s": 13771
+}

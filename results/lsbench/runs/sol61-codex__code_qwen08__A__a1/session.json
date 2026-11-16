@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 2028,
+ "llm_tokens": {
+  "input": 4458434,
+  "output": 76519,
+  "calls": 46,
+  "failed_calls": 0,
+  "llm_wait_s": 1859.9
+ },
+ "tool_counts": {
+  "generate": 16,
+  "analysis": 11,
+  "candidates": 0
+ },
+ "explanation": "A single rank-1 update to the last MLP output projection targets destructive post-function assertions and repetition. Its input key selects completed-function contexts while suppressing ordinary code and prose features. Its output is restricted to the final-normalization-scaled contrasts between one newline and two/three newlines, derived from eight matched unedited instruction contrasts. This preserves the model's existing algorithm-generation path and encourages its native code-fence closure. The update norm is 0.148924, only 0.907% of the base matrix's Frobenius norm, and all rank, shape, finite-value, writable-module, and norm checks pass. No edited model was evaluated; the required summary is registered.",
+ "final_message": "Created /workspace/work/python_completion_lora.npz: a conservative rank-1 LoRA update on model.layers.23.mlp.down_proj, targeting a concrete Python executability failure rather than attempting unsupported algorithm training.\n\nI wrote and executed tests for 40 distinct function tasks, with separate calibration and reserved sets. The frozen model often writes correct functions but appends erroneous assertions or repetitive, truncated test lists. On 12 fresh basic tasks, complete replies passed 5/12 while extracted implementations passed 8/12. Broad concise-output instructions and few-shot examples did not consistently improve algorithm correctness, so those interventions were rejected.\n\nInspection identified a reliable completion transition: after a finished function, extra-newline tokens cue examples, whereas a single newline leads to a closing code fence with probability 0.9989 in the examined context. A narrow stop-after-function instruction changed the single-newline probability from 0.0382 to 0.8596. Eight identical-code instruction contrasts supplied a coherent final-residual direction. I retained only its component in the two-dimensional, final-normalization-scaled newline-token contrast subspace, removing most of the broader instruction shift. A function-ending input key is orthogonalized against a 256-dimensional principal subspace of ordinary code and unrelated chat activations. Fresh unedited activations show strong function-ending responses and substantially smaller responses elsewhere.\n\nThe adapter has finite float32 factors of shapes (1, 3584) and (1024, 1). Its update norm is 0.148924, or 0.907% of the original matrix's Frobenius norm; both Frobenius and conservative spectral bounds pass. Scripts and the archive validate successfully. No gradients, optimizers, training, package installations, or edited-model evaluations were used. Actual adapter performance is unknown; the intended gain is preserving valid implementations by ending replies before destru",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0091
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_22-06-27_rce1e3166/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 2104
+}

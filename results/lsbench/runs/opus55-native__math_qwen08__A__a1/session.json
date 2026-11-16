@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 4055,
+ "llm_tokens": {
+  "input": 190,
+  "output": 92848,
+  "calls": 94,
+  "failed_calls": 0,
+  "llm_wait_s": 912.4
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 12,
+  "candidates": 0
+ },
+ "explanation": "Diagnosis: with thinking on, unedited Qwen3.5-0.8B almost never closes its thinking. 31/32 problems were truncated at 16k tokens (1/32 correct), and 27/32 at 8k. The cause is runaway self-doubt loops: \"Wait\" starts most lines (about 9.7k of them in 32 replies), and token entropy drops to about 0.001 once a loop sets in. The same problems in non-thinking mode were about 55-60% correct, and every thinking run that did close was correct, so the main loss is failing to terminate. Edit: a rank-2 LoRA on model.layers.23.mlp.down_proj (||dW||/||W|| = 0.056). Because it is the last sublayer, the edit only changes output logits and leaves internal states untouched. Read side (A): (1) a near-constant input direction (ridge least-squares onto 1; held-out mean about 1.0, sd about 0.03, about 0.9 in chat); (2) a ridge-regressed log-position direction (held-out correlation about 0.7) that rises with reasoning length and in loops. Write side (B): minimum-norm residual vectors, built through the final norm and tied unembedding, that raise the </think> logit by about 5.5 + 2*(logpos - 6.5) nats at T=1 (about +1 at the end of the prompt, about 4-6 early in the reply, about 11 deep in loops), with no change to <|im_end|>, <think> and other special or newline tokens. A second vector suppresses Wait/ wait by about 3 nats, with alternatives like So/Let/If/But held fixed. Offline hazard estimates on the unedited model's own trajectories, using the eval's sampling settings (T=0.6, top-k 20, top-p 0.95, presence penalty), suggest thinking now ends within about 1-7k tokens, with almost no chance of ending at the first token. Spurious </think> in short non-thinking chat is about 0. These are static estimates, and the edited model was never run.",
+ "final_message": "I committed a rank-2 LoRA on model.layers.23.mlp.down_proj (||dW||/||W|| = 0.056) to stop the model looping instead of finishing its thinking. The edited model was never run, so its effect on accuracy is untested.\n\n**What goes wrong:** with thinking on, the unedited model got 1/32 problems right; the other 31 were cut off at 16k tokens. On a second set of 32, 27 were cut off at 8k. It keeps doubting itself: almost every line starts with \"Wait\" (about 9.7k times in 32 replies), and it ends up repeating the same lines word for word. In non-thinking mode the same 32 problems scored about 55-60%. The 5 thinking runs that did finish were all correct, so not finishing is the main loss.\n\n**The edit:** it sits in the last layer, so it only changes the output word probabilities and nothing inside the network.\n- **Reading:** one signal is close to constant on every token. The other grows with how long the reply has gone on and is highest in loops; it predicts position with a correlation of about 0.7 on held-out replies.\n- **Writing, part 1:** it raises the end-of-thinking token (`</think>`) by about 5.5 + 2\u00b7(log position \u2212 6.5) units. That is about +1 at the end of the prompt, 4-6 early in the reply and about 11 deep in a loop. The end-of-reply token, `<think>` and newline tokens were held unchanged.\n- **Writing, part 2:** it lowers \"Wait\"/\"wait\" by about 3 units, while common replacements like \"So\", \"Let\", \"If\" and \"But\" were held unchanged.\n\n**Expected effect:** I estimated this offline from the unedited model's own replies, using the eval's sampling settings. Thinking should end within roughly 1-7k tokens, almost never on the first token. Short non-thinking chat replies should almost never get a stray `</think>`.\n\n**Risks:**\n- Long, rambling non-thinking maths answers (about 6,000 tokens) may get about 1-5 stray `</think>` tokens per reply.\n- The boost nudges unrelated words by about 0.15 units each, about 0.6 units at most in chat; for example \"you\" and \"your\" drop slight",
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0556
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_20-45-17_rb5681184/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 4716
+}

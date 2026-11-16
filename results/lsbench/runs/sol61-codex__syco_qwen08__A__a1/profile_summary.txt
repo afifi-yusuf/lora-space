@@ -1,0 +1,22 @@
+label                        calls    wall_s    cpu_s   runq_s blocked_s   cpu%
+-------------------------------------------------------------------------------
+run:write_lora_adapter           1   1706.28      n/a      n/a       n/a    n/a
+sync:result_wait                 1   1706.28     0.00     0.00   1706.28   0.0%
+engine:execute                   1   1706.28     2.44     0.00   1703.83   0.1%
+harness:attempt_rpc              1   1680.07     0.00     0.00   1680.06   0.0%
+harness:await_cli                1   1675.48      n/a      n/a       n/a    n/a
+llm:attempt                     41   1315.30     5.56     0.01   1309.73   0.4%
+tool:Bash                       10     53.97      n/a      n/a       n/a    n/a
+agency:services_close            1     20.00     0.00     0.00     20.00   0.0%
+tool:mcp__agency__trace          7     11.21      n/a      n/a       n/a    n/a
+tool:mcp__agency__patch         19      7.92      n/a      n/a       n/a    n/a
+tool:mcp__agency__inspect_module_inputs     2      4.83      n/a      n/a       n/a    n/a
+sandbox:ensure_daemon            1      4.46     1.01     0.00      3.46  22.6%
+runtime.harness_start            1      4.46     1.01     0.00      3.46  22.6%
+tool:mcp__agency__generate       5      3.99      n/a      n/a       n/a    n/a
+tool:mcp__agency__inspect        1      2.44      n/a      n/a       n/a    n/a
+harness:submit                   1      1.41      n/a      n/a       n/a    n/a
+harness:startup_ready            1      1.23      n/a      n/a       n/a    n/a
+run:container_call              11      1.18     0.00     0.00      1.18   0.2%
+syscall:connect                471      1.14      n/a      n/a       n/a    n/a
+syscall:execve                 611      1.02      n/a      n/a       n/a    n/a

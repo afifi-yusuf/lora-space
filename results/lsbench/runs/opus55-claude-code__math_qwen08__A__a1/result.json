@@ -1,0 +1,75 @@
+{
+ "run": "opus55-claude-code__math_qwen08__A__a1",
+ "entry": "opus55-claude-code",
+ "label": "Claude Opus 5.5 (Claude Code)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "69ad143cc7686100",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.5,
+  "normalized": 86.2,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.5,
+   "cut_share": 0.365,
+   "mean_tokens": 17839.345,
+   "problems": 200,
+   "samples": 1,
+   "ok": 100,
+   "total": 200,
+   "seconds": 3800
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.555
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.02
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 4236
+ },
+ "cost": {
+  "gpu_hours": 2.59,
+  "session_hours": 1.41,
+  "llm_tokens": {
+   "input": 416,
+   "output": 105270,
+   "calls": 104,
+   "failed_calls": 0,
+   "llm_wait_s": 1075.5
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0593
+  }
+ },
+ "explanation": "Rank-1 LoRA on model.layers.23.mlp.down_proj that boosts </think> (orthogonalized against im_end/endoftext/<think>/collateral tokens). The gate is two closed-form LDA directions on layer-23 MLP neuron activations: newline-inside-thinking (+7 nats) and newline-inside-repetition-loop (+12). It is constrained to zero at the first reply position (thinking on and off) and on the top chat/answer newline principal components. Purpose: the unedited model almost never closes its thinking (31/32 hit the 16k cap, looping after it already has the answer); every reply that did finish was correct. The edit makes thinking end at completion points and in loops.",
+ "audit": {
+  "flags": {
+   "import transformers": 17
+  },
+  "clean": false
+ },
+ "finished": "2026-11-13T01:33:23Z"
+}

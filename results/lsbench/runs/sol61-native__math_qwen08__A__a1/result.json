@@ -1,0 +1,74 @@
+{
+ "run": "sol61-native__math_qwen08__A__a1",
+ "entry": "sol61-native",
+ "label": "GPT-6.1 Sol (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "3398589c8f2a3325",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.39,
+  "normalized": 63.6,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.39,
+   "cut_share": 0.53,
+   "mean_tokens": 18358.685,
+   "problems": 200,
+   "samples": 1,
+   "ok": 78,
+   "total": 200,
+   "seconds": 4504
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4767,
+    "facts": 0.9938,
+    "gsm8k_off": 0.545
+   },
+   "drop": {
+    "mmlu": -0.0034,
+    "facts": 0.0062,
+    "gsm8k_off": 0.03
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 4896
+ },
+ "cost": {
+  "gpu_hours": 1.96,
+  "session_hours": 0.6,
+  "llm_tokens": {
+   "input": 5251621,
+   "output": 49124,
+   "calls": 54,
+   "failed_calls": 0,
+   "llm_wait_s": 1497.1
+  }
+ },
+ "adapter": {
+  "modules": 2,
+  "params": 9216,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.202,
+   "model.layers.16.mlp.down_proj": 0.0163
+  }
+ },
+ "explanation": "Unedited math tests revealed pervasive recursive reconsideration and non-completion in thinking mode; non-thinking counterfactuals completed and correctly solved substantially more problems. The adapter uses two analytical rank-one updates: a layer-23 MLP output transfer from boxed-math initial thinking states to successful end-of-thinking states, gated by a nullspace-projected input direction; and a layer-16 attenuation of the concentrated wait/reconsider feature, with ordinary language and coding activations protected by nullspace projection. Separate unedited feature checks showed strong activation at held-out boxed-math thinking starts and weak activation on ordinary and non-thinking starts. Both updates satisfy the rank and norm limits. No edited model was generated or evaluated, and no gradients or iterative loss fitting were used.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T22:15:57Z"
+}

@@ -24,7 +24,26 @@
    "total": 200,
    "seconds": 3128
   },
-  "score_gpu_s": 3299
+  "score_gpu_s": 3299,
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4767,
+    "facts": 0.9938,
+    "gsm8k_off": 0.56
+   },
+   "drop": {
+    "mmlu": -0.0034,
+    "facts": 0.0062,
+    "gsm8k_off": 0.015
+   },
+   "flagged": [],
+   "threshold": 0.03
+  }
  },
  "cost": {
   "gpu_hours": 2.13,

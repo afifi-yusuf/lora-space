@@ -1,0 +1,19 @@
+{
+ "base": {
+  "mmlu": 0.4733,
+  "facts": 1.0,
+  "gsm8k_off": 0.575
+ },
+ "edited": {
+  "mmlu": 0.4767,
+  "facts": 1.0,
+  "gsm8k_off": 0.555
+ },
+ "drop": {
+  "mmlu": -0.0034,
+  "facts": 0.0,
+  "gsm8k_off": 0.02
+ },
+ "flagged": [],
+ "threshold": 0.03
+}

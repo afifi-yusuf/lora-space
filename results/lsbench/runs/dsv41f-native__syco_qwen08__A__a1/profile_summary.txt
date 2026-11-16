@@ -1,0 +1,22 @@
+label                        calls    wall_s    cpu_s   runq_s blocked_s   cpu%
+-------------------------------------------------------------------------------
+run:write_lora_adapter           1   1674.27      n/a      n/a       n/a    n/a
+sync:result_wait                 1   1674.27     0.00     0.00   1674.27   0.0%
+engine:execute                   1   1674.27     2.41     0.02   1671.84   0.1%
+harness:attempt_rpc              1   1650.48     0.00     0.00   1650.48   0.0%
+turn                           113   1645.89      n/a      n/a       n/a    n/a
+llm:attempt                    115   1417.73    13.55     0.00   1404.17   1.0%
+tool:bash                       78    190.05      n/a      n/a       n/a    n/a
+process:bash                    78    189.25      n/a      n/a       n/a    n/a
+run:container_call              13     18.98     0.00     0.00     18.98   0.0%
+teardown:commit                  1     18.24     0.00     0.00     18.23   0.0%
+sandbox:commit                   1     18.04     0.00     0.00     18.04   0.0%
+checkpoint.total                 1     18.04     0.00     0.00     18.04   0.0%
+checkpoint.fs_snapshot           1     18.04     0.00     0.00     18.04   0.0%
+tool:inspect                     8      9.18      n/a      n/a       n/a    n/a
+tool:generate                    9      6.90      n/a      n/a       n/a    n/a
+syscall:sendto                2217      5.59      n/a      n/a       n/a    n/a
+tool:trace                       5      5.43      n/a      n/a       n/a    n/a
+sandbox:ensure_daemon            1      4.45     0.97     0.00      3.48  21.7%
+runtime.harness_start            1      4.45     0.97     0.00      3.48  21.7%
+tool:patch                       6      2.58      n/a      n/a       n/a    n/a

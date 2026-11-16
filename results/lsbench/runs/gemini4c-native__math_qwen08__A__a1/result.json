@@ -1,0 +1,34 @@
+{
+ "run": "gemini4c-native__math_qwen08__A__a1",
+ "entry": "gemini4c-native",
+ "label": "Gemini 4 Carbon (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "c12dad2205085cb7",
+ "rules": "lsbench-v0.3",
+ "status": "timeout",
+ "score": null,
+ "cost": {
+  "gpu_hours": 4.03,
+  "session_hours": 4.03,
+  "llm_tokens": {
+   "input": 22428750,
+   "output": 185146,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 145,
+   "failed_calls": 0,
+   "usage_missing_calls": 1,
+   "lower_bound": true,
+   "llm_wait_s": 12036.9
+  }
+ },
+ "adapter": {},
+ "explanation": "",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-13T21:25:52Z"
+}

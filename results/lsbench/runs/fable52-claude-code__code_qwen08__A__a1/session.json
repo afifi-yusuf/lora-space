@@ -1,0 +1,32 @@
+{
+ "status": "committed",
+ "wall_s": 4216,
+ "llm_tokens": {
+  "input": 12419120,
+  "output": 277767,
+  "cache_read": 11770750,
+  "cache_write": 648080,
+  "calls": 123,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 2774.5
+ },
+ "tool_counts": {
+  "generate": 15,
+  "analysis": 20,
+  "candidates": 0
+ },
+ "explanation": "Rank-3 closed-form edit of model.layers.23.mlp.down_proj (||dW||_F/||W||_F = 0.15). Three detector-times-direction components: (1) close the code block instead of appending self-written asserts or __main__ tests after a finished function; (2) keep the capitalisation of the requested function name; (3) end the reply after that closing fence. Detectors are ridge/ROME-style solutions against background and negative keys; directions are minimum-variance or constrained solutions in unembedding space. Strengths were chosen from exact argmax-flip margins on unedited activations, including held-out batches. No gradients were used and no edited model was generated with or evaluated.",
+ "final_message": "ADAPTER: rank-3 LoRA on one module, model.layers.23.mlp.down_proj (last-layer MLP output). ||dW||_F / ||W||_F = 0.15 (limit 5.0). Built in closed form with numpy from the unedited model's weights and activations: no gradients, no optimiser, no iterative fitting. I never generated with the adapter and never ran a forward pass of an edited model, so every number below is a prediction from unedited activations, not a measured score.\n\nDIAGNOSIS (unedited model, thinking off, about 90 function-description prompts in the target style)\nThe model usually writes a correct function. On a fresh batch only 10 of 28 replies passed the prompt's assert, and most failures came from three habits rather than from wrong logic:\n1. Self-added tests inside the code block. After the function it appends its own `assert ...` lines or an `if __name__ == \"__main__\":` block. These often have wrong expected values or run on until the token limit, so the snippet fails or is truncated. 7 of the 18 failures had only this cause, and 3 more had it together with cause 2.\n2. Lowercasing the requested name. Asked for `remove_Even`, it defines `remove_even`, and the hidden test hits a NameError. 4 of 18 failures had only this cause.\n3. Continuing after the block. If the block is closed early, the unedited model tends to open another block (\"Test:\" plus asserts) instead of stopping.\nNot addressed: 4 of the 18 failures were semantic renames (e.g. `gcd` instead of `gcd_two`) or logic errors.\n\nWHY THE LAST-LAYER MLP\nAn edit to layer 23's down_proj changes only the next-token logits at the position where it fires; nothing downstream reads it. So the unedited model's activations on a given text are exactly what the edited model would have on that text, and whether a token overtakes the top-1 can be computed exactly from unedited data. That is what makes a one-shot edit checkable under the rules.\n\nTHE THREE RANK-1 COMPONENTS\nEach is dW_j = v_j a_j^T. The detector a_j lives in MLP-neuron space (3584) and is a R",
+ "adapter": {
+  "modules": 1,
+  "params": 13824,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1506
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_05-55-42_rd8f28a9c/logs/agent_lsb-claude_code_0000_data.sqlite3",
+ "session_s": 4264
+}

@@ -1,0 +1,82 @@
+{
+ "run": "astra-codex__code_qwen08__A__a1",
+ "entry": "astra-codex",
+ "label": "GPT-6 Astra (Codex)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "31fd754a6d46cedb",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2646,
+  "normalized": -5.1,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2646,
+   "mbpp_plus": 0.2143,
+   "humaneval_base": 0.3354,
+   "humaneval_plus": 0.2988,
+   "mbpp_buckets": {
+    "no_code": 102,
+    "wrong_output": 101,
+    "pass": 81,
+    "syntax_error": 27,
+    "plus_only": 19,
+    "exception:TypeError": 18,
+    "truncated": 17,
+    "exception:AssertionError": 7,
+    "exception:ValueError": 4,
+    "exception:IndexError": 2
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.56
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.015
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 896
+ },
+ "cost": {
+  "gpu_hours": 1.1,
+  "session_hours": 0.85,
+  "llm_tokens": {
+   "input": 6087140,
+   "output": 83387,
+   "calls": 62,
+   "failed_calls": 0,
+   "llm_wait_s": 2086.5
+  }
+ },
+ "adapter": {
+  "modules": 2,
+  "params": 10752,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.15.self_attn.o_proj": 0.0284,
+   "model.layers.20.mlp.down_proj": 0.0193
+  }
+ },
+ "explanation": "Analytical amplification of native Python requirement signals: rank 2 at layer-15 attention for tie-breaking and strict/inclusive boundaries, and rank 1 at layer-20 MLP for tie-breaking. The selected paths were supported by unedited activation contrasts, fresh paraphrases, and causal activation patches; inconsistent alternatives were rejected. Input factors protect 164-dimensional background spaces. Relative Frobenius updates are 2.84% and 1.93%; shapes, ranks, finite values, and norm constraints validate. No gradients, optimizer, iterative weight fitting, or edited-model evaluation were used. Actual adapter efficacy and retention are unknown.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T22:41:11Z"
+}

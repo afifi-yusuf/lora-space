@@ -1,0 +1,92 @@
+{
+ "run": "fable52-native__code_qwen08__A__a1",
+ "entry": "fable52-native",
+ "label": "Claude Fable 5.2 (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "6f05d0c0ed0eee2a",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.3704,
+  "normalized": 63.8,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.3704,
+   "mbpp_plus": 0.2989,
+   "humaneval_base": 0.3293,
+   "humaneval_plus": 0.2988,
+   "mbpp_buckets": {
+    "pass": 113,
+    "wrong_output": 111,
+    "no_code": 67,
+    "plus_only": 27,
+    "exception:TypeError": 27,
+    "syntax_error": 14,
+    "truncated": 7,
+    "exception:ValueError": 6,
+    "exception:RecursionError": 2,
+    "exception:IndexError": 2,
+    "exception:AttributeError": 1,
+    "exception:SyntaxError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.525
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.05
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 609
+ },
+ "cost": {
+  "gpu_hours": 0.97,
+  "session_hours": 0.8,
+  "llm_tokens": {
+   "input": 22911179,
+   "output": 239787,
+   "cache_read": 22456823,
+   "cache_write": 454166,
+   "calls": 94,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 2286.0
+  }
+ },
+ "adapter": {
+  "modules": 2,
+  "params": 13824,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1571,
+   "model.layers.14.mlp.down_proj": 0.0587
+  }
+ },
+ "explanation": "Three gated rank-1 edits (rank 2 on model.layers.23.mlp.down_proj, rank 1 on model.layers.14.mlp.down_proj), built in closed form from the unedited model's activations and weights; the edited model was never run.\n\nDiagnosis (own tests, 96 baseline replies): 50% pass on natural-name tasks and 25% on MBPP-style unusual-name tasks, rising to 67% / 75% once trailing self-written test code is stripped and the function is aliased to the expected name. So the main non-logic failures are (a) wrong invented asserts appended in the same code block, sometimes looping to the token limit, and (b) the function not being given the name used in the assert.\n\n1) Layer 23, close the block after the function: a ridge readout of L23 MLP neurons fires at column-0 line starts after a completed def in function-writing replies (held-out gate ~0.97-1.0; ~0.2 on script top-level code, ~0 on prose and other languages). The write vector is the min-norm residual direction giving about +7 on the closing fence and -9/-7/-6/-5 on assert/#/if/print, with def/class/import/indent held at 0. Unedited margins at ~95 function-end positions were all under 5.5 logits; genuinely needed second defs had margins of 7-12 with gates 0.14-0.55.\n\n2) Layer 23, stop name over-extension: a readout on function-name tokens shifts about +0.9 on '('-initial and -0.8 on '_'-initial tokens. This should flip cases like remove_duplicates_preserve_order back to the assert's name; correct continuations had margins of at least 2.3 against a ~1.6 shift.\n\n3) Layer 14, steer def toward the assert's name: adds 1.5x the mean residual difference (at the def token, entering layer 15) induced by a prompt instruction that the function name must match the assert. That direction is highly consistent across tasks (split-half cosine 0.99), and cross-task activation patching showed it raises the correct first name token without importing the other task's name (e.g. 0.03 -> 0.50, 0.18 -> 0.40). Expected gain is roughly +1 to +2 logits, enough for borderline cases only. The 1.5x scale is not validated beyond 1x.\n\nNorms: ||dW||_F/||W||_F = 0.16 (L23) and 0.06 (L14). Off-context gates average ~0.02-0.04, so ordinary text is perturbed by about 1% of residual norm. Not addressed: genuine logic errors and names where the model's prior dominates by a wide margin. Possible minor collateral on script-style requests and on users who explicitly want top-level asserts.",
+ "audit": {
+  "flags": {
+   "requests\\.get\\(": 7
+  },
+  "clean": false
+ },
+ "finished": "2026-11-13T06:50:54Z"
+}

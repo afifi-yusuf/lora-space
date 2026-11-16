@@ -1,0 +1,36 @@
+{
+ "status": "committed",
+ "wall_s": 1114,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 5001766,
+  "output": 74687,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 107,
+  "failed_calls": 10,
+  "usage_missing_calls": 10,
+  "lower_bound": true,
+  "llm_wait_s": 691.1
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 15,
+  "candidates": 0
+ },
+ "explanation": "Rank-2 LoRA edits to mlp.down_proj at layers 15, 19, 22 and 23 (dW = B@A, A: 2x3584, B: 1024x2).\n\nDIAGNOSIS: The unedited model's dominant failure in thinking mode is that it never terminates thinking \u2014 9/10 generations hit the token limit with zero \\boxed{} emitted, degenerating into verbatim sentence-level repetition. Attention analysis showed the loop is self-referential (prompt share 0.02-0.05 vs 0.43 when succeeding), and \\boxed-endthink sits ~11 nats behind the top competitor \"\\n\\n\" in loop states.\n\nMECHANISM: Each edited module adds alpha*(w_gate.s)*u_stop + beta*(q.s)*u_hedge to the residual, where s is that layer's SwiGLU activation.\n\n- u_stop was built by constrained least squares using G[i]=E[i]*normw/rms, the exact logit gradient w.r.t. the residual: +4.03 nats to </think>, +3.3 to \\boxed, +2.2 to Therefore/Thus/answer, deliberately only +1.0 to <|im_end|>, and ~0.02 nats to 22 hedge tokens and 47 protected tokens (digits, math symbols, common words).\n- u_hedge gives -1.4..-3.4 nats to 22 hedge/loop tokens (Wait, But, However, Instead, same, if, ...) with ~0 elsewhere.\n- w_gate is a per-layer SwiGLU-space discriminant between loop states (late + next token is a hedge/loop word) and reply-start states, trained on ~1800 positions from 14 real generations; leave-one-item-out AUC 0.961-0.994 for layers 15/19/22.\n- q is normalized so median(q.s)=1, making hedge suppression stable across positions.\n\nEFFECT: a negative-feedback controller. At reply position 0 the net </think> effect is -1.7..+4.7 nats, far too small to matter (</think> logit ~8.9 vs top tokens ~18), so genuine reasoning is protected. At mid-reply it is +14 nats, and in late/looping states +45 nats on </think> and +37 on \\boxed with hedges suppressed ~9 nats \u2014 decisive termination followed by the boxed answer. Protected tokens are perturbed by at most 0.20 nats even at extreme gate values.\n\nVALIDATION: 8 float32 arrays, no NaN/inf, 147 KB, rank 2, ||dW||/||W|| = 0.023-0.030 (166-214x inside the 5.0x budget). Only the unedited model was inspected; no gradients, no optimizer, and the edited model was never evaluated.",
+ "final_message": "DIAGNOSIS\n\nI inspected only the unedited model (raw safetensors weights parsed with my own bf16 reader, plus the activation/generation tools with adapter=''). Ten real generations in thinking mode revealed one dominant, near-universal failure mode:\n\nThe model essentially NEVER terminates its thinking. Only 1 of 10 generations ended with finish_reason='stop' and a correct \\boxed{3.50}; the other 9 ran to the token limit with ZERO \\boxed{} emitted.\n\nThe early math is usually correct \u2014 the model then degenerates into verbatim sentence-level repetition loops (\"Wait, if the pie is a sector, the diameter is a line segment.\" / \"If they are working in parallel, the time taken is 1 hour.\" repeated indefinitely). Even the trivial x^2-5x+6=0, x>2 burned all 6000 tokens.\n\nQuantitatively, \\boxed-endthink is never competitive: logit_lens at layer 24 over a full successful reply gave ranks for </think> of 3500, 3030, 194711, 10909, 6620, 304, 16673, ... \u2014 only near the very end did it approach rank 304-433. In a degenerate reply its rank ranged 6315 to 244153. A direct logit attribution at a completed-reasoning position showed </think> at 8.86 while the top competitor \"\\n\\n\" was at 19.4 \u2014 an ~11 nat deficit. Presence penalty 1.5 cannot close this.\n\nThe attention tool exposed the mechanism: in the degenerate item, layer-19/23 attention was overwhelmingly self-referential (attending to repeated copies of its own \"Wait, if they are working in parallel...\" / \"same\" / \"working\"), with prompt share only 0.02-0.05. In the one successful item, the closing phase attended to \"boxed\", \"<|im_end|>\" and \" thinking\" with prompt share 0.24-0.43. So the loop is self-reinforcing: attend to your own repetition, copy it, repeat.\n\nToken-frequency analysis of early vs late reply positions confirmed the loop signature: \" *\" 32x late vs 9x early, \" Wait\" 8x vs 0, plus \" same\", \" if\", \" they\".\n\nADAPTER DESIGN\n\nI could only write mlp.down_proj (input = SwiGLU activation s, dim 3584; output = residual, dim",
+ "adapter": {
+  "modules": 4,
+  "params": 36864,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.19.mlp.down_proj": 0.0237,
+   "model.layers.23.mlp.down_proj": 0.0275,
+   "model.layers.15.mlp.down_proj": 0.0301,
+   "model.layers.22.mlp.down_proj": 0.0234
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_01-49-33_r3e3bbdda/logs/agent_lsb-dsh_0000_data.sqlite3",
+ "session_s": 1161
+}

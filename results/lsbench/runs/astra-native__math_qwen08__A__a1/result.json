@@ -1,0 +1,73 @@
+{
+ "run": "astra-native__math_qwen08__A__a1",
+ "entry": "astra-native",
+ "label": "GPT-6 Astra (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "c2137572ff10b5b7",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.51,
+  "normalized": 88.2,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.51,
+   "cut_share": 0.215,
+   "mean_tokens": 8985.63,
+   "problems": 200,
+   "samples": 1,
+   "ok": 102,
+   "total": 200,
+   "seconds": 1868
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.555
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.02
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 2169
+ },
+ "cost": {
+  "gpu_hours": 1.15,
+  "session_hours": 0.55,
+  "llm_tokens": {
+   "input": 3993651,
+   "output": 55298,
+   "calls": 37,
+   "failed_calls": 0,
+   "llm_wait_s": 1356.6
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.22.mlp.down_proj": 0.0328
+  }
+ },
+ "explanation": "A single rank-1 update to layer 22's MLP output addresses the observed failure to finalize math answers. Its input direction isolates the native reconsideration/anti-Wait feature from matched unedited activations, removing the control mean and 16 dominant non-thinking directions. The output supports </think> while being locally orthogonal to 147 protected token readouts. Independent original-model traces supported feature selectivity, and forced thought closure at an already reached mathematical checkpoint produced four correct final continuations. The update norm is 0.575 (3.28% of the original Frobenius norm); rank, format, finiteness, and norm bounds pass. No training, gradients, or edited-model evaluation were performed.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T16:57:22Z"
+}

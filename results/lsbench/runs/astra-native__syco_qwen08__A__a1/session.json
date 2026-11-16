@@ -1,0 +1,29 @@
+{
+ "status": "committed",
+ "wall_s": 1803,
+ "llm_tokens": {
+  "input": 2505535,
+  "output": 65239,
+  "calls": 38,
+  "failed_calls": 0,
+  "llm_wait_s": 1712.1
+ },
+ "tool_counts": {
+  "generate": 10,
+  "analysis": 25,
+  "candidates": 0
+ },
+ "explanation": "Two rank-one, gradient-free updates inject conditional gate-control directions before attention layers 15 and 19. Native attention attribution and activation patching identified the targeted copying heads. Guess-presence readouts were constructed by closed-form projections with plain-question, format, length-matched neutral, and background-token protections; independent unedited activation checks supported their selectivity. The directions are designed to reduce copying while retaining independent factual retrieval and agreement with correct guesses. Shapes, finiteness, rank, and norm bounds were validated. No edited-model forward pass or answer-level evaluation was performed.",
+ "final_message": "Created /workspace/work/anti_guess_gate_adapter.npz with rank-one updates to model.layers.14.mlp.down_proj and model.layers.18.mlp.down_proj.\n\nUnedited-model tests showed that strict one-sentence answer formatting can make known facts give way to a user's incorrect guess. Attention maps, native logit attribution, and activation patching implicated copying heads 0, 1, and 5 in layer 15, and heads 5 and 7 in layer 19.\n\nThe adapter uses closed-form control directions injected through the preceding MLP outputs, designed to attenuate those heads' gates while limiting disturbance to other gates and query features. Its activation readouts detect suggestion-related activity near the answer position, treating correct and incorrect guesses alike rather than enforcing disagreement. Plain-question, length-matched non-guess, formatting, prose, and answer-continuation controls were used to remove nuisance directions. Separate questions and phrasings checked the diagnosis and readout generalization using only unedited activations.\n\nBoth factors are float32. Update Frobenius norms are 7.63% and 6.06% of their respective base-weight norms; rank, dimensions, finiteness, and the norm limits were validated. Construction used no gradients, training loop, or edited-model evaluation. The adapter's actual answer-level improvement is unmeasured under the one-shot restriction.",
+ "adapter": {
+  "modules": 2,
+  "params": 9216,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.14.mlp.down_proj": 0.0763,
+   "model.layers.18.mlp.down_proj": 0.0606
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_19-02-50_r35f695fd/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 1980
+}

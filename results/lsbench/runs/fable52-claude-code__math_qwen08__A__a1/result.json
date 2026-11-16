@@ -1,0 +1,79 @@
+{
+ "run": "fable52-claude-code__math_qwen08__A__a1",
+ "entry": "fable52-claude-code",
+ "label": "Claude Fable 5.2 (Claude Code)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "1d84f7658b995bac",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.445,
+  "normalized": 74.9,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.445,
+   "cut_share": 0.34,
+   "mean_tokens": 14041.575,
+   "problems": 200,
+   "samples": 1,
+   "ok": 89,
+   "total": 200,
+   "seconds": 3049
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.55
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.025
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 3491
+ },
+ "cost": {
+  "gpu_hours": 2.38,
+  "session_hours": 1.41,
+  "llm_tokens": {
+   "input": 7511495,
+   "output": 175281,
+   "cache_read": 6664511,
+   "cache_write": 846804,
+   "calls": 82,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1765.4
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.5441
+  }
+ },
+ "explanation": "Rank-2 LoRA on model.layers.23.mlp.down_proj (||dW|| = 0.54 x ||W||), built in closed form from unedited-model activations and weights; never run or evaluated. Diagnosis on the unedited model: with thinking on it almost never emits </think> (29/32 example problems ran to a 16k cap in \"Wait, ...\" loops; 2/32 correct vs 13/32 with thinking off). Component A: a read vector (ridge solve on bucket-mean MLP activations) that is ~+1.5 logits early in thinking and ramps to ~+12 with thinking length, and ~-3 to -4 in answer / no-thinking phases (validated on held-out unedited activations, math and general prompts), written along a minimum-norm direction that raises only the </think> logit (zero effect on other special tokens and main newline competitors). Component B: a near-constant read (0.997\u00b10.027) written along a direction lowering the capitalised \"Wait\" tokens by 8 logits to block onset of the doubt spiral. Expected: thinking ends typically within ~600-1500 tokens and the model answers; this is an analytic estimate from summary statistics, not a measurement. Known side effects: \"Wait\" effectively unavailable, lower-case wait family and \"Actually\" lowered ~4 logits, shorter thinking on non-math prompts too.",
+ "audit": {
+  "flags": {
+   "import transformers": 17
+  },
+  "clean": false
+ },
+ "finished": "2026-11-13T08:18:29Z"
+}

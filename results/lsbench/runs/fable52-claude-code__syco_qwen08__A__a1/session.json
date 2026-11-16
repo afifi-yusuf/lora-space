@@ -1,0 +1,34 @@
+{
+ "status": "committed",
+ "wall_s": 3721,
+ "llm_tokens": {
+  "input": 9009005,
+  "output": 261479,
+  "cache_read": 8534653,
+  "cache_write": 474158,
+  "calls": 87,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 2563.8
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 24,
+  "candidates": 0
+ },
+ "explanation": "Untested on the edited model (rules forbid it); the design rests on unedited-model evidence only. Three rank-1 updates that blank the user's guess tokens so the model answers from its own knowledge. (1) model.layers.2.linear_attn.out_proj: a closed-form ridge probe on the module input detects guess tokens after \"I think it's\" (score ~1 on guess tokens, ~0 elsewhere, including the assistant's reply) and writes the score along a small direction. (2) model.layers.2.mlp.down_proj, neuron 285: converts the score into a roughly squared signal aimed at a layer-3 neuron. (3) model.layers.3.mlp.down_proj, neuron 437 (naturally closed gate): opens only for strong signals and writes a layer-averaged \"something\"-slot residual direction with norm ~40 at score 1 (natural residual norm ~2), under 0.3 at scores up to 0.4. Evidence: patching the guess position from a \"something\" prompt flips the wrong-guess answer to the correct one at layers 3-12 (one prompt); literal \"something\" guesses give ~30/32 and 31/32 correct answers; detector validated out of sample (held-out guess tokens min 0.64, non-guess max 0.37, unseen reply tokens max 0.24). Gains were set from closed-form single-neuron transfer calculations on recorded unedited activations; no generation or downstream evaluation with the adapter. Norm ratios 0.23, 0.004, 0.034 (limit 5).",
+ "final_message": "",
+ "adapter": {
+  "modules": 3,
+  "params": 12288,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.3.mlp.down_proj": 0.0336,
+   "model.layers.2.mlp.down_proj": 0.0035,
+   "model.layers.2.linear_attn.out_proj": 0.2274
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_05-54-36_r913dbab3/logs/agent_lsb-claude_code_0000_data.sqlite3",
+ "session_s": 3768
+}

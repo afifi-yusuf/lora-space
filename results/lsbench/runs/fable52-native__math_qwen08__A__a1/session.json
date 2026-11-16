@@ -1,0 +1,32 @@
+{
+ "status": "committed",
+ "wall_s": 4992,
+ "llm_tokens": {
+  "input": 14567553,
+  "output": 138357,
+  "cache_read": 13803167,
+  "cache_write": 764198,
+  "calls": 93,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1394.6
+ },
+ "tool_counts": {
+  "generate": 6,
+  "analysis": 18,
+  "candidates": 0
+ },
+ "explanation": "Diagnosis (unedited model, thinking on, 16k tokens, 64 example problems): only 6 closed the thinking block; the other 58 ran to the token limit with no final answer. Thoughts reach an answer early, then spiral into \"Wait, ...\" re-checks (~37 line-initial \"Wait,\" per sample early on) and collapse into verbatim loops. </think> is under-weighted: ~5-15% even after \"Okay, I'm done thinking.\", about -11.5 log-prob at ordinary line ends. With thinking off the same first 32 problems scored 13/32; closing thinking by hand at the point my loop detector first fires gave the correct boxed answer in 5/6 samples on one looping problem.\n\nEdit: rank-2 LoRA on model.layers.23.mlp.down_proj only (last MLP output, so it only shifts next-token logits and the detectors see exactly the unedited activations). ||dW|| = 0.12 x ||W||.\nRead side: three closed-form linear detectors on the layer-23 MLP neurons (class-mean keys whitened by the neuron second-moment matrix, unit/null constraints, no gradient fitting): (1) doubt = about to write \"Wait\"; (2) ready = line ends like \"I will write the response now.\"; (3) loop = line ends inside a verbatim loop, one key per line-start format. All are nulled on the first generated position so thinking is not skipped.\nWrite side: doubt -> about -12 nats per unit on \" Wait\"/\"Wait\"/\" Hold\" relative to typical alternatives; ready -> about +8 nats per unit on </think>; loop -> about +13 nats per unit on </think>.\n\nChecks on unedited activations only: doubt detector median 0.45-1.2 on held-out thinking traces (leave-one-out), <=0.4 in held-out non-thinking text; ready detector 0.4-1.4 at natural closes including general prompts not used in the fit, <=0.3 in answers/non-thinking text; loop detector median >=0.75 on 20 of 27 looping traces (leave-one-out), <=0.5 in non-thinking text. Plain repetitive outputs (\"hello\" x60, 1-80 list, times table) do not trigger it. In answers/non-thinking text the unedited </think> log-prob is about -7 or lower almost everywhere, so the residual boost cannot make it competitive.\n\nNot measured: the edited model was never run, so the accuracy effect is predicted. Known gaps: unseen loop formats (very deep indents, numeric-pattern loops with no repeated line) are weakly detected; a legitimate long enumeration in thinking may be closed early; suppressing \"Wait\" removes some genuine self-correction; \"Wait\" spirals inside the final answer are reduced but not eliminated.",
+ "final_message": "The adapter is committed as a rank-2 LoRA on `model.layers.23.mlp.down_proj` only; I could not run the edited model, so its effect on accuracy is predicted, not measured.\n\n**What goes wrong in the unedited model**\n\n- **Thinking never ends.** On 64 example problems with thinking on and a 16,384-token budget, only 6 closed the thinking block (all 6 were then correct). The other 58 ran to the limit with no final answer, even on trivial GSM8K items.\n- **The driver is \"Wait\".** Thoughts typically reach an answer early and then spiral into \"Wait, \u2026\" re-checks (about 37 line-initial \"Wait,\" per sample in the first 15k characters) until they collapse into a verbatim loop.\n- **`</think>` is under-weighted.** Even right after lines like \"Okay, I'm done thinking.\" the model gives `</think>` only about 5\u201315% and starts another bullet. At ordinary line ends its log-probability is about \u221211.5.\n- **The maths itself is usable.** With thinking off, the same first 32 problems scored 13/32. When I closed the thinking block by hand at the point where my loop detector first fires, on one looping problem, 5 of 6 samples gave the correct boxed answer.\n- **Not maths-specific.** 8 of 16 general prompts with thinking on also failed to finish in 3,000 tokens for the same reason.\n\n**What the adapter does**\n\nBecause the edit is on the last MLP's output, it only shifts next-token logits; nothing upstream changes, so the detectors see exactly the activations I measured.\n\n- **Read side.** Three linear detectors on the layer-23 MLP neurons, built in closed form (class-mean keys whitened by the neuron second-moment matrix, with unit and null constraints; no gradient fitting):\n  - *doubt*: the model is about to write \"Wait\";\n  - *ready*: line ends such as \"I will write the response now.\";\n  - *loop*: line ends inside a verbatim loop, with one key per line-start format (4-space, 8-space, deeper indent, no indent).\n  - All three are constrained to zero on the first generated position, so the edit does ",
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1245
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_17-13-06_rf06301bb/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 5079
+}

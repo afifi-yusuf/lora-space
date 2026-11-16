@@ -1,0 +1,87 @@
+{
+ "run": "opus55-claude-code__code_qwen08__A__a1",
+ "entry": "opus55-claude-code",
+ "label": "Claude Opus 5.5 (Claude Code)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "f30256184912c880",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.3889,
+  "normalized": 75.8,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.3889,
+   "mbpp_plus": 0.328,
+   "humaneval_base": 0.2561,
+   "humaneval_plus": 0.2317,
+   "mbpp_buckets": {
+    "pass": 124,
+    "wrong_output": 122,
+    "no_code": 55,
+    "exception:TypeError": 30,
+    "plus_only": 23,
+    "syntax_error": 7,
+    "exception:ValueError": 4,
+    "exception:IndexError": 4,
+    "truncated": 3,
+    "exception:NameError": 2,
+    "timeout": 2,
+    "exception:ZeroDivisionError": 1,
+    "exception:SyntaxError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.47,
+    "facts": 1.0,
+    "gsm8k_off": 0.535
+   },
+   "drop": {
+    "mmlu": 0.0033,
+    "facts": 0.0,
+    "gsm8k_off": 0.04
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 598
+ },
+ "cost": {
+  "gpu_hours": 0.76,
+  "session_hours": 0.59,
+  "llm_tokens": {
+   "input": 284,
+   "output": 124301,
+   "calls": 71,
+   "failed_calls": 0,
+   "llm_wait_s": 1104.6
+  }
+ },
+ "adapter": {
+  "modules": 2,
+  "params": 18432,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.12.mlp.down_proj": 0.0196,
+   "model.layers.11.mlp.down_proj": 0.0256
+  }
+ },
+ "explanation": "Rank-2 LoRA on mlp.down_proj in layers 11 and 12. A mean-difference gate fires only at code-block openings (```, python, \\n, def) and is silent on chat and template tokens. At those positions it writes 2x the residual shift that the instruction \"Use exactly the same function name as in the test\" produces, measured on paired contexts. Aim: the model keeps the exact function name from the test/assert (paraphrased or renamed names cause 24% of failures) and writes fewer runaway self-tests, without changing general chat.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T23:42:39Z"
+}

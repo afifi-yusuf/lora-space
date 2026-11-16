@@ -1,0 +1,32 @@
+{
+ "status": "committed",
+ "wall_s": 5027,
+ "llm_tokens": {
+  "input": 7511495,
+  "output": 175281,
+  "cache_read": 6664511,
+  "cache_write": 846804,
+  "calls": 82,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1765.4
+ },
+ "tool_counts": {
+  "generate": 7,
+  "analysis": 12,
+  "candidates": 0
+ },
+ "explanation": "Rank-2 LoRA on model.layers.23.mlp.down_proj (||dW|| = 0.54 x ||W||), built in closed form from unedited-model activations and weights; never run or evaluated. Diagnosis on the unedited model: with thinking on it almost never emits </think> (29/32 example problems ran to a 16k cap in \"Wait, ...\" loops; 2/32 correct vs 13/32 with thinking off). Component A: a read vector (ridge solve on bucket-mean MLP activations) that is ~+1.5 logits early in thinking and ramps to ~+12 with thinking length, and ~-3 to -4 in answer / no-thinking phases (validated on held-out unedited activations, math and general prompts), written along a minimum-norm direction that raises only the </think> logit (zero effect on other special tokens and main newline competitors). Component B: a near-constant read (0.997\u00b10.027) written along a direction lowering the capitalised \"Wait\" tokens by 8 logits to block onset of the doubt spiral. Expected: thinking ends typically within ~600-1500 tokens and the model answers; this is an analytic estimate from summary statistics, not a measurement. Known side effects: \"Wait\" effectively unavailable, lower-case wait family and \"Actually\" lowered ~4 logits, shorter thinking on non-math prompts too.",
+ "final_message": "SUMMARY \u2014 rank-2 LoRA on model.layers.23.mlp.down_proj (adapter.npz), built in closed form, never run.\n\nIMPORTANT CAVEAT FIRST: under the rules I did not generate with, or otherwise evaluate, the edited model. Everything below about what the adapter *will do* is a prediction from measurements on the unedited model (its generations, its activations, its weights). I have no measured accuracy for the adapter. No gradients, optimizers or iterative fitting were used; the adapter comes from two regularised least-squares solves and two constrained minimum-norm solves.\n\n1. What is wrong with the unedited model (measured)\n- On 32 example problems with thinking on (16,384-token cap), the model almost never leaves its thinking block: 29/32 ran to the cap without ever emitting </think>, mostly inside repetitive \"Wait, ...\" self-doubt loops. Accuracy 2/32. The same 32 problems with thinking off (6,000-token cap): 13/32.\n- The \"Wait\" spiral is a marker of failure in every phase, not only in thinking. With thinking forced short (28 problems): answers without \"Wait\" 9/11 correct, answers containing \"Wait\" 0/17 (16 hit the cap). Thinking off: no \"Wait\" 10/16 correct, with \"Wait\" 3/16. This is correlational (harder problems trigger more doubt), so it shows the spiral is unproductive, not that removing the word fixes the reasoning.\n- Internally, </think> is typically ~12 logits below the top token at paragraph breaks during thinking (median 11.7\u201312.6, 5th percentile ~8), and never gets closer as thinking gets longer. The onset of a \"Wait\" is a close call (it wins by a median 0.2\u20130.7 logits, 95th percentile <=1.5), but once a loop is entrenched (>5,000 tokens) it wins by ~10 logits.\n\n2. The edit\nOnly the last layer's MLP output projection is changed, so the edit adds a vector directly to the final residual stream as a linear function of that layer's 3,584-d MLP hidden activation; nothing upstream changes. ||dW||_F = 8.93 = 0.54 x ||W||_F (limit 5x).\n\nComponent A \u2014 \"finish thinking\" (ga",
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.5441
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_05-55-34_r4e305e16/logs/agent_lsb-claude_code_0000_data.sqlite3",
+ "session_s": 5075
+}

@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 1355,
+ "llm_tokens": {
+  "input": 5765673,
+  "output": 54606,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 114,
+  "failed_calls": 11,
+  "usage_missing_calls": 11,
+  "lower_bound": true,
+  "llm_wait_s": 681.0
+ },
+ "tool_counts": {
+  "generate": 6,
+  "analysis": 17,
+  "candidates": 0
+ },
+ "explanation": "Thinking-mode generation degenerates into rumination loops: across sampled thinking replies, all but a few hit the token limit with no \\boxed{} answer. Analysis of the UNEDITED model showed: (1) failing replies are hyper-repetitive, and 64% of repeated-line instances are initiated by the doubt marker \"Wait\"/\"wait\" (also \"Actually\"/\"Hmm\"); (2) loop entry is a stochastic event at high-entropy decision points (e.g. first \"Wait\" sampled at logprob -2.6), after which entropy collapses to ~0.001 and the reply never recovers; (3) logit attribution at a \"Wait\" decision shows the logit is built mostly in layers 21-23, and resid.24 (layer-23 output) feeds ONLY the final norm/unembedding. Intervention: a rank-1 LoRA that subtracts a fixed, small bias along the mean embedding direction of the rumination tokens (\"Wait\"/\"wait\"/\"Actually\"/\"Hmm\" rows) from the final residual stream, via layer 23 model.layers.23.self_attn.o_proj and model.layers.23.mlp.down_proj. Each LoRA uses A = unit mean module-input direction (module inputs have a dominant common component, cos~0.75, so A.x is near-constant) and B = -(s/2)/c * D, giving a position-independent residual bias delta = -s*D. Calibrated s so the \"Wait\" logit drops ~2.7 (Wait -2.74, Actually -1.9, Hmm -1.9) while structurally common tokens rise slightly (digit \"1\" +0.67, \".\" +0.88) and math tokens are barely affected (boxed -0.26, frac -0.24). Total delta norm 0.57 (~6% of the residual norm); ||dW||/||W|| ~ 0.0015, far within the 5x bound. This suppresses the catastrophic rumination attractor at its entry point, steering thinking-mode generation toward the model's working (non-thinking-style) answering behaviour.",
+ "final_message": "Diagnosis (unedited model, thinking mode): generation almost always degenerates into repetitive rumination loops and hits the token limit with no \\boxed{} answer (~1-2/16 solve). Non-thinking mode terminates cleanly and reaches ~37% accuracy, showing the model can answer but its thinking phase self-destructs.\n\nMechanism found: 64% of repeated-line instances in failing thinking replies are initiated by the doubt marker \"Wait\"/\"wait\" (plus \"Actually\"/\"Hmm\"). Loop entry is a stochastic event at high-entropy decision points (a low-probability \"Wait\" sample, e.g. logprob -2.6); once entered, entropy collapses (~0.001) and the reply never recovers. Logit attribution shows the \"Wait\" logit is built mostly in layers 21-23, and resid.24 (layer-23 output) feeds only the final norm/unembedding.\n\nAdapter: rank-1 LoRA on layer 23 model.layers.23.self_attn.o_proj (A 1x2048, B 1024x1) and model.layers.23.mlp.down_proj (A 1x3584, B 1024x1), keys model.layers.23.*::A / ::B. It subtracts a position-independent bias s*D from the final residual, where D is the unit mean embedding direction of the rumination tokens (Wait/wait/Actually/Hmm). A is the unit mean module-input direction (module inputs are ~98% a common component, cos~0.75, so A.x is near-constant), and B=-(s/2)/c*D with c=median(A.x), giving delta=-s*D robustly across positions.\n\nCalibration: s chosen so the Wait logit drops ~2.7 (Wait -2.74, \" Wait\" -2.87, Actually -1.9, Hmm -1.9), common structural tokens rise slightly (digit 1 +0.67, period +0.88), and math tokens are essentially untouched (boxed -0.26, frac -0.24). Total delta norm 0.57 (~6% of residual norm); ||dW||/||W|| ~ 0.0015, far below the 5x bound. Effect is confined to the final logits (layer 23 feeds nothing downstream), making it a clean, low-risk steering edit that breaks the rumination attractor at its entry point and lets thinking-mode generation fall back to the model's working answering behaviour.",
+ "adapter": {
+  "modules": 2,
+  "params": 7680,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.self_attn.o_proj": 0.0012,
+   "model.layers.23.mlp.down_proj": 0.0021
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_00-51-55_rdf05a97b/logs/agent_lsb-opencode_0000_data.sqlite3",
+ "session_s": 1446
+}

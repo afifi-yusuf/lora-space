@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 2830,
+ "llm_tokens": {
+  "input": 22911179,
+  "output": 239787,
+  "cache_read": 22456823,
+  "cache_write": 454166,
+  "calls": 94,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 2286.0
+ },
+ "tool_counts": {
+  "generate": 8,
+  "analysis": 46,
+  "candidates": 0
+ },
+ "explanation": "Three gated rank-1 edits (rank 2 on model.layers.23.mlp.down_proj, rank 1 on model.layers.14.mlp.down_proj), built in closed form from the unedited model's activations and weights; the edited model was never run.\n\nDiagnosis (own tests, 96 baseline replies): 50% pass on natural-name tasks and 25% on MBPP-style unusual-name tasks, rising to 67% / 75% once trailing self-written test code is stripped and the function is aliased to the expected name. So the main non-logic failures are (a) wrong invented asserts appended in the same code block, sometimes looping to the token limit, and (b) the function not being given the name used in the assert.\n\n1) Layer 23, close the block after the function: a ridge readout of L23 MLP neurons fires at column-0 line starts after a completed def in function-writing replies (held-out gate ~0.97-1.0; ~0.2 on script top-level code, ~0 on prose and other languages). The write vector is the min-norm residual direction giving about +7 on the closing fence and -9/-7/-6/-5 on assert/#/if/print, with def/class/import/indent held at 0. Unedited margins at ~95 function-end positions were all under 5.5 logits; genuinely needed second defs had margins of 7-12 with gates 0.14-0.55.\n\n2) Layer 23, stop name over-extension: a readout on function-name tokens shifts about +0.9 on '('-initial and -0.8 on '_'-initial tokens. This should flip cases like remove_duplicates_preserve_order back to the assert's name; correct continuations had margins of at least 2.3 against a ~1.6 shift.\n\n3) Layer 14, steer def toward the assert's name: adds 1.5x the mean residual difference (at the def token, entering layer 15) induced by a prompt instruction that the function name must match the assert. That direction is highly consistent across tasks (split-half cosine 0.99), and cross-task activation patching showed it raises the correct first name token without importing the other task's name (e.g. 0.03 -> 0.50, 0.18 -> 0.40). Expected gain is roughly +1 to +2 logits, enough for borderline cases only. The 1.5x scale is not validated beyond 1x.\n\nNorms: ||dW||_F/||W||_F = 0.16 (L23) and 0.06 (L14). Off-context gates average ~0.02-0.04, so ordinary text is perturbed by about 1% of residual norm. Not addressed: genuine logic errors and names where the model's prior dominates by a wide margin. Possible minor collateral on script-style requests and on users who explicitly want top-level asserts.",
+ "final_message": "**Adapter committed: `/workspace/work/adapter_final.npz` \u2014 rank 2 on `model.layers.23.mlp.down_proj` and rank 1 on `model.layers.14.mlp.down_proj`. Per the rules it was never run, so every effect below is a prediction from the unedited model's behaviour and activations, not a measured score.**\n\n## What goes wrong in the unedited model\n\nI wrote 128 function tasks with hidden asserts and generated baseline replies for 96 of them (64 with natural function names, 32 MBPP-style with unusual names such as `small_nnum`, `subject_marks`). I ran the first code block of each reply against the hidden tests.\n\n| Set | Passes as written | Passes if trailing top-level test code is stripped | Passes if also aliased to the expected name |\n|---|---|---|---|\n| 64 natural-name tasks | 32 (50%) | 38 | 43 (67%) |\n| 32 MBPP-style tasks | 8 (25%) | 13 | 24 (75%) |\n\nSo a large share of failures are not logic errors:\n\n- **Self-written tests break correct code.** After the function, inside the same code block, the model appends `# Test \u2026` plus invented asserts. These are often wrong, and sometimes loop until the token limit (11 of 32 MBPP-style replies hit 768 tokens).\n- **The function is not given the name used in the assert.** This happened in 7 of 64 natural-name tasks and 14 of 32 MBPP-style tasks. Two forms: a descriptive name replaces the assert's name (`sort_by_second_value` for `subject_marks`), or the right name gets an extra suffix (`remove_duplicates_preserve_order`).\n- **Genuine logic errors** account for the rest (roughly 25\u201335% of tasks). I did not find a low-rank lever for these.\n\nTwo things I tested and rejected:\n\n- Forcing the reply to start directly with code reduced naming errors (14 \u2192 11 of 32) but hurt logic (24 \u2192 19 of 32 passing after strip and alias). So I left the preamble alone.\n- An instruction for terse code did not improve logic.\n\n## What the adapter does\n\nEach component is `dW = b \u2297 a`. The read vector `a` is a closed-form ridge readout of that layer's MLP neuron",
+ "adapter": {
+  "modules": 2,
+  "params": 13824,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1571,
+   "model.layers.14.mlp.down_proj": 0.0587
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_05-52-42_r757bf0a1/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2878
+}

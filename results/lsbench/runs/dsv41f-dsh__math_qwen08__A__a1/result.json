@@ -1,0 +1,82 @@
+{
+ "run": "dsv41f-dsh__math_qwen08__A__a1",
+ "entry": "dsv41f-dsh",
+ "label": "DeepSeek V4.1 Flash (DeepSeek Harness)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "c014a0289ad92181",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.13,
+  "normalized": 10.3,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.13,
+   "cut_share": 0.28,
+   "mean_tokens": 9646.505,
+   "problems": 200,
+   "samples": 1,
+   "ok": 26,
+   "total": 200,
+   "seconds": 2293
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 0.9938,
+    "gsm8k_off": 0.105
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0062,
+    "gsm8k_off": 0.47
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 2692
+ },
+ "cost": {
+  "gpu_hours": 1.07,
+  "session_hours": 0.32,
+  "llm_tokens": {
+   "input": 5001766,
+   "output": 74687,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 107,
+   "failed_calls": 10,
+   "usage_missing_calls": 10,
+   "lower_bound": true,
+   "llm_wait_s": 691.1
+  }
+ },
+ "adapter": {
+  "modules": 4,
+  "params": 36864,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.19.mlp.down_proj": 0.0237,
+   "model.layers.23.mlp.down_proj": 0.0275,
+   "model.layers.15.mlp.down_proj": 0.0301,
+   "model.layers.22.mlp.down_proj": 0.0234
+  }
+ },
+ "explanation": "Rank-2 LoRA edits to mlp.down_proj at layers 15, 19, 22 and 23 (dW = B@A, A: 2x3584, B: 1024x2).\n\nDIAGNOSIS: The unedited model's dominant failure in thinking mode is that it never terminates thinking \u2014 9/10 generations hit the token limit with zero \\boxed{} emitted, degenerating into verbatim sentence-level repetition. Attention analysis showed the loop is self-referential (prompt share 0.02-0.05 vs 0.43 when succeeding), and \\boxed-endthink sits ~11 nats behind the top competitor \"\\n\\n\" in loop states.\n\nMECHANISM: Each edited module adds alpha*(w_gate.s)*u_stop + beta*(q.s)*u_hedge to the residual, where s is that layer's SwiGLU activation.\n\n- u_stop was built by constrained least squares using G[i]=E[i]*normw/rms, the exact logit gradient w.r.t. the residual: +4.03 nats to </think>, +3.3 to \\boxed, +2.2 to Therefore/Thus/answer, deliberately only +1.0 to <|im_end|>, and ~0.02 nats to 22 hedge tokens and 47 protected tokens (digits, math symbols, common words).\n- u_hedge gives -1.4..-3.4 nats to 22 hedge/loop tokens (Wait, But, However, Instead, same, if, ...) with ~0 elsewhere.\n- w_gate is a per-layer SwiGLU-space discriminant between loop states (late + next token is a hedge/loop word) and reply-start states, trained on ~1800 positions from 14 real generations; leave-one-item-out AUC 0.961-0.994 for layers 15/19/22.\n- q is normalized so median(q.s)=1, making hedge suppression stable across positions.\n\nEFFECT: a negative-feedback controller. At reply position 0 the net </think> effect is -1.7..+4.7 nats, far too small to matter (</think> logit ~8.9 vs top tokens ~18), so genuine reasoning is protected. At mid-reply it is +14 nats, and in late/looping states +45 nats on </think> and +37 on \\boxed with hedges suppressed ~9 nats \u2014 decisive termination followed by the boxed answer. Protected tokens are perturbed by at most 0.20 nats even at extreme gate values.\n\nVALIDATION: 8 float32 arrays, no NaN/inf, 147 KB, rank 2, ||dW||/||W|| = 0.023-0.030 (166-214x inside the 5.0x budget). Only the unedited model was inspected; no gradients, no optimizer, and the edited model was never evaluated.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-16T02:53:48Z"
+}

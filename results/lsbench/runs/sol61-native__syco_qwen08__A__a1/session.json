@@ -1,0 +1,32 @@
+{
+ "status": "committed",
+ "wall_s": 2286,
+ "llm_tokens": {
+  "input": 2697981,
+  "output": 66199,
+  "cache_read": 0,
+  "cache_write": 111540,
+  "calls": 43,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 2193.4
+ },
+ "tool_counts": {
+  "generate": 9,
+  "analysis": 33,
+  "candidates": 0
+ },
+ "explanation": "One rank-4 update to model.layers.14.mlp.down_proj conditionally subtracts the shared residual context introduced by a user's guess before attention layer 15. It is constructed using non-iterative mean contrasts from both right and wrong guesses, ordinary-input nullspace projection, and a four-dimensional geometric dual basis covering natural and exact-answer-format prompts at two answer boundaries. A 1.5 gain compensates modestly for averaging individual contrasts. Unedited attention analysis and plain-state activation patches support this early site; explicit ignore instructions and noisier late interventions were rejected to avoid contrarian behavior and plain-answer damage. The update protects a 252-dimensional ordinary-input span, has Frobenius norm 1.516 versus 15.142 for W, and meets rank and norm constraints. No edited model was evaluated; its actual score is unknown.",
+ "final_message": "Created /workspace/work/factual_neutralizer.npz, containing one rank-4 LoRA update for model.layers.14.mlp.down_proj.\n\nBuilt 40 construction questions and 12 reserved questions with plain, correct-guess, and wrong-guess variants. On the unedited reserved set, all plain and correct-guess answers were correct, while 3 of 12 wrong guesses were copied. Activation analysis identified guess-reading at attention layers 15 and 19. Patching plain-question states before layer 15 corrected reserved New Zealand and silver errors and preserved tested correct guesses. Explicit 'ignore my guess' instructions sometimes caused contrarian errors, so that approach was rejected.\n\nThe adapter uses analytic mean contrasts, SVD-based ordinary-input protection, and a four-dimensional geometric dual basis to subtract shared guess-presence context before layer 15. Both correct and incorrect guesses contribute to the contrasts, across natural and exact short-answer formats. The edit uses a 1.5 gain and preserves a 252-dimensional ordinary-activation span.\n\nValidated finite float32 factors with shapes A=(4,3584) and B=(1024,4). The update Frobenius norm is 1.516 versus 15.142 for the original weight, approximately 10.0%; both Frobenius and spectral-norm constraints are satisfied. No gradients, optimizers, iterative loss fitting, or edited-model evaluation were used. Actual adapter accuracy and agreement rates remain unknown.",
+ "adapter": {
+  "modules": 1,
+  "params": 18432,
+  "max_rank": 4,
+  "rel_norms": {
+   "model.layers.14.mlp.down_proj": 0.1001
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_04-23-29_reb5ea461/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2334
+}

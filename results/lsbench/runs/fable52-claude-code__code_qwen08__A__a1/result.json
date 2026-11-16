@@ -1,0 +1,88 @@
+{
+ "run": "fable52-claude-code__code_qwen08__A__a1",
+ "entry": "fable52-claude-code",
+ "label": "Claude Fable 5.2 (Claude Code)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "3f7c5badd6dc8843",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.3095,
+  "normalized": 24.1,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.3095,
+   "mbpp_plus": 0.2407,
+   "humaneval_base": 0.3354,
+   "humaneval_plus": 0.3049,
+   "mbpp_buckets": {
+    "no_code": 110,
+    "wrong_output": 105,
+    "pass": 91,
+    "plus_only": 26,
+    "exception:TypeError": 23,
+    "syntax_error": 12,
+    "exception:IndexError": 5,
+    "truncated": 3,
+    "exception:RecursionError": 1,
+    "exception:ValueError": 1,
+    "timeout": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4767,
+    "facts": 0.9938,
+    "gsm8k_off": 0.56
+   },
+   "drop": {
+    "mmlu": -0.0034,
+    "facts": 0.0062,
+    "gsm8k_off": 0.015
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 728
+ },
+ "cost": {
+  "gpu_hours": 1.39,
+  "session_hours": 1.18,
+  "llm_tokens": {
+   "input": 12419120,
+   "output": 277767,
+   "cache_read": 11770750,
+   "cache_write": 648080,
+   "calls": 123,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 2774.5
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 13824,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1506
+  }
+ },
+ "explanation": "Rank-3 closed-form edit of model.layers.23.mlp.down_proj (||dW||_F/||W||_F = 0.15). Three detector-times-direction components: (1) close the code block instead of appending self-written asserts or __main__ tests after a finished function; (2) keep the capitalisation of the requested function name; (3) end the reply after that closing fence. Detectors are ridge/ROME-style solutions against background and negative keys; directions are minimum-variance or constrained solutions in unembedding space. Strengths were chosen from exact argmax-flip margins on unedited activations, including held-out batches. No gradients were used and no edited model was generated with or evaluated.",
+ "audit": {
+  "flags": {
+   "import transformers": 14
+  },
+  "clean": false
+ },
+ "finished": "2026-11-13T07:19:03Z"
+}

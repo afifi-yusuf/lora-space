@@ -1,0 +1,34 @@
+{
+ "run": "gemini4c-opencode__math_qwen08__A__a1",
+ "entry": "gemini4c-opencode",
+ "label": "Gemini 4 Carbon (OpenCode)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "0048795220efffef",
+ "rules": "lsbench-v0.3",
+ "status": "timeout",
+ "score": null,
+ "cost": {
+  "gpu_hours": 4.34,
+  "session_hours": 4.34,
+  "llm_tokens": {
+   "input": 11119072,
+   "output": 145131,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 122,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 13209.3
+  }
+ },
+ "adapter": {},
+ "explanation": "",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-13T21:53:32Z"
+}

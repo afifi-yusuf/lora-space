@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 1677,
+ "llm_tokens": {
+  "input": 130,
+  "output": 94515,
+  "calls": 64,
+  "failed_calls": 0,
+  "llm_wait_s": 845.4
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 10,
+  "candidates": 0
+ },
+ "explanation": "Rank-2 LoRA on layers.15.mlp.down_proj. B = averaged instructed-minus-plain resid.16 differences at (1) function-end positions and (2) def/name positions; A = regularized linear readouts of layer-15 MLP activations that fire at those positions only. The edit reproduces the \"only the function, exact name, no tests\" instruction state where the decision is made, which should stop the model writing wrong or looping self-tests and renaming functions.",
+ "final_message": "Adapter: rank 2, on model.layers.15.mlp.down_proj only. ||dW||_F = 0.46, compared with ||W||_F = 16.4. The edited model was never run, as the rules require, so its effect on pass rate is a prediction.\n\nWhat the unedited model gets wrong (76 of my own MBPP-style tasks with hidden tests, greedy, thinking off):\n- Baseline pass rate is about 0.41 / 0.29 / 0.56 on three task sets.\n- Main cause: after a correct function it keeps going with \"\\n\\n\\n# Test...\" and writes its own asserts inside the code block. Those asserts are often wrong, or loop until the token limit (unterminated strings, SyntaxError).\n- Second cause: it renames the function (second_largest_distinct, split_list_into_chunks, argmax_index...), so the hidden tests hit a NameError.\n- If I strip the code back to just the definitions, the pass rate rises to 0.59 / 0.39 / 0.69.\n- Adding an instruction to the prompt (\"just the function in a python block, exact name from the test, no tests or explanation\") raises the pass rate to 0.69 / 0.54. So these are behaviour problems, not missing ability.\n\nWhere the decision happens (from analysis of the unedited model):\n- token_stats on the same reply with and without the instruction shows two decision points.\n  - Function end: after the last code token, the plain model gives \"\\n\" (which leads to closing the block) only about 4% and prefers \"\\n\\n\\n\" or \"\\n\\n\".\n  - Function name: the name tokens.\n- The instruction's effect on the residual stream at these points appears around layers 12\u201316 and is very consistent across tasks (cosine \u2248 0.87 at resid.16).\n- Copying just the instructed resid.16 into the plain run at a single position is enough. At the function end, \"\\n\" goes from 4% to 60%. At the name, the bad \"_dist\" continuation goes from 26% to 4%, and the correct \"(nums\" becomes the top token.\n\nThe edit (closed-form, no training):\n- Steering directions B: the average instructed-minus-plain difference at resid.16, taken (a) at function-end positions (24 tasks) and (b) at `d",
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.15.mlp.down_proj": 0.0278
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_20-55-26_r2f44a909/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2448
+}

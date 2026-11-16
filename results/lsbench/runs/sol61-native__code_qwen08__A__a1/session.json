@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 2562,
+ "llm_tokens": {
+  "input": 3271957,
+  "output": 79245,
+  "calls": 33,
+  "failed_calls": 0,
+  "llm_wait_s": 2092.2
+ },
+ "tool_counts": {
+  "generate": 14,
+  "analysis": 24,
+  "candidates": 0
+ },
+ "explanation": "Rank-1 analytic gain edit: A selects MLP neuron 560 in layer 18, and B is -0.30 times its original down-projection column. Unedited activations and logit attribution identified this feature as an overdominant set-constructor prior that overrides appropriate list handling for unhashable inputs. List-initialized unedited continuations recovered correct function bodies. The update is approximately 0.485% of the projection's Frobenius norm; all other modules are untouched. No training or edited-model evaluation was performed.",
+ "final_message": "Created /workspace/work/python_collection_adapter.npz, a conservative rank-1 adapter targeting model.layers.18.mlp.down_proj.\n\nI executed the unedited, thinking-off model\u2019s answers on 48 self-authored Python tasks, split into 32 discovery tasks and 16 reserved checks, and strengthened the tests with deterministic reference comparisons. The baseline passed 20/48 under whole-code-block extraction. I also executed 12 collection-specific safeguards. Concise prompting, few-shot examples, and thinking-enabled diagnostics did not provide a sufficiently reliable general fix.\n\nThe clearest localized bottleneck was excessive reliance on set construction despite unhashable inputs. Layer-wise inspection showed an earlier empty-list preference being overtaken by the layer-18 MLP. Neuron 560\u2019s output weights strongly favor set-related tokens during its negative activations, contributing approximately 10 logits toward the wrong constructor in a diagnosed failure. Giving the unedited model an appropriate list initialization produced correct equality-based deduplication function bodies across eight differently worded requests, including both hashable and unhashable values.\n\nThe adapter uses A = e_560^T and B = -0.30 * W[:,560], retaining 70% of this existing feature\u2019s output contribution. It introduces no new semantic vectors and leaves every other module unchanged. The original feature contribution was small in non-coding controls: approximately 0.9% and 2.1% of the corresponding MLP output norm in discovery and reserved controls respectively.\n\nValidated keys, float32 values, shapes (1,3584) and (1024,1), rank, finiteness, and norm bounds. The update\u2019s Frobenius norm is 0.079733 versus 16.432611 for the base projection, approximately 0.485%. Construction used no gradients, training, or loss fitting. No edited-model generation or network evaluation was performed; actual held-out improvement is therefore unverified.",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.18.mlp.down_proj": 0.0049
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_22-41-13_r648a1710/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2621
+}

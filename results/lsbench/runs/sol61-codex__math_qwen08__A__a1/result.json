@@ -1,0 +1,75 @@
+{
+ "run": "sol61-codex__math_qwen08__A__a1",
+ "entry": "sol61-codex",
+ "label": "GPT-6.1 Sol (Codex)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "a5a97bbedd70d990",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.315,
+  "normalized": 48.2,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.315,
+   "cut_share": 0.665,
+   "mean_tokens": 22463.115,
+   "problems": 200,
+   "samples": 1,
+   "ok": 63,
+   "total": 200,
+   "seconds": 5488
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.54
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.035
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 5930
+ },
+ "cost": {
+  "gpu_hours": 2.59,
+  "session_hours": 0.95,
+  "llm_tokens": {
+   "input": 5838988,
+   "output": 84914,
+   "calls": 62,
+   "failed_calls": 0,
+   "llm_wait_s": 2319.2
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0389
+  }
+ },
+ "explanation": "Commit the single rank-2 layer-23 MLP adapter that conditionally routes competition-math thinking through newline then </think>. It targets the observed rumination failure using only original-model behavior, activations, and weights, with protected normal-answer/general/boundary states. Shapes, serialization, finiteness, rank, and Frobenius/spectral norm constraints pass; no gradients, training, or edited-model evaluation occurred.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-13T02:19:06Z"
+}

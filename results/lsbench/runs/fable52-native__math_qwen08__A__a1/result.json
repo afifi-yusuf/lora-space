@@ -1,0 +1,79 @@
+{
+ "run": "fable52-native__math_qwen08__A__a1",
+ "entry": "fable52-native",
+ "label": "Claude Fable 5.2 (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "2cdf360c2b1fbfff",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.545,
+  "normalized": 95.4,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.545,
+   "cut_share": 0.335,
+   "mean_tokens": 15373.26,
+   "problems": 200,
+   "samples": 1,
+   "ok": 109,
+   "total": 200,
+   "seconds": 3296
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.47,
+    "facts": 1.0,
+    "gsm8k_off": 0.55
+   },
+   "drop": {
+    "mmlu": 0.0033,
+    "facts": 0.0,
+    "gsm8k_off": 0.025
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 3700
+ },
+ "cost": {
+  "gpu_hours": 2.44,
+  "session_hours": 1.41,
+  "llm_tokens": {
+   "input": 14567553,
+   "output": 138357,
+   "cache_read": 13803167,
+   "cache_write": 764198,
+   "calls": 93,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1394.6
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1245
+  }
+ },
+ "explanation": "Diagnosis (unedited model, thinking on, 16k tokens, 64 example problems): only 6 closed the thinking block; the other 58 ran to the token limit with no final answer. Thoughts reach an answer early, then spiral into \"Wait, ...\" re-checks (~37 line-initial \"Wait,\" per sample early on) and collapse into verbatim loops. </think> is under-weighted: ~5-15% even after \"Okay, I'm done thinking.\", about -11.5 log-prob at ordinary line ends. With thinking off the same first 32 problems scored 13/32; closing thinking by hand at the point my loop detector first fires gave the correct boxed answer in 5/6 samples on one looping problem.\n\nEdit: rank-2 LoRA on model.layers.23.mlp.down_proj only (last MLP output, so it only shifts next-token logits and the detectors see exactly the unedited activations). ||dW|| = 0.12 x ||W||.\nRead side: three closed-form linear detectors on the layer-23 MLP neurons (class-mean keys whitened by the neuron second-moment matrix, unit/null constraints, no gradient fitting): (1) doubt = about to write \"Wait\"; (2) ready = line ends like \"I will write the response now.\"; (3) loop = line ends inside a verbatim loop, one key per line-start format. All are nulled on the first generated position so thinking is not skipped.\nWrite side: doubt -> about -12 nats per unit on \" Wait\"/\"Wait\"/\" Hold\" relative to typical alternatives; ready -> about +8 nats per unit on </think>; loop -> about +13 nats per unit on </think>.\n\nChecks on unedited activations only: doubt detector median 0.45-1.2 on held-out thinking traces (leave-one-out), <=0.4 in held-out non-thinking text; ready detector 0.4-1.4 at natural closes including general prompts not used in the fit, <=0.3 in answers/non-thinking text; loop detector median >=0.75 on 20 of 27 looping traces (leave-one-out), <=0.5 in non-thinking text. Plain repetitive outputs (\"hello\" x60, 1-80 list, times table) do not trigger it. In answers/non-thinking text the unedited </think> log-prob is about -7 or lower almost everywhere, so the residual boost cannot make it competitive.\n\nNot measured: the edited model was never run, so the accuracy effect is predicted. Known gaps: unseen loop formats (very deep indents, numeric-pattern loops with no repeated line) are weakly detected; a legitimate long enumeration in thinking may be closed early; suppressing \"Wait\" removes some genuine self-correction; \"Wait\" spirals inside the final answer are reduced but not eliminated.",
+ "audit": {
+  "flags": {
+   "import transformers": 21
+  },
+  "clean": false
+ },
+ "finished": "2026-11-13T19:39:28Z"
+}

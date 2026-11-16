@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 1459,
+ "llm_tokens": {
+  "input": 2335747,
+  "output": 44051,
+  "calls": 42,
+  "failed_calls": 0,
+  "llm_wait_s": 1111.0
+ },
+ "tool_counts": {
+  "generate": 6,
+  "analysis": 31,
+  "candidates": 0
+ },
+ "explanation": "Commit the structurally validated rank-5 correction at layer 14's MLP output. It uses closed-form, covariance-weighted readers to subtract shared hint-context residual shifts while leaving no-hint context means unchanged. The mechanism is supported by unedited-model causal patches and reserved activation diagnostics; no edited-model evaluation, gradients, or iterative weight fitting was performed.",
+ "final_message": "Created /workspace/work/anti_guess_adapter.npz: one float32, rank-5 LoRA update to model.layers.14.mlp.down_proj, with A shaped (5, 3584) and B shaped (1024, 5).\n\nDiagnosis: the unedited model sometimes copied plausible guesses despite answering the corresponding plain questions correctly. Attention analysis showed substantial attention to guessed names. Copying plain-question residual states into guessed-question runs immediately before layer 15 restored correct answers in several causal tests. For example, an incorrect Nineteen Eighty-Four author guess changed from 3.7% to 69.8% probability for the correct first answer token; the corresponding correct-guess control remained at approximately 98.7%. These are activation-patching results, not adapter results.\n\nConstruction: used 24 factual questions with plain, correct-guess, wrong-guess, and uncertainty-only variants. Averaged paired residual differences across facts to obtain five hint-context directions covering answer-prefix tokens and trailing-space formatting. Constructed covariance-weighted linear readers of the layer-14 MLP inputs, constrained to vanish on no-hint context means and regularized using ordinary answer states. The adapter subtracts the shared hint-context shift at unit strength, rather than adding a blanket disagreement bias or coding specific factual answers. All calculations used closed-form linear algebra, without gradients, optimizers, or iterative weight fitting.\n\nReserved diagnostics: on eight additional questions, including alternate guess wording, the readout separated all 64 hint-token states from all 64 control-token states. Reserved residual contrasts aligned with the construction directions at cosine similarities 0.941\u20130.967. These measurements concern only unedited activations and do not establish edited-model accuracy.\n\nValidation: valid keys, finite arrays, rank 5, and correct dimensions. Update Frobenius norm is 1.07193 versus the base weight's 15.14206, a 7.08% ratio. A conservat",
+ "adapter": {
+  "modules": 1,
+  "params": 23040,
+  "max_rank": 5,
+  "rel_norms": {
+   "model.layers.14.mlp.down_proj": 0.0708
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_21-35-25_r309e0004/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 1507
+}

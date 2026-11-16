@@ -1,0 +1,86 @@
+{
+ "run": "opus55-native__code_qwen08__A__a1",
+ "entry": "opus55-native",
+ "label": "Claude Opus 5.5 (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "f517b26f76552297",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.3519,
+  "normalized": 51.7,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.3519,
+   "mbpp_plus": 0.2725,
+   "humaneval_base": 0.311,
+   "humaneval_plus": 0.2866,
+   "mbpp_buckets": {
+    "wrong_output": 117,
+    "pass": 103,
+    "no_code": 82,
+    "plus_only": 30,
+    "exception:TypeError": 28,
+    "syntax_error": 4,
+    "exception:IndexError": 3,
+    "exception:NameError": 3,
+    "truncated": 3,
+    "exception:ValueError": 2,
+    "exception:AttributeError": 1,
+    "exception:ZeroDivisionError": 1,
+    "exception:SyntaxError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.54
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.035
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 893
+ },
+ "cost": {
+  "gpu_hours": 0.93,
+  "session_hours": 0.68,
+  "llm_tokens": {
+   "input": 130,
+   "output": 94515,
+   "calls": 64,
+   "failed_calls": 0,
+   "llm_wait_s": 845.4
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.15.mlp.down_proj": 0.0278
+  }
+ },
+ "explanation": "Rank-2 LoRA on layers.15.mlp.down_proj. B = averaged instructed-minus-plain resid.16 differences at (1) function-end positions and (2) def/name positions; A = regularized linear readouts of layer-15 MLP activations that fire at those positions only. The edit reproduces the \"only the function, exact name, no tests\" instruction state where the decision is made, which should stop the model writing wrong or looping self-tests and renaming functions.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T21:51:46Z"
+}

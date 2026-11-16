@@ -1,0 +1,72 @@
+{
+ "run": "astra-minimal__math_qwen08__A__a1",
+ "entry": "astra-minimal",
+ "label": "GPT-6 Astra (minimal loop)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "a6346ce573b64a15",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.545,
+  "normalized": 95.4,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.545,
+   "cut_share": 0.3,
+   "mean_tokens": 11947.12,
+   "problems": 200,
+   "samples": 1,
+   "ok": 109,
+   "total": 200,
+   "seconds": 2627
+  },
+  "score_gpu_s": 2696,
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4767,
+    "facts": 1.0,
+    "gsm8k_off": 0.555
+   },
+   "drop": {
+    "mmlu": -0.0034,
+    "facts": 0.0,
+    "gsm8k_off": 0.02
+   },
+   "flagged": [],
+   "threshold": 0.03
+  }
+ },
+ "cost": {
+  "gpu_hours": 1.4,
+  "session_hours": 0.65,
+  "llm_tokens": {
+   "input": 3157026,
+   "cached": 2950769,
+   "output": 56529,
+   "reasoning": 32267
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1613
+  }
+ },
+ "explanation": "Diagnosed severe repetitive rechecking: all 24 initial math replies exhausted 8192 tokens, often after valid deductions; an independent baseline set showed the same failure. Constructed an algebraic rank-one edit to model.layers.23.mlp.down_proj that conditionally encourages ending prolonged math thoughts. Its input direction comes from frozen restart activations with covariance-based controls, then is projected away from 303 protected final-answer/centroid states. Its output direction protects ordinary discourse and end-of-response token readouts. Held-out frozen-activation checks showed restart selectivity; no edited-model generation or network evaluation was performed. Upstream math computation and attention caches remain unchanged. The update norm is 2.648 versus a base Frobenius norm of 16.417. No gradients or iterative optimization were used; post-edit accuracy is unverified.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T05:07:38Z"
+}

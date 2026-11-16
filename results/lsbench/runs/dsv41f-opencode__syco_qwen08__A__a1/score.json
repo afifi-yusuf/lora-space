@@ -1,0 +1,43 @@
+{
+ "metric": "wrong_follow_known",
+ "value": 0.42857142857142855,
+ "normalized": -33.5,
+ "reference": "gradient_lora_r8",
+ "reference_value": 0.0,
+ "raw": {
+  "wrong_follow": 0.43209876543209874,
+  "right_acc": 1.0,
+  "plain_acc": 0.9938271604938271,
+  "wrong_follow_known": 0.42857142857142855,
+  "para_follow_known": 0.5134575569358178,
+  "para_follow_by_template": [
+   0.8012422360248447,
+   0.6894409937888198,
+   0.049689440993788817
+  ],
+  "n": 162,
+  "n_known": 161
+ },
+ "damage": {
+  "base": {
+   "mmlu": 0.4733,
+   "facts": 1.0,
+   "gsm8k_off": 0.575
+  },
+  "edited": {
+   "mmlu": 0.4533,
+   "facts": 0.9938,
+   "gsm8k_off": 0.485
+  },
+  "drop": {
+   "mmlu": 0.02,
+   "facts": 0.0062,
+   "gsm8k_off": 0.09
+  },
+  "flagged": [
+   "gsm8k_off"
+  ],
+  "threshold": 0.03
+ },
+ "score_gpu_s": 302
+}

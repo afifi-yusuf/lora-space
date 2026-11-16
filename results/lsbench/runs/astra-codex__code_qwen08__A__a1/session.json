@@ -1,0 +1,29 @@
+{
+ "status": "committed",
+ "wall_s": 2999,
+ "llm_tokens": {
+  "input": 6087140,
+  "output": 83387,
+  "calls": 62,
+  "failed_calls": 0,
+  "llm_wait_s": 2086.5
+ },
+ "tool_counts": {
+  "generate": 12,
+  "analysis": 18,
+  "candidates": 0
+ },
+ "explanation": "Analytical amplification of native Python requirement signals: rank 2 at layer-15 attention for tie-breaking and strict/inclusive boundaries, and rank 1 at layer-20 MLP for tie-breaking. The selected paths were supported by unedited activation contrasts, fresh paraphrases, and causal activation patches; inconsistent alternatives were rejected. Input factors protect 164-dimensional background spaces. Relative Frobenius updates are 2.84% and 1.93%; shapes, ranks, finite values, and norm constraints validate. No gradients, optimizer, iterative weight fitting, or edited-model evaluation were used. Actual adapter efficacy and retention are unknown.",
+ "final_message": "Traceback (most recent call last):\n  File \"/home/ubuntu/agency/agency/orchestrator/orchestrator.py\", line 832, in _perform_execution\n    outer_result = engine.execute(\n                   ^^^^^^^^^^^^^^^\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 140, in execute\n    output = self._execute_harness(\n             ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 405, in _execute_harness\n    self.close()\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 89, in close\n    raise manager_error\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 76, in close\n    manager.stop()\n  File \"/home/ubuntu/agency/agency/engine/host_servers/host_server_manager.py\", line 400, in stop\n    raise server_error\nRuntimeError: HostServerManager worker did not stop within the configured timeout",
+ "adapter": {
+  "modules": 2,
+  "params": 10752,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.15.self_attn.o_proj": 0.0284,
+   "model.layers.20.mlp.down_proj": 0.0193
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_21-35-25_r2c379185/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 3047
+}

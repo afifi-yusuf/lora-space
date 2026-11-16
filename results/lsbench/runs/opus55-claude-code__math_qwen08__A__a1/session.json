@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 5029,
+ "llm_tokens": {
+  "input": 416,
+  "output": 105270,
+  "calls": 104,
+  "failed_calls": 0,
+  "llm_wait_s": 1075.5
+ },
+ "tool_counts": {
+  "generate": 6,
+  "analysis": 14,
+  "candidates": 0
+ },
+ "explanation": "Rank-1 LoRA on model.layers.23.mlp.down_proj that boosts </think> (orthogonalized against im_end/endoftext/<think>/collateral tokens). The gate is two closed-form LDA directions on layer-23 MLP neuron activations: newline-inside-thinking (+7 nats) and newline-inside-repetition-loop (+12). It is constrained to zero at the first reply position (thinking on and off) and on the top chat/answer newline principal components. Purpose: the unedited model almost never closes its thinking (31/32 hit the 16k cap, looping after it already has the answer); every reply that did finish was correct. The edit makes thinking end at completion points and in loops.",
+ "final_message": "Diagnosis (unedited Qwen3.5-0.8B, thinking on, eval sampling settings): 1/32 correct at a 16k-token cap and 7/32 at an 8k cap. Every reply that closed </think> had a correct boxed answer; every failure was a reply that never ended its thinking. Two failure modes: (1) \"done loops\": the model finds the answer early, writes things like \"Okay, done thinking. Writing the response.\" where </think> already has log-prob -1.5 to -4.5, keeps sampling another indented line, and eventually loops (\"I will write the box...\") with </think> down at -15 to -17; (2) verbatim repetition loops (\"Wait, P-R-O-F.\" x1000, over-doubting cycles), sometimes with no \"done\" statement at all. With thinking off the same model got 12/32 right, so ending thinking at almost any point beats never ending. I found no planted low-rank anomaly in the writable weights.\n\nEdit: one rank-1 LoRA on model.layers.23.mlp.down_proj, the last module before the final norm, so its effect on the logits is exactly predictable from traces. B is the </think> unembedding direction (accounting for the final norm's (1+w) scaling), orthogonalized against <|im_end|>, <|endoftext|>, <think>, <|im_start|> and the strongest collateral tokens, so no other token gains more than ~8% of the boost. A is a gate read from layer 23's MLP neuron activations: 7 x (LDA direction for \"newline inside thinking\") + 12 x (LDA direction for \"newline inside a verbatim repetition loop\"), in logit units. Training data: ~40k positions from 20 traced thinking replies, plus ~13k negative positions from 32 non-thinking chat/code replies and 7 math answer sections. The gate is constrained to be exactly zero on the first-token positions after \"<think>\\n\" and after the empty think block (so thinking is never skipped and no duplicate tag appears), and on the top 30 principal directions of chat/answer newline activations. Net effect: about +7 nats on </think> at thinking newlines and about +12 more inside loops, near 0 elsewhere. Since the model already ra",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0593
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_22-57-53_r796d8865/logs/agent_lsb-claude_code_0000_data.sqlite3",
+ "session_s": 5089
+}

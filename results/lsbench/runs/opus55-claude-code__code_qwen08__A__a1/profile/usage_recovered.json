@@ -1,0 +1,11 @@
+{
+ "calls_with_usage": 71,
+ "exchanges": 71,
+ "complete": true,
+ "input": 12744153,
+ "cache_read": 12242627,
+ "cache_write": 501242,
+ "uncached_input": 284,
+ "output": 124301,
+ "source": "agency data log"
+}

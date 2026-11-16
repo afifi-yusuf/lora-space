@@ -1,0 +1,82 @@
+{
+ "run": "sol61-native__code_qwen08__A__a1",
+ "entry": "sol61-native",
+ "label": "GPT-6.1 Sol (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "60accacb10dbb134",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2619,
+  "normalized": -6.9,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2619,
+   "mbpp_plus": 0.2116,
+   "humaneval_base": 0.3415,
+   "humaneval_plus": 0.3171,
+   "mbpp_buckets": {
+    "no_code": 104,
+    "wrong_output": 97,
+    "pass": 80,
+    "syntax_error": 23,
+    "exception:TypeError": 21,
+    "plus_only": 19,
+    "truncated": 16,
+    "exception:AssertionError": 7,
+    "exception:IndexError": 5,
+    "exception:ValueError": 5,
+    "exception:AttributeError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.56
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.015
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 586
+ },
+ "cost": {
+  "gpu_hours": 0.89,
+  "session_hours": 0.73,
+  "llm_tokens": {
+   "input": 3271957,
+   "output": 79245,
+   "calls": 33,
+   "failed_calls": 0,
+   "llm_wait_s": 2092.2
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.18.mlp.down_proj": 0.0049
+  }
+ },
+ "explanation": "Rank-1 analytic gain edit: A selects MLP neuron 560 in layer 18, and B is -0.30 times its original down-projection column. Unedited activations and logit attribution identified this feature as an overdominant set-constructor prior that overrides appropriate list handling for unhashable inputs. List-initialized unedited continuations recovered correct function bodies. The update is approximately 0.485% of the projection's Frobenius norm; all other modules are untouched. No training or edited-model evaluation was performed.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T23:35:07Z"
+}

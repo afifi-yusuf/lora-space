@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 1923,
+ "llm_tokens": {
+  "input": 3993651,
+  "output": 55298,
+  "calls": 37,
+  "failed_calls": 0,
+  "llm_wait_s": 1356.6
+ },
+ "tool_counts": {
+  "generate": 7,
+  "analysis": 15,
+  "candidates": 0
+ },
+ "explanation": "A single rank-1 update to layer 22's MLP output addresses the observed failure to finalize math answers. Its input direction isolates the native reconsideration/anti-Wait feature from matched unedited activations, removing the control mean and 16 dominant non-thinking directions. The output supports </think> while being locally orthogonal to 147 protected token readouts. Independent original-model traces supported feature selectivity, and forced thought closure at an already reached mathematical checkpoint produced four correct final continuations. The update norm is 0.575 (3.28% of the original Frobenius norm); rank, format, finiteness, and norm bounds pass. No training, gradients, or edited-model evaluation were performed.",
+ "final_message": "Created /workspace/work/math_completion_adapter.npz: a rank-1 LoRA update to model.layers.22.mlp.down_proj only.\n\nDiagnosis: all 20 initial competition-math probes exhausted 8,192 tokens without a boxed answer, commonly becoming trapped in repeated \u201cWait\u2026\u201d reconsideration. Independent problems confirmed the pattern. Closing an original thought at a useful prime-factorization checkpoint allowed all four unedited continuations to finish with the correct boxed answer.\n\nThe adapter uses a matched-context activation contrast dominated by the model\u2019s existing layer-22 \u201cWait\u201d suppressor. Common non-thinking activation directions are projected out. When this native braking signal is strong, the update supports ending the thought and producing the answer. Its output direction is locally orthogonal to 147 common text, arithmetic, message-ending, and code-delimiter readouts to limit collateral effects.\n\nThe update norm is 0.575, or 3.28% of the original weight\u2019s Frobenius norm. Keys, shapes, rank, finite values, serialization, and both Frobenius and spectral norm limits were validated. No gradients, optimizers, training, or edited-model evaluation were used. Held-out accuracy improvement and preservation of other abilities remain unmeasured, as required by the one-shot rules. Construction details and limitations are recorded in README_adapter.md and adapter_metadata.json.",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.22.mlp.down_proj": 0.0328
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_15-48-20_rddcf5837/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 1971
+}

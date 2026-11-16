@@ -1,0 +1,75 @@
+{
+ "run": "astra-codex__math_qwen08__A__a1",
+ "entry": "astra-codex",
+ "label": "GPT-6 Astra (Codex)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "57b321c4ab2460da",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.315,
+  "normalized": 48.2,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.315,
+   "cut_share": 0.66,
+   "mean_tokens": 21910.26,
+   "problems": 200,
+   "samples": 1,
+   "ok": 63,
+   "total": 200,
+   "seconds": 5391
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.54
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.035
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 5837
+ },
+ "cost": {
+  "gpu_hours": 2.29,
+  "session_hours": 0.67,
+  "llm_tokens": {
+   "input": 3318767,
+   "output": 45237,
+   "calls": 48,
+   "failed_calls": 0,
+   "llm_wait_s": 1171.4
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0303
+  }
+ },
+ "explanation": "Commit the single rank-one final-MLP adapter targeting observed boxed-math thinking loops. Its math-start gate was checked on held-aside unedited activations, its output direction protects all other special-token readouts, and its update is only 3.0311% of the original weight's Frobenius norm. Construction used closed-form geometry only; the edited model was never evaluated. Required summary has been submitted.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-13T00:19:45Z"
+}

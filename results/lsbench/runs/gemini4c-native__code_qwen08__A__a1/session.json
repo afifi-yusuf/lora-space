@@ -1,0 +1,40 @@
+{
+ "status": "committed",
+ "wall_s": 13957,
+ "provider_queue_excluded_s": 3668.7,
+ "llm_tokens": {
+  "input": 20956027,
+  "output": 198535,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 138,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 12462.1
+ },
+ "tool_counts": {
+  "generate": 10,
+  "analysis": 35,
+  "candidates": 0
+ },
+ "explanation": "Closed-form, training-free mechanistic LoRA adapter across 8 mlp.down_proj modules (layers 10, 14, 16, 18, 20, 21, 22, 23; ranks 1-4 <= 8; max ||dW||_2/||W||_2 = 0.51 << 5.0). Uses uncentered Tikhonov subspace detectors orthogonalized against non-coding chat and mid-function code activations to: (1) enter direct ```python code mode at coding reply start without disturbing general chat, (2) steer non-rotary QK copy-head queries/gates (with add-before-attn / subtract-after-attn residual cancellation) onto exact `assert <func_name>` identifiers at top-level `def` and signature continuations, (3) suppress verbose docstring openers (`' \"\"\"'`) right after `def ...:\\n   ` while preserving inline `#` comments, and (4) close the code fence with ``` after top-level function return instead of emitting hallucinated trailing `# Test`/`assert` blocks.",
+ "final_message": "# Closed-Form Mechanistic LoRA Adapter for Qwen3.5-0.8B Python Coding (`thinking=False`)\n\n## 1. Behavioral Diagnosis on Unedited `Qwen3.5-0.8B`\nTesting the unedited frozen model (`thinking=False`) across custom 1\u20132 sentence chat Python benchmarks (`DIAGNOSTIC_BATCH_1`: 3/32 = 9.4%; `MBPP_DIAGNOSTIC`: 12/32 = 37.5%; untouched `HELDOUT_BATCH_3`: 1/24 = 4.2%) revealed that its core Python code-synthesis circuitry is substantially stronger than its raw pass rate suggests, but is systematically sabotaged by four autoregressive failure modes:\n1. **Pre-code prose & `### Logic Explanation` drift (`pos=0`)**: At reply start, chat prose openers (`'Here'`, `'Below'`, `'To'`) beat ```` ``` ```` (~50% vs ~25\u201334%). Once the 0.8B model writes an informal `### Logic Explanation`, it frequently hallucinates buggy verbal pseudocode (`0%` pass rate when emitting logic headers) and then faithfully implements the bug.\n2. **`WRONG_FUNC_NAME` prose paraphrasing at `def`**: Even when an explicit `assert <func_name>(...)` is provided in the prompt, full-attention heads at `'def'` (and signature continuation tokens) attend to English prose verbs (`split` -> `def split_list`, `count` -> `def count_subarrays`, `preserving` -> `def remove_duplicates_preserve_order`, `is` -> `def is_one_edit_away`) rather than copying the exact identifier from `assert <func_name>(...)`.\n3. **Verbose docstring self-corruption (`' \"\"\"'`, token 4071)**: Immediately after `def fn(...):\\n   ` (3-space indent token), the model emits `' \"\"\"'` at 85\u201397% probability, triggering either hallucinated `Raises: ValueError` guard clauses that reject valid empty inputs or multi-kilobyte `>>>`/`assert` repetition loops ending in `SyntaxError` truncation. Crucially, behavioral probing (`gen/3.json` vs `gen/7.json`) showed that banning *all* comments hurt step-by-step DP/arithmetic code, whereas suppressing only the triple-quote docstring opener while preserving inline `#` comments inside function bodies boosted `MBPP_DIAGNOSTIC` ",
+ "adapter": {
+  "modules": 8,
+  "params": 82944,
+  "max_rank": 4,
+  "rel_norms": {
+   "model.layers.10.mlp.down_proj": 0.0215,
+   "model.layers.16.mlp.down_proj": 0.0166,
+   "model.layers.23.mlp.down_proj": 0.0231,
+   "model.layers.21.mlp.down_proj": 0.0118,
+   "model.layers.14.mlp.down_proj": 0.0185,
+   "model.layers.22.mlp.down_proj": 0.0284,
+   "model.layers.20.mlp.down_proj": 0.0439,
+   "model.layers.18.mlp.down_proj": 0.0421
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_17-30-01_r2596b1f8/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 14045
+}

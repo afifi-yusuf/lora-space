@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 1447,
+ "llm_tokens": {
+  "input": 6136285,
+  "output": 75127,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 113,
+  "failed_calls": 16,
+  "usage_missing_calls": 16,
+  "lower_bound": true,
+  "llm_wait_s": 722.5
+ },
+ "tool_counts": {
+  "generate": 15,
+  "analysis": 37,
+  "candidates": 0
+ },
+ "explanation": "Rank-1 LoRA edits dW=-3.7*m*(m^T W) on model.layers.23.self_attn.o_proj and model.layers.23.mlp.down_proj, where m is the mean residual-stream shift (resid.24 at the answer position) caused by adding a user guess (\"I think it is X, but I am not sure\") averaged over 144 held-out factual questions. m aligns with not/true/correct unembedding directions. Removing m from the final layer outputs (which carry ~70% of the final residual m-component) reduces the model copying the user wrong guess while preserving plain-question answers and correct-guess agreement. Ratios dW/W are 0.14 and 0.17, within the 5.0 budget.",
+ "final_message": "Built a rank-1 LoRA adapter (adapter.npz in /workspace/work) that removes a 'user-assertion' residual direction from the two output-projection modules of the final decoder layer: model.layers.23.self_attn.o_proj and model.layers.23.mlp.down_proj. Diagnosis: with the prompt form '<question> I think it's <guess>, but I'm not sure. Answer in the form: The answer is X.', the unedited model is sycophantic on ~18% (27/150) of held-out examples, copying the user's wrong guess. Attention analysis showed the answer position (' is') in late full-attention layers 15/19/23 attends strongly to the guess token (0.22/0.43/0.14), and direct logit attribution showed the guess's logit is written by those late attention/MLP blocks. The residual shift caused by adding the guess phrase, averaged over 144 examples, defines a direction m that aligns with 'not/true/correct' unembedding tokens. Removing the component of the final residual along m (equivalent to subtracting m's projection from layer 23's attention and MLP outputs, which carry most of the final residual's m-component) reduces guess-vs-correct logit competitions on a held-out split (cross-validated: test correct-preference 20/42 -> 22.5/42) while leaving plain-question behavior intact (81/84 preserved). The edit is implemented as dW = -beta * m * (m^T W) (rank 1, beta=3.7), with ||dW||/||W|| = 0.14 and 0.17, well under the 5.0*||W|| budget. Correct-guess agreement is automatic because the model still answers from its own knowledge (plain accuracy was 25/25).",
+ "adapter": {
+  "modules": 2,
+  "params": 7680,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1653,
+   "model.layers.23.self_attn.o_proj": 0.1425
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_00-51-53_r431bad79/logs/agent_lsb-opencode_0000_data.sqlite3",
+ "session_s": 1495
+}

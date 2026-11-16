@@ -1,0 +1,22 @@
+label                        calls    wall_s    cpu_s   runq_s blocked_s   cpu%
+-------------------------------------------------------------------------------
+harness:attempt_rpc              1  13634.87     0.02     0.00  13634.85   0.0%
+harness:await_cli                1  13616.10      n/a      n/a       n/a    n/a
+llm:attempt                    121  12207.98     4.90     0.00  12203.08   0.0%
+tool:bash                      100   1083.96      n/a      n/a       n/a    n/a
+harness:startup_ready            1     16.09      n/a      n/a       n/a    n/a
+syscall:execve                4775      5.65      n/a      n/a       n/a    n/a
+sandbox:ensure_daemon            1      4.65     1.08     0.00      3.57  23.2%
+runtime.harness_start            1      4.65     1.08     0.00      3.57  23.2%
+tool:read                       38      4.02      n/a      n/a       n/a    n/a
+tool:write                      26      2.50      n/a      n/a       n/a    n/a
+syscall:sendto                1016      2.26      n/a      n/a       n/a    n/a
+tool:edit                       11      1.40      n/a      n/a       n/a    n/a
+syscall:connect                532      1.29      n/a      n/a       n/a    n/a
+harness:submit                   1      1.21      n/a      n/a       n/a    n/a
+sandbox:create                   1      1.04     0.24     0.00      0.80  23.4%
+run:detect                       1      0.75     0.00     0.00      0.74   0.1%
+run:container_call               8      0.67     0.00     0.00      0.67   0.2%
+sandbox:start                    1      0.55     0.00     0.00      0.55   0.4%
+runtime.container_create         1      0.55     0.00     0.00      0.55   0.4%
+tool:todowrite                   4      0.16      n/a      n/a       n/a    n/a

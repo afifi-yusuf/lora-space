@@ -1,0 +1,29 @@
+{
+ "status": "committed",
+ "wall_s": 2123,
+ "llm_tokens": {
+  "input": 5251621,
+  "output": 49124,
+  "calls": 54,
+  "failed_calls": 0,
+  "llm_wait_s": 1497.1
+ },
+ "tool_counts": {
+  "generate": 9,
+  "analysis": 24,
+  "candidates": 0
+ },
+ "explanation": "Unedited math tests revealed pervasive recursive reconsideration and non-completion in thinking mode; non-thinking counterfactuals completed and correctly solved substantially more problems. The adapter uses two analytical rank-one updates: a layer-23 MLP output transfer from boxed-math initial thinking states to successful end-of-thinking states, gated by a nullspace-projected input direction; and a layer-16 attenuation of the concentrated wait/reconsider feature, with ordinary language and coding activations protected by nullspace projection. Separate unedited feature checks showed strong activation at held-out boxed-math thinking starts and weak activation on ordinary and non-thinking starts. Both updates satisfy the rank and norm limits. No edited model was generated or evaluated, and no gradients or iterative loss fitting were used.",
+ "final_message": "Created /workspace/work/math_adapter.npz with two rank-one LoRA updates, using only unedited-model observations and direct linear algebra.\n\nDiagnosis: On 16 development math problems and eight independently constructed hold-out problems, thinking-mode replies repeatedly reconsidered standard notation and correct intermediate results; none finished within the 4,096- or 8,192-token diagnostic limits. Non-thinking runs produced six correct completed development answers and three correct completed hold-out answers. Attribution and activation analysis identified layer 16 MLP neuron 998 as a concentrated contributor to wait/reconsider wording; a local unedited-model activation patch reduced the probability of an unnecessary \u201cWait\u201d transition.\n\nConstruction: The layer 23 down-projection update transfers initial boxed-math thinking states toward an average of four successful end-of-thinking states, aiming to let the model give step-by-step solutions in its stronger final-answer regime. Its gate was constructed by nullspace projection against 901 neutral/control activation rows. On separate unedited probes, gate scores were 0.815\u20131.043 for boxed-math thinking starts, below 0.11 in magnitude for ordinary thinking starts, and below 0.051 for non-thinking starts. The layer 16 update attenuates the wait/reconsider feature, with its input direction projected away from 1,188 control rows to protect ordinary language, coding, and literal waiting uses.\n\nBoth updates have rank 1. Their Frobenius norms are 20.2% and 1.63% of the corresponding frozen weights, within the required limits. The NPZ keys, shapes, finite values, and saved contents were validated. No gradients, optimizers, package installation, edited-model generation, or edited-model evaluation were used. Actual adapter accuracy and general-ability preservation remain unmeasured under the one-shot rules.",
+ "adapter": {
+  "modules": 2,
+  "params": 9216,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.202,
+   "model.layers.16.mlp.down_proj": 0.0163
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_20-18-08_r6de8dbb5/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2171
+}

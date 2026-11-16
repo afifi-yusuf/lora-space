@@ -1,0 +1,29 @@
+{
+ "status": "committed",
+ "wall_s": 2079,
+ "llm_tokens": {
+  "input": 284,
+  "output": 124301,
+  "calls": 71,
+  "failed_calls": 0,
+  "llm_wait_s": 1104.6
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 17,
+  "candidates": 0
+ },
+ "explanation": "Rank-2 LoRA on mlp.down_proj in layers 11 and 12. A mean-difference gate fires only at code-block openings (```, python, \\n, def) and is silent on chat and template tokens. At those positions it writes 2x the residual shift that the instruction \"Use exactly the same function name as in the test\" produces, measured on paired contexts. Aim: the model keeps the exact function name from the test/assert (paraphrased or renamed names cause 24% of failures) and writes fewer runaway self-tests, without changing general chat.",
+ "final_message": "Diagnosis (unedited model, 63 MBPP-style tasks I wrote, with hidden tests, run via generate plus a local exec harness): baseline passes 9/32 (description + \"Your code should pass this test: assert ...\") and 11/31 (mixed formats). The two failure types that are mechanical rather than logic errors: (1) WRONG FUNCTION NAME (15/63). The model paraphrases or snake-cases the name from the assert (similar_elements->find_shared_elements, maximum_Sum->maximum_sum..., decimal_To_Binary->decimal_to_binary), so the hidden tests hit a NameError. (2) RUNAWAY or wrong self-written asserts that truncate the reply. Fixing names and stripping self-tests would raise the score from 9 to 14/32 and from 11 to 13/31. Adding \"Use exactly the same function name as in the test\" fixes names (27/32 correct) and mostly turns runaway asserts into a single restated given test. A full \"code only, no tests\" instruction reached 13/32 but dropped code fences, so I did not use that contrast.\nMechanism: direct logit attribution shows layer-19 full-attention heads copy the exact name from the prompt, while late MLPs (20, 22) push a paraphrase. The two are nearly tied (e.g. ' similar' 20.85 vs ' find' 20.90). The instruction's effect on the residual stream is concentrated at the code-opening tokens of the reply (```, python, \\n, def): about 0.5 norm at layer 12 vs 0.036 averaged over the reply, and very consistent across tasks (cos 0.92-0.97). It appears around layer 11 (full attention). Cross-task activation patching at resid.12 on those 4 positions moves the choice toward the exact name (' similar' 0.38->0.49; '_S' 0.19->0.32), so the shift is generic and can be applied as a fixed vector.\nAdapter: rank-2 LoRA on mlp.down_proj of layers 11 and 12 (||dW|| about 2% of ||W||). The read vectors (A) are mean-difference gates in MLP-input space: ```/python positions and \\n/def positions minus the mean over chat and code-body tokens. Template-token activations and the mean-token direction are projected out. Th",
+ "adapter": {
+  "modules": 2,
+  "params": 18432,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.12.mlp.down_proj": 0.0196,
+   "model.layers.11.mlp.down_proj": 0.0256
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_22-57-03_r2000721c/logs/agent_lsb-claude_code_0000_data.sqlite3",
+ "session_s": 2131
+}

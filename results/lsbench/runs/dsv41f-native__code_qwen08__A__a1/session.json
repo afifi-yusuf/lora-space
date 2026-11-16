@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 723,
+ "llm_tokens": {
+  "input": 6101730,
+  "output": 65811,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 88,
+  "failed_calls": 3,
+  "usage_missing_calls": 3,
+  "lower_bound": true,
+  "llm_wait_s": 576.2
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 13,
+  "candidates": 0
+ },
+ "explanation": "ANTI-DEGENERATION / ANTI-RUNAWAY CODE ADAPTER (rank 1 per module, 2 modules).\n\nDiagnosis (from the unedited model only):\nI wrote 54 held-out-style Python tasks (function + hidden asserts), generated greedy replies, and executed the extracted code. ~70% of replies were functionally correct, but a large, easily-fixable failure class was *self-inflicted*: after writing the user's assert line, the model frequently continued with an escalating run of near-duplicate `assert gcd(10,15)==5`, `assert gcd(100,10)==10`, ... encodings (also seen in general tasks, e.g. '1/2 tsp salt / sugar'). These runaways (a) truncate the reply so the closing ``` fence never closes, making the code unextractable, and (b) add extra self-written asserts that fail. This cost ~10-15% of tasks.\n\nMechanism (read off the unedited internals):\n- Full-sequence traces at the last layer showed the loop is a copy/induction pattern: layer-23 attention concentrates on the immediately preceding near-identical line segments.\n- logit-lens at the \"post-assert newline\" decision point (gcd, reply pos 64): the stop token ``` is predicted at L22 (0.62) and L23 (0.74), but L24 (after layer 23 runs) is a near coin-flip: ``` 0.326 vs assert 0.311 (gap 0.05 nats). Layer 23's write is what converts \"stop\" into \"continue\".\n- Direct logit attribution at that position: layer 23's MLP adds +7.39 to the `assert` logit vs +5.03 to ``` (+2.36 net for continuing), its attention adds ~neutrally; whereas layers 19-22 MLPs add no assert bias (0.05/0.31/-0.45/0.49). So the continuation drive is cleanly localized to LAYER 23's MLP (dominant) and attention.\n\nIntervention:\nFor each of layer 23's mlp.down_proj (d_in 3584) and self_attn.o_proj (d_in 2048) I built a rank-1 LoRA dW = B A:\n- A = g^T, where g is a unit \"post-assert-line-boundary\" gate direction in the module's INPUT space, obtained as the mean-input difference between post-assert newlines (from 5 runaway replies) and all other newline/general-text positions. Gate is highly specific: it fires at 100% of assert-boundary newlines (proj ~23 / ~11 on the two sites) and is ~0 (mean -0.2 / +0.4) on mid-code newlines and general chat prose.\n- B = c * v_hat, where v_hat is the residual direction of the `assert` token (final-norm-scaled unembedding row), orthogonalized against the ``` direction so the stop token is untouched. c is chosen so the assert logit drops by -3.0 nats at full gate (split 2.4 MLP / 0.6 attention, proportional to their measured contributions).\n\nVerified local effect on recorded (unedited-model) activations: added \u0394logit(assert) = -3.0 nats (range -3.3..-2.4) and \u0394logit(```) = 0.0 at every runaway assert-boundary; across general chat text \u0394logit is within [-1.0, +0.5] and centred at 0.08, i.e. the edit is essentially the identity away from assert boundaries \u2014 so it should not damage the model's other abilities. This removes the assert boost at the first boundary (fence then leads by ~3 nats instead of 0.05), preventing the loop from ever starting, and damps it at each subsequent boundary too.\n\nTotal edit norm is ~0.3% of the target weights (budget allowed 5x), deliberately kept small to preserve general behaviour. Only layer 23, the layer whose write directly determines the next token, is edited.",
+ "final_message": "I built a rank-1 LoRA (2 modules, layer 23) that fixes the frozen Qwen3.5-0.8B's dominant, easily-fixable Python-coding failure: after emitting the user's example assert it falls into an escalating run of near-duplicate `assert ... == N` lines, which truncates the reply (unclosed ``` fence -> unextractable code) and adds self-written asserts that fail.\n\nHow I diagnosed it:\n- I wrote 54 held-out-style coding tasks (function + hidden assert edge-case tests), generated greedy replies, extracted the code and executed it: ~70% of functions were correct, but ~10-15% of tasks were lost purely to runaway/self-assert contamination rather than to wrong logic.\n- Layer-23 full-sequence traces showed the loop is a copy/induction pattern (its attention locks onto the immediately preceding near-identical line). logit-lens at a post-assert newline showed the stop token ``` is strongly predicted at L22/L23 but becomes a 0.05-nat coin-flip with `assert` after layer 23 runs; direct logit attribution confirmed layer 23's MLP alone adds +2.36 net nats toward `assert`, while layers 19-22 MLPs add none.\n\nThe edit: for layer 23's mlp.down_proj (3584->1024) and self_attn.o_proj (2048->1024), dW = B A where A is a unit \"post-assert-line-boundary\" gate direction in the module's input space, and B is (a scaled, fence-orthogonalized copy of) the `assert`-token residual direction. Computed from unedited activations, the gate fires at 100% of assert-boundary newlines but is ~0 on mid-code newlines and general prose, and the added perturbation is \u0394logit(assert) = -3.0 nats with \u0394logit(```) = 0 at every runaway boundary while staying within [-1.0,+0.5] on general chat. Total edit norm is ~0.3% of the weights (budget 5x), so the model is essentially untouched away from assert boundaries; this tips the first decision to stop (~3 nats instead of 0.05) and breaks the loop before it starts. Genuine one-line logic slips (off-by-one, wrong return type) were investigated but proved not addressable by a sta",
+ "adapter": {
+  "modules": 2,
+  "params": 7680,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.003,
+   "model.layers.23.self_attn.o_proj": 0.0012
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_01-25-48_r56217634/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 771
+}

@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 3350,
+ "llm_tokens": {
+  "input": 5838988,
+  "output": 84914,
+  "calls": 62,
+  "failed_calls": 0,
+  "llm_wait_s": 2319.2
+ },
+ "tool_counts": {
+  "generate": 8,
+  "analysis": 29,
+  "candidates": 0
+ },
+ "explanation": "Commit the single rank-2 layer-23 MLP adapter that conditionally routes competition-math thinking through newline then </think>. It targets the observed rumination failure using only original-model behavior, activations, and weights, with protected normal-answer/general/boundary states. Shapes, serialization, finiteness, rank, and Frobenius/spectral norm constraints pass; no gradients, training, or edited-model evaluation occurred.",
+ "final_message": "Created /workspace/work/math_termination_lora.npz: a rank-2 LoRA update to model.layers.23.mlp.down_proj only, with float32 A shaped (2, 3584) and B shaped (1024, 2).\n\nDiagnosis: the original model's thinking mode repeatedly reconsiders even correct elementary calculations, often looping until the generation limit. The initial baseline completed only 3 of 24 problems within 8,192 tokens. On 12 independently constructed math tests, native thinking produced 0 correct nonempty boxed answers, while an unedited prefilled newline-and-closing-thinking prefix produced 11. On 21 reserved competition examples, native thinking scored 1/21, immediate thinking closure scored 5/21, and newline followed by closure scored 10/21. These are original-model prefix experiments, not adapter evaluations. Matched activation traces and original-model activation patches also implicated the persistent thinking-mode state.\n\nIntervention: selectively route the initial competition-math thinking state through one newline and then the native </think> token, reproducing the better-performing empty-thinking boundary while leaving explicit step-by-step calculation to the final response. Two input signatures are constructed by closed-form activation geometry, SVD projection against 408 protected states, and a well-conditioned 2-by-2 dual-basis normalization. Protected states cover ordinary math answers, general tasks, and post-closure boundaries. Independent initial math signatures activate the first route at 0.917\u20131.072; post-newline math signatures activate the second at 0.791\u20131.069, with small cross-activation. Output directions use the original tied embeddings and final normalization weights, projected orthogonally to common continuation tokens, chat opening/end tokens, and the other routing token.\n\nValidation: factor keys, shapes, float32 values, finiteness, rank, serialization, and both Frobenius and spectral norm bounds pass. The update has Frobenius norm 0.638393, versus 16.416725 for the orig",
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0389
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_23-43-02_r195b17fe/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 3410
+}

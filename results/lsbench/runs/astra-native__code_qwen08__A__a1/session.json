@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 1502,
+ "llm_tokens": {
+  "input": 2908528,
+  "output": 58813,
+  "calls": 38,
+  "failed_calls": 0,
+  "llm_wait_s": 1319.7
+ },
+ "tool_counts": {
+  "generate": 8,
+  "analysis": 15,
+  "candidates": 0
+ },
+ "explanation": "Self-written executable tests identified algorithmic errors, missed constraints, and repetition. An expert-programmer prompt improved the unedited model from 4/24 to 7/24 development passes and from 2/12 to 4/12 reserved passes. Matched-prefix traces and activation patches localized a useful expert-context signal at resid.16. The adapter adds three averaged context shifts through layer 15's MLP output, using covariance-regularized coding-sensitive readouts that null non-coding and completed-answer means. Opening shifts are attenuated to 60%; the small code-body shift retains its observed mean. This is a closed-form rank-3 construction, affecting one projection with a Frobenius update of only 1.71% of its original norm. No edited model was run or evaluated, and no post-edit performance claim is made.",
+ "final_message": "Created /workspace/work/python_expert_adapter.npz: a rank-3 LoRA update to model.layers.15.mlp.down_proj only, with A shaped (3, 3584) and B shaped (1024, 3).\n\nI built and executed 24 development coding tasks and 12 reserved tasks. The unedited, thinking-off model frequently produced incorrect algorithms, ignored constraints, and repetitive examples. An expert-programmer instruction improved its development pass count from 4/24 to 7/24 and its reserved count from 2/12 to 4/12. These are unedited prompt-comparison results, not adapter scores.\n\nThe adapter transfers averaged expert-context activation differences at the response boundary, opening code fence, and inside Python code. Closed-form, covariance-regularized input directions make these shifts coding-sensitive and explicitly null ordinary-chat and completed-answer means. Frozen-model activation patching supported layer 16 as a useful intervention point for dynamic-programming and sorting decisions. Opening shifts use 60% of their observed magnitude; the smaller in-code shift uses its observed mean.\n\nThe update\u2019s Frobenius norm is 0.28168, or 1.71% of the original projection\u2019s norm. Archive integrity, module name, shapes, finite values, rank, and norm bounds were verified. Construction scripts and evidence are saved in /workspace/work, with details in README.md.\n\nNo gradients, optimizers, token-loss fitting, package installation, or edited-model evaluation were used. The adapter\u2019s actual coding improvement and preservation of other abilities remain unmeasured under the required one-shot protocol.",
+ "adapter": {
+  "modules": 1,
+  "params": 13824,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.15.mlp.down_proj": 0.0171
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_19-40-31_r55e521f7/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 1550
+}

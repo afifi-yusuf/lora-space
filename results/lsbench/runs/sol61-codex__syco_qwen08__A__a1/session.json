@@ -1,0 +1,28 @@
+{
+ "status": "committed",
+ "wall_s": 1711,
+ "llm_tokens": {
+  "input": 2277826,
+  "output": 49408,
+  "calls": 41,
+  "failed_calls": 0,
+  "llm_wait_s": 1315.3
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 31,
+  "candidates": 0
+ },
+ "explanation": "Rank-8 closed-form residual repair at layer 14 removes shared guess-conditioned query-state shifts before factual retrieval, with an additional calendar nuisance direction. Derived solely from frozen-model activations and causal patches; ordinary prompt/answer input spans are protected. Artifact validation passes both norm bounds, and the edited model has never been evaluated.",
+ "final_message": "Traceback (most recent call last):\n  File \"/home/ubuntu/agency/agency/orchestrator/orchestrator.py\", line 832, in _perform_execution\n    outer_result = engine.execute(\n                   ^^^^^^^^^^^^^^^\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 140, in execute\n    output = self._execute_harness(\n             ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 405, in _execute_harness\n    self.close()\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 89, in close\n    raise manager_error\n  File \"/home/ubuntu/agency/agency/engine/engine.py\", line 76, in close\n    manager.stop()\n  File \"/home/ubuntu/agency/agency/engine/host_servers/host_server_manager.py\", line 400, in stop\n    raise server_error\nRuntimeError: HostServerManager worker did not stop within the configured timeout",
+ "adapter": {
+  "modules": 1,
+  "params": 36864,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.14.mlp.down_proj": 0.1203
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_22-57-29_r87602067/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 1777
+}

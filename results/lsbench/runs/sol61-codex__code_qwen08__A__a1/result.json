@@ -1,0 +1,85 @@
+{
+ "run": "sol61-codex__code_qwen08__A__a1",
+ "entry": "sol61-codex",
+ "label": "GPT-6.1 Sol (Codex)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "2ade323df0982720",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2989,
+  "normalized": 17.2,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2989,
+   "mbpp_plus": 0.2513,
+   "humaneval_base": 0.311,
+   "humaneval_plus": 0.2805,
+   "mbpp_buckets": {
+    "no_code": 116,
+    "wrong_output": 106,
+    "pass": 95,
+    "exception:TypeError": 20,
+    "plus_only": 18,
+    "truncated": 6,
+    "syntax_error": 6,
+    "exception:ValueError": 4,
+    "exception:NameError": 3,
+    "exception:IndexError": 2,
+    "timeout": 1,
+    "exception:AssertionError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.54
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.035
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 820
+ },
+ "cost": {
+  "gpu_hours": 0.81,
+  "session_hours": 0.58,
+  "llm_tokens": {
+   "input": 4458434,
+   "output": 76519,
+   "calls": 46,
+   "failed_calls": 0,
+   "llm_wait_s": 1859.9
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0091
+  }
+ },
+ "explanation": "A single rank-1 update to the last MLP output projection targets destructive post-function assertions and repetition. Its input key selects completed-function contexts while suppressing ordinary code and prose features. Its output is restricted to the final-normalization-scaled contrasts between one newline and two/three newlines, derived from eight matched unedited instruction contrasts. This preserves the model's existing algorithm-generation path and encourages its native code-fence closure. The update norm is 0.148924, only 0.907% of the base matrix's Frobenius norm, and all rank, shape, finite-value, writable-module, and norm checks pass. No edited model was evaluated; the required summary is registered.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T22:55:45Z"
+}

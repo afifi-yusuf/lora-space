@@ -1,0 +1,75 @@
+{
+ "run": "opus55-native__math_qwen08__A__a1",
+ "entry": "opus55-native",
+ "label": "Claude Opus 5.5 (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "da492dd460904521",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.55,
+  "normalized": 96.4,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.55,
+   "cut_share": 0.265,
+   "mean_tokens": 13668.045,
+   "problems": 200,
+   "samples": 1,
+   "ok": 110,
+   "total": 200,
+   "seconds": 2708
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.47,
+    "facts": 1.0,
+    "gsm8k_off": 0.58
+   },
+   "drop": {
+    "mmlu": 0.0033,
+    "facts": 0.0,
+    "gsm8k_off": -0.005
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 3211
+ },
+ "cost": {
+  "gpu_hours": 2.2,
+  "session_hours": 1.31,
+  "llm_tokens": {
+   "input": 190,
+   "output": 92848,
+   "calls": 94,
+   "failed_calls": 0,
+   "llm_wait_s": 912.4
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0556
+  }
+ },
+ "explanation": "Diagnosis: with thinking on, unedited Qwen3.5-0.8B almost never closes its thinking. 31/32 problems were truncated at 16k tokens (1/32 correct), and 27/32 at 8k. The cause is runaway self-doubt loops: \"Wait\" starts most lines (about 9.7k of them in 32 replies), and token entropy drops to about 0.001 once a loop sets in. The same problems in non-thinking mode were about 55-60% correct, and every thinking run that did close was correct, so the main loss is failing to terminate. Edit: a rank-2 LoRA on model.layers.23.mlp.down_proj (||dW||/||W|| = 0.056). Because it is the last sublayer, the edit only changes output logits and leaves internal states untouched. Read side (A): (1) a near-constant input direction (ridge least-squares onto 1; held-out mean about 1.0, sd about 0.03, about 0.9 in chat); (2) a ridge-regressed log-position direction (held-out correlation about 0.7) that rises with reasoning length and in loops. Write side (B): minimum-norm residual vectors, built through the final norm and tied unembedding, that raise the </think> logit by about 5.5 + 2*(logpos - 6.5) nats at T=1 (about +1 at the end of the prompt, about 4-6 early in the reply, about 11 deep in loops), with no change to <|im_end|>, <think> and other special or newline tokens. A second vector suppresses Wait/ wait by about 3 nats, with alternatives like So/Let/If/But held fixed. Offline hazard estimates on the unedited model's own trajectories, using the eval's sampling settings (T=0.6, top-k 20, top-p 0.95, presence penalty), suggest thinking now ends within about 1-7k tokens, with almost no chance of ending at the first token. Spurious </think> in short non-thinking chat is about 0. These are static estimates, and the edited model was never run.",
+ "audit": {
+  "flags": {
+   "import transformers": 21
+  },
+  "clean": false
+ },
+ "finished": "2026-11-12T22:57:32Z"
+}

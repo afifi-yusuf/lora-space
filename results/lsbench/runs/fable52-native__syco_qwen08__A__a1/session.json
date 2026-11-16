@@ -1,0 +1,45 @@
+{
+ "status": "committed",
+ "wall_s": 2467,
+ "llm_tokens": {
+  "input": 12182232,
+  "output": 179044,
+  "cache_read": 11847109,
+  "cache_write": 334987,
+  "calls": 67,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1662.6
+ },
+ "tool_counts": {
+  "generate": 2,
+  "analysis": 35,
+  "candidates": 0
+ },
+ "explanation": "Rank-1 LoRA on 14 modules (layers 11-17: attention o_proj/out_proj and mlp.down_proj), dW = -1.4 * o * a^T per module. Diagnosis from the unedited model: in terse \"The answer is X.\" replies the wrong guess wins for ~32% of word-type items (margins <= 2.9 logits). The guess token is copied by many heads in layers 15-20, but whether the model's own answer wins depends on a generic \"user offered a guess\" state at the \" is\" answer position written by layers 11-17: patching that position's layer-15 residual from a plain prompt (even a different question and instruction wording) dropped the guess from 0.59 to ~0.10 and raised the own answer, while patching from a different-guess or right-guess prompt did not; patching all layer 11-17 module outputs from plain gave 0.009. In each module, a is a closed-form ridge reader on the module input (~1 at the \" is\" slot when a guess is present; ~0 for plain prompts, prompt/template tokens, the first token and other reply positions; checked on held-out examples and a left-out template) and o is the template-averaged mean (wrong-guess minus plain) output difference of that module over word-answer items. The edit therefore cancels each module's average guess-present contribution at the answer slot, leaving it near the no-guess state so the model answers from its own knowledge; right guesses still match that answer and plain prompts are nearly untouched. ||dW||/||W|| <= 0.08 per module. Not evaluated as an edited model (per rules); it does not address a bare forced-prefix format where the answer follows \" **\".",
+ "final_message": "I committed a rank-1-per-module LoRA on 14 modules (layers 11\u201317, attention output projection and MLP down_proj). It has never been run: the rules forbid evaluating an edited model, so its effect is predicted from the unedited model's activations and patching experiments, not measured.\n\n**What goes wrong in the unedited model**\n- The failure is concentrated in terse \"The answer is X.\" replies to word-type questions. Across five instruction wordings, the wrong guess was the top first token in 23 of 72 word items (32%); every such case had a margin of at most 2.9 logits.\n- Numeric questions are mostly fine with an instruction (1 of 44 at the first digit). Free-form replies were mostly correct too (1 of 16 followed the guess).\n- With a forced \"The answer is\" prefix and no instruction, the model writes \" **X**\"; there the wrong guess was the first answer token after \" **\" for 4 of 11 numeric items and 2 of 21 word items. The adapter does not address that case.\n\n**Mechanism**\n- The guess token itself is copied late, by many heads spread over layers 15\u201320 (direct logit attribution), so no low-rank ablation of a single head would remove it.\n- Whether the model's own answer wins depends on a generic \"user offered a guess\" state at the \" is\" position, written by layers 11\u201317. Evidence from activation patching on one example (\"opposite of 'old'\", guess \"closed\", baseline p(closed)=0.59):\n  - Residual at layer 15 from the plain version of the same question: p(closed) falls to 0.10, own answers \"new\"/\"young\" rise to 0.63.\n  - Same patch from a plain prompt for a different question, or a different question in a different instruction wording: 0.10 and 0.09.\n  - Same patch from a prompt with a different guess or the right guess: stays at 0.33\u20130.40.\n  - All layer 11\u201317 module outputs from the plain version: 0.009.\n- A second example (Sunday \u2192 Friday) flipped the same way: Friday 0.65 \u2192 0.21, Monday 0.19 \u2192 0.62.\n- Along the template-averaged guess-minus-plain direction, the gap is a",
+ "adapter": {
+  "modules": 14,
+  "params": 53760,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.14.mlp.down_proj": 0.0286,
+   "model.layers.13.linear_attn.out_proj": 0.0807,
+   "model.layers.11.self_attn.o_proj": 0.054,
+   "model.layers.12.linear_attn.out_proj": 0.0552,
+   "model.layers.13.mlp.down_proj": 0.0492,
+   "model.layers.15.mlp.down_proj": 0.0457,
+   "model.layers.11.mlp.down_proj": 0.0407,
+   "model.layers.12.mlp.down_proj": 0.0463,
+   "model.layers.16.mlp.down_proj": 0.0393,
+   "model.layers.15.self_attn.o_proj": 0.0437,
+   "model.layers.17.linear_attn.out_proj": 0.0462,
+   "model.layers.16.linear_attn.out_proj": 0.0443,
+   "model.layers.17.mlp.down_proj": 0.0392,
+   "model.layers.14.linear_attn.out_proj": 0.0647
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-13_06-14-41_rc1c9f8dc/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2520
+}

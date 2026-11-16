@@ -1,0 +1,84 @@
+{
+ "run": "astra-native__code_qwen08__A__a1",
+ "entry": "astra-native",
+ "label": "GPT-6 Astra (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "49c94a3fe98786bb",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2593,
+  "normalized": -8.6,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2593,
+   "mbpp_plus": 0.209,
+   "humaneval_base": 0.2927,
+   "humaneval_plus": 0.2683,
+   "mbpp_buckets": {
+    "no_code": 99,
+    "wrong_output": 89,
+    "pass": 79,
+    "syntax_error": 29,
+    "truncated": 24,
+    "plus_only": 19,
+    "exception:TypeError": 18,
+    "exception:AssertionError": 10,
+    "exception:ValueError": 6,
+    "exception:IndexError": 4,
+    "exception:RecursionError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 0.9938,
+    "gsm8k_off": 0.54
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0062,
+    "gsm8k_off": 0.035
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 554
+ },
+ "cost": {
+  "gpu_hours": 0.58,
+  "session_hours": 0.43,
+  "llm_tokens": {
+   "input": 2908528,
+   "output": 58813,
+   "calls": 38,
+   "failed_calls": 0,
+   "llm_wait_s": 1319.7
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 13824,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.15.mlp.down_proj": 0.0171
+  }
+ },
+ "explanation": "Self-written executable tests identified algorithmic errors, missed constraints, and repetition. An expert-programmer prompt improved the unedited model from 4/24 to 7/24 development passes and from 2/12 to 4/12 reserved passes. Matched-prefix traces and activation patches localized a useful expert-context signal at resid.16. The adapter adds three averaged context shifts through layer 15's MLP output, using covariance-regularized coding-sensitive readouts that null non-coding and completed-answer means. Opening shifts are attenuated to 60%; the small code-body shift retains its observed mean. This is a closed-form rank-3 construction, affecting one projection with a Frobenius update of only 1.71% of its original norm. No edited model was run or evaluated, and no post-edit performance claim is made.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-12T20:15:38Z"
+}

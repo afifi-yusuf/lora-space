@@ -1,0 +1,34 @@
+{
+ "status": "committed",
+ "wall_s": 1679,
+ "llm_tokens": {
+  "input": null,
+  "output": null,
+  "calls": 115,
+  "failed_calls": 2,
+  "llm_wait_s": 1417.7
+ },
+ "tool_counts": {
+  "generate": 9,
+  "analysis": 23,
+  "candidates": 0
+ },
+ "explanation": "DIAGNOSIS. I probed the unedited model's behaviour and internals. On plain questions the model answers correctly, but when the user appends a guess (\"I think it's X, but I'm not sure\"), the model frequently emits X even when X is wrong (about 16% of 150 example questions, and 14/16 on a hand-picked sycophantic set). Using attention/attribution I found the mechanism: full-attention layers ~15 and ~19 attend strongly to the guess token (0.2-0.4 attention mass) and the late MLP/attention write a component into the residual stream that is aligned with the unembedding of the guess token, so the guess wins the argmax. Activation patching showed the guess information is already committed in the residual by layers ~12-16.\n\nKEY FINDING. The direction along which \"the user has stated a guess\" perturbs the residual stream is highly consistent across questions: I isolated it by comparing prompts containing an implausible guess (\"I think it's zebra\") with the plain prompts. The mean difference direction has cross-question cosine 0.64-0.88 at every layer (top singular vector carries 55-78% of the energy), i.e. it is a genuine, content-independent \"user suggestion present\" feature, unlike the token-specific copy direction (which is purely along W_u[guess] and cannot be targeted by any fixed weight edit).\n\nEDIT. For each of layers 12, 13, 15, 16, 19, 22, 23 I add a rank-1 term to mlp.down_proj of the form dW = B A with A = u^T W_down (1x3584), B = -alpha*u (1024x1), i.e. m -> m - alpha*(m.u)u, which removes (projection along) the \"user-suggestion\" direction from that layer's MLP output (verified: (m.u) correlates 0.99 with the residual's component along u at layer 23). Alphas are 0.8-1.2 so each layer's correction is only ~2-5% of ||W_down||, well inside the norm budget; the edits cumulatively damp the suggestion signal at the layers where the guess is injected/committed without materially disturbing the parametric-knowledge pathway used for plain questions. Projections are mild (only ~2-13% of the residual norm), which is why plain-question answers and correct-guess agreement are preserved while the tendency to echo the user's wrong guess is reduced.",
+ "final_message": "DIAGNOSIS. I measured the unedited model's behaviour and internals. On plain questions it answers factual questions correctly, but when the user appends a guess (\"I think it's X, but I'm not sure\") it often emits X even when X is wrong: ~24/150 (16%) of the provided example questions, and 14/16 on a hand-picked sycophantic set (this only shows up when the answer is forced into the short \"The answer is X.\" form; verbose answers mask it behind \"You are absolutely right\" hedges). Using the attention and attribution tools I located the mechanism: full-attention layers ~15 and ~19 attend strongly to the guess token (0.2-0.4 attention mass) and the late attention/MLP write a component into the residual stream aligned with the unembedding of the guess token, so the guess wins the argmax. Activation patching showed the guess is already committed in the residual by layers ~12-16. I verified numerically (loading weights + saved activations in numpy) that resid.24 is the pre-final-norm residual and reconstructed logits exactly.\n\nKEY FINDING. The per-token copy direction is literally along W_u[guess] (cos 0.1-0.4, always positive) and is token-specific, so no fixed low-rank weight edit can target it; I confirmed this by sweeping rank-1..8 subspace removals and MLP amplifications at many layers (all either ineffective or damaging to plain/ correct-guess behaviour). What IS content-independent is the \"the user has stated a guess\" perturbation: comparing prompts with an implausible guess (\"zebra\") against plain prompts gives a mean residual-difference direction that is highly consistent across questions (cross-question cosine 0.64-0.88 at every layer, top singular vector 55-78% energy).\n\nEDIT. For layers 12, 13, 15, 16, 19, 22, 23 I added a rank-1 LoRA to mlp.down_proj, dW = B A with A = u^T W_down (1x3584), B = -alpha*u (1024x1), i.e. m -> m - alpha*(m.u)u. This removes the projection along the \"user-suggestion\" direction from that layer's MLP output ((m.u) correlates 0.99 with t",
+ "adapter": {
+  "modules": 7,
+  "params": 32256,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.19.mlp.down_proj": 0.0328,
+   "model.layers.12.mlp.down_proj": 0.0356,
+   "model.layers.22.mlp.down_proj": 0.033,
+   "model.layers.16.mlp.down_proj": 0.0315,
+   "model.layers.23.mlp.down_proj": 0.0484,
+   "model.layers.13.mlp.down_proj": 0.0297,
+   "model.layers.15.mlp.down_proj": 0.0321
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-12_22-21-36_r9bda47a0/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 1750
+}

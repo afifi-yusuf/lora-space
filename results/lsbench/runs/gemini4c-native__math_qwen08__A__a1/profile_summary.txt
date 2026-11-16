@@ -1,0 +1,22 @@
+label                        calls    wall_s    cpu_s   runq_s blocked_s   cpu%
+-------------------------------------------------------------------------------
+turn                           143  14341.31      n/a      n/a       n/a    n/a
+llm:attempt                    144  12036.88     6.32     0.00  12030.56   0.1%
+tool:generate                   11   1339.16      n/a      n/a       n/a    n/a
+tool:bash                      103    641.23      n/a      n/a       n/a    n/a
+process:bash                   103    640.33      n/a      n/a       n/a    n/a
+tool:top_activations             8    177.85      n/a      n/a       n/a    n/a
+llm:compact                      1    108.08      n/a      n/a       n/a    n/a
+tool:trace                       5     83.19      n/a      n/a       n/a    n/a
+tool:token_stats                 1     38.75      n/a      n/a       n/a    n/a
+syscall:sendto                2595      6.25      n/a      n/a       n/a    n/a
+tool:logit_lens                  1      5.65      n/a      n/a       n/a    n/a
+sandbox:ensure_daemon            1      4.88     1.14     0.00      3.74  23.4%
+runtime.harness_start            1      4.88     1.14     0.00      3.74  23.3%
+tool:attribution                 4      4.67      n/a      n/a       n/a    n/a
+syscall:connect                721      1.75      n/a      n/a       n/a    n/a
+sandbox:create                   1      1.11     0.25     0.00      0.86  22.6%
+run:detect                       1      0.81     0.00     0.00      0.81   0.1%
+run:container_call               6      0.65     0.00     0.00      0.64   0.2%
+sandbox:start                    1      0.58     0.00     0.00      0.57   0.5%
+runtime.container_create         1      0.58     0.00     0.00      0.57   0.5%
