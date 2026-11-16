@@ -2,6 +2,8 @@
 
 **A benchmark for editing models by writing their weights.**
 
+[Results](https://loraspace.org) · [Rules](#how-a-run-works) · [Run it](#running-it) · [Contributing](CONTRIBUTING.md) · [Citation](#citation) · [MIT license](LICENSE)
+
 An editor model is given a frozen target model and a short request in plain English, such as "make this model better
 at math". It inspects the target through a fixed set of tools and writes a LoRA adapter by hand, as arrays of numbers.
 It gets no gradients and no training loop, and it commits once. The adapter is then scored on held-out data.
@@ -110,7 +112,7 @@ infra/
   grid/                   launches and balances a fleet of GPU workers, and pulls back finished runs
 src/lso/, scripts/        target-model definitions and the earlier LSO experiments the benchmark grew out of
 paper/                    draft write-up of those experiments
-plans/lora_bench_plan.md  the benchmark's design notes
+docs/                     the benchmark's design notes and the original LSO research brief
 ```
 
 ## Running it
@@ -174,7 +176,27 @@ findings the benchmark builds on:
   ([`results/m0/`](results/m0/)).
 - Applied as a rank-1 LoRA, that edit scores 51.2% on MATH-500, against 7.9% for the unedited model.
 
-The original research brief is [`LSO_CLAUDE_CODE.md`](LSO_CLAUDE_CODE.md).
+The original research brief is [`docs/lso-research-brief.md`](docs/lso-research-brief.md).
+
+## Contributing
+
+To report a result that looks wrong, or to propose an editor, harness or task, see
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## Citation
+
+```bibtex
+@misc{afifi2026lorabench,
+  title  = {LoRA-Space Bench: A Benchmark for Editing Models by Writing Their Weights},
+  author = {Afifi, Yusuf},
+  year   = {2026},
+  url    = {https://loraspace.org}
+}
+```
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).
 
 ## Acknowledgements
 

@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+title: "LoRA-Space Bench: a benchmark for editing models by writing their weights"
+message: "If you use this benchmark or its run records, please cite it as below."
+type: software
+authors:
+  - family-names: Afifi
+    given-names: Yusuf
+    affiliation: "University of California, Berkeley"
+url: "https://loraspace.org"
+repository-code: "https://github.com/afifi-yusuf/lora-space"
+date-released: 2026-11-15
+version: "lsbench-v0.3"
+license: MIT

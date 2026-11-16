@@ -1,8 +1,9 @@
 [project]
 name = "lso"
 version = "0.1.0"
-description = "LoRA-Space Optimization: frontier LLMs program LoRA adapters for frozen models without gradients"
+description = "LoRA-Space Bench: editor models write LoRA adapters for frozen models from a plain-English request, without gradients"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26",
