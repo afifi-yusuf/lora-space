@@ -15,3 +15,36 @@ jobs:
         run: uvx --with numpy pytest -q
       - name: Build the results site from the committed run records
         run: python3 -m lsbench.site
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site/
+          retention-days: 7
+
+  # Publishes the site built above to Cloudflare Pages (loraspace.org) on every push to main.
+  # Needs two repository secrets: CLOUDFLARE_API_TOKEN (Pages: Edit) and CLOUDFLARE_ACCOUNT_ID.
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: true
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::Cloudflare secrets are not set; skipping the deploy."
+            exit 0
+          fi
+          npx --yes wrangler@4 pages deploy site --project-name loraspace --branch main --commit-hash "$GITHUB_SHA"

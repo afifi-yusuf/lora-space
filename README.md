@@ -152,8 +152,10 @@ pass `--force`.
 
 ```bash
 .venv/bin/python -m lsbench.site                                        # writes site/index.html
-npx wrangler@3 pages deploy site --project-name loraspace --branch main  # publishes to loraspace.org
 ```
+
+Pushing to `main` publishes it: the CI workflow rebuilds the site from the committed run records and deploys it to
+[loraspace.org](https://loraspace.org) on Cloudflare Pages.
 
 The site is one self-contained HTML file with the run data embedded. It needs no GPU and no server; building it
 reads only `results/lsbench/` and the config files.
