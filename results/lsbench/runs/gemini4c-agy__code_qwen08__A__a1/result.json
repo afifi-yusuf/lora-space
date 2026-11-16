@@ -1,0 +1,96 @@
+{
+ "run": "gemini4c-agy__code_qwen08__A__a1",
+ "entry": "gemini4c-agy",
+ "label": "Gemini 4 Carbon (Antigravity CLI)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "4c38829720196a49",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.3571,
+  "normalized": 55.1,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.3571,
+   "mbpp_plus": 0.2831,
+   "humaneval_base": 0.3293,
+   "humaneval_plus": 0.2866,
+   "mbpp_buckets": {
+    "wrong_output": 113,
+    "pass": 107,
+    "no_code": 80,
+    "plus_only": 28,
+    "exception:TypeError": 27,
+    "syntax_error": 8,
+    "exception:NameError": 3,
+    "truncated": 3,
+    "exception:ValueError": 3,
+    "exception:AssertionError": 2,
+    "exception:IndexError": 1,
+    "exception:AttributeError": 1,
+    "exception:SyntaxError": 1,
+    "timeout": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 0.9938,
+    "gsm8k_off": 0.52
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0062,
+    "gsm8k_off": 0.055
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 578
+ },
+ "cost": {
+  "gpu_hours": 3.0,
+  "session_hours": 2.84,
+  "llm_tokens": {
+   "input": 15982499,
+   "output": 189399,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 130,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 9297.1
+  }
+ },
+ "adapter": {
+  "modules": 6,
+  "params": 46080,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.18.mlp.down_proj": 0.1221,
+   "model.layers.23.mlp.down_proj": 0.0038,
+   "model.layers.21.mlp.down_proj": 0.0033,
+   "model.layers.19.self_attn.o_proj": 0.0264,
+   "model.layers.21.linear_attn.out_proj": 0.0025,
+   "model.layers.22.mlp.down_proj": 0.0033
+  }
+ },
+ "explanation": "Closed-form mechanistic LoRA adapter (6 modules: L18.mlp.down_proj r=2, L19.self_attn.o_proj r=2, L21.linear_attn.out_proj r=1, L21.mlp.down_proj r=2, L22.mlp.down_proj r=1, L23.mlp.down_proj r=3) addressing Qwen3.5-0.8B's three dominant Python chat-coding failure modes while preserving general chat (<0.153 max logit shift across 989 general-chat positions): (1) task-agnostic resid.19 query-routing at 'def' and 'def <ident>' when an assert is present so L19/L23 copy the exact asserted function signature instead of paraphrasing English verbs/suffixes, (2) single-newline '\\n' -> '```' fence closure after top-level return statements (counteracting L21.H15's \\n\\n\\n push without affecting indented early returns) plus backup Cat B2 assert-loop escape, and (3) clean pos-0 ```python fence initiation on coding prompts.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-16T06:20:46Z"
+}

@@ -1,0 +1,79 @@
+{
+ "run": "kimi31-native__math_qwen08__A__a1",
+ "entry": "kimi31-native",
+ "label": "Kimi K3.1 Pro (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "6ede691af8101393",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.095,
+  "normalized": 3.1,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.095,
+   "cut_share": 0.96,
+   "mean_tokens": 31549.515,
+   "problems": 200,
+   "samples": 1,
+   "ok": 19,
+   "total": 200,
+   "seconds": 7887
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4833,
+    "facts": 0.9938,
+    "gsm8k_off": 0.105
+   },
+   "drop": {
+    "mmlu": -0.01,
+    "facts": 0.0062,
+    "gsm8k_off": 0.47
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 8348
+ },
+ "cost": {
+  "gpu_hours": 2.49,
+  "session_hours": 0.17,
+  "llm_tokens": {
+   "input": 2171677,
+   "output": 38646,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 32,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 331.5
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.135
+  }
+ },
+ "explanation": "Rank-1, context-gated final-layer LoRA that promotes </think> only at the initial boxed-math thinking state. Untouched-model tests showed this escapes nonterminating verification loops and restores ordinary step-by-step boxed answers; gate, shape, rank, norm, and finite-value audits passed, with ||dW||/||W||=0.13496.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-16T04:13:06Z"
+}

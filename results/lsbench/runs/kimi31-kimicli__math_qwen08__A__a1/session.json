@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 4726,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 43268786,
+  "output": 98584,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 456,
+  "failed_calls": 52,
+  "usage_missing_calls": 52,
+  "lower_bound": true,
+  "llm_wait_s": 2900.0
+ },
+ "tool_counts": {
+  "generate": 13,
+  "analysis": 47,
+  "candidates": 0
+ },
+ "explanation": "Unprefixed frozen-model generations showed recurrent over-deliberation and repetition after derivations or boxed answers, rather than reliable termination. This rank-one adapter targets only model.layers.23.mlp.down_proj. Its input direction contrasts two naturally stopped successful responses with four genuine long-continued loops; its output direction is the frozen weights acting on that selector. Using the existing vocabulary readout and layer-23 endpoint attribution, it favors <|im_end|> over newline alternatives at selected completion states while being strongly off in the measured loops. Relative Frobenius norm is approximately 0.10 (||delta W||_F = 1.64149 versus ||W||_F = 16.41718), well below the allowed norm of 5||W||. Its direction also excites general/think readouts and may respond to intermediate closing braces, so premature cessation and non-math collateral effects are unquantified. No adapted generation, candidate-model reimplementation or evaluation was run, as required; improvement is not claimed as measured.",
+ "final_message": "Committed /workspace/work/adapter.npz, a rank-one LoRA on model.layers.23.mlp.down_proj only. Frozen-model generations showed a recurrent failure mode: after successful derivations, and sometimes after boxed answers, the model continued checking and repeating instead of terminating. The adapter contrasts layer-23 MLP inputs from two naturally completed responses with four genuine over-deliberation loops, then maps that contrast through the frozen down-projection. Its positive endpoint gain uses the existing vocabulary readout to reinforce the observed completion contribution of <|im_end|> relative to newline alternatives; it is not a fixed answer or constant stop-token embedding. At one frozen endpoint, the actual MLP output had positive projection 1.9142 along the selected direction. Calibration against the measured layer-23 attribution gave an estimated first-order end-versus-two-blank-line-margin gain of about 3.86 logits at alpha = 0.10, compared with a 2.91 deficit observed for a short completed response. The saved update has ||delta W||_F = 1.6414926, ||W||_F = 16.417181, relative norm 0.0999863, safely below 5||W||. A reload verified exactly the two required keys, A shape (1,3584) and B shape (1024,1), finite float32 contents, exact rank-one outer-product reconstruction, matching selected directions, and the norm constraint. The original checkpoint hash was unchanged. No training, gradients, optimizers, candidate-network reimplementation, or edited-model generation/evaluation was used, in accordance with the restrictions. The behavioral improvement is therefore unmeasured. The contrast also responds to final-brace features and has nonzero general/think-token readouts, so early stopping after intermediate displays and effects on other capabilities remain known, unverified risks.",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_03-23-12_rd24a3c4f/logs/agent_lsb-kimi_0000_data.sqlite3",
+ "session_s": 4774
+}

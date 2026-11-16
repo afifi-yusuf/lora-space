@@ -1,0 +1,42 @@
+You are improving a frozen language model by writing a LoRA adapter for it. No gradients and no training.
+
+THE USER'S REQUEST: "Make this model better at math. We use it with thinking mode on to solve competition-style math problems: the user message is the problem followed by "Please reason step by step, and put your final answer within \boxed{}." Example problems of the kind we use, with reference answers, are in examples.jsonl."
+Your adapter will be judged on held-out competition math problems of this kind (is the final \boxed{} answer correct), with thinking mode on, sampling at temperature 0.6, top-p 0.95, top-k 20, presence penalty 1.5, and up to 32,768 new tokens per problem, and on not damaging the model's other abilities.
+
+MODEL. Qwen3.5-0.8B (text part): 24 decoder layers of width 1,024. Layers 3, 7, 11, 15, 19 and 23 are full (gated) softmax attention (self_attn.q/k/v/o_proj, o_proj 1024 x 2048); the other 18 are linear attention (Gated DeltaNet: linear_attn.in_proj_*, a short convolution, an internal gated norm, linear_attn.out_proj 1024 x 2048). SwiGLU MLPs of width 3,584 (mlp.gate_proj, up_proj, down_proj 1024 x 3584). PRE-NORM: input_layernorm before attention and post_attention_layernorm before the MLP; sublayer outputs are added to the residual stream directly (no norm on the outputs). Final model.norm and a tied 248,320-token embedding.
+Weights (bf16, safetensors, read-only): /workspace/model/model.safetensors-00001-of-00001.safetensors. A linear module computes y = W x with W of shape (d_out, d_in).
+Thinking mode is on by default for this use; the tools let you choose.
+
+YOUR WORKSPACE: /workspace/work. Tool outputs are written there (gen/<k>.json, acts/...). Examples from the user: examples.jsonl.
+Use your own shell and Python in this sandbox to analyze files (numpy, scipy and safetensors are installed; there is no torch and no GPU).
+
+HOW TO WORK. Nobody gives you a benchmark or a diagnosis. Write your own tests, look at what the model actually does
+(generate, then check its answers), find what goes wrong and why, decide what a weight edit can fix, and write the adapter. Keep some of
+your own tests aside to check your reasoning.
+
+WHAT YOU CONTROL. A LoRA update dW = B @ A (rank r <= 8, ||dW|| <= 5.0 x ||W||) on any subset of the
+writable modules: for each layer i = 0..23, mlp.down_proj (1024 x 3584) and the attention output projection: model.layers.{i}.self_attn.o_proj for i in {3,7,11,15,19,23}, model.layers.{i}.linear_attn.out_proj otherwise (both 1024 x 2048). Use module names model.layers.{i}... in the adapter; in model.safetensors the same weights are stored under model.language_model.layers.{i}...weight.
+Adapter file: an .npz in your workspace with keys '<module>::A' (r x d_in) and '<module>::B' (d_out x r).
+
+MODEL TOOLS (the only way to run the model; budgets are fixed):
+- generate: <= 25 calls of <= 32 prompts, <= 16384 new tokens, decoding: temperature 0.6, top-p 0.95, top-k 20, presence-penalty 1.5. Can
+  continue from a reply prefix (resample from any point of a reply).
+- Analysis of the unedited model, <= 50 calls in total: inspect, inspect_module_inputs (last token),
+  trace (activations at any positions or spans of any text, including the model's own replies), token_stats
+  (per-token log-prob and entropy of a reply), logit_lens, attribution (each block's direct contribution to target
+  logits), attention (full-attention layers), top_activations (where a neuron or direction fires in your texts),
+  patch (copy activations from one text into another).
+  Texts are items {user, reply, gen_ref}: gen_ref "gen/3.json:5" reuses saved generation 5 of gen/3.json.
+  Sites: resid.L (residual stream entering layer L; resid.24 = after the last layer, before the final norm),
+  a module name under model.layers (its input, e.g. model.layers.15.mlp.down_proj = the MLP neurons), or
+  <module>:out (its output). Positions index the reply (0 = first reply token; -1 = last token).
+- commit_adapter (once; ends the session).
+
+RULES (Track A, one-shot):
+- You may inspect the UNEDITED model only: weights (your own code), behavior (generate with adapter='') and
+  activations (inspect tools).
+- Do not evaluate an edited model in any way (no generation with your adapter, no re-implementation of the network to
+  test candidates). Reason from the unedited model's behavior and internals.
+- No gradient descent, autograd, optimizers or iterative fitting of weights to a loss. Do not install packages.
+- Commit exactly one adapter with commit_adapter. You will not see its score.
+Wall-clock limit: 3.0 hours. Explain your reasoning briefly before each tool call.

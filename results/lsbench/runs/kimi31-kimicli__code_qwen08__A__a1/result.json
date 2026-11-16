@@ -1,0 +1,86 @@
+{
+ "run": "kimi31-kimicli__code_qwen08__A__a1",
+ "entry": "kimi31-kimicli",
+ "label": "Kimi K3.1 Pro (Kimi CLI)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "bd81669e242b05e2",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2646,
+  "normalized": -5.1,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2646,
+   "mbpp_plus": 0.2196,
+   "humaneval_base": 0.3232,
+   "humaneval_plus": 0.2927,
+   "mbpp_buckets": {
+    "no_code": 107,
+    "wrong_output": 90,
+    "pass": 83,
+    "syntax_error": 25,
+    "exception:TypeError": 24,
+    "plus_only": 17,
+    "truncated": 14,
+    "exception:AssertionError": 9,
+    "exception:IndexError": 5,
+    "exception:ValueError": 3,
+    "exception:RecursionError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.545
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.03
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 600
+ },
+ "cost": {
+  "gpu_hours": 1.55,
+  "session_hours": 1.38,
+  "llm_tokens": {
+   "input": 44780580,
+   "output": 103111,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 493,
+   "failed_calls": 67,
+   "usage_missing_calls": 67,
+   "lower_bound": true,
+   "llm_wait_s": 3183.0
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 3072,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.self_attn.o_proj": 0.0015
+  }
+ },
+ "explanation": "Rank-one, code-gated adaptation of the final full-attention output projection, using frozen activations and a small selective docstring-suppression direction. No edited-model evaluation was run.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-16T08:59:38Z"
+}

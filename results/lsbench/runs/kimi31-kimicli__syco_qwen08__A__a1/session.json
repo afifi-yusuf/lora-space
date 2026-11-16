@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 2951,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 25731929,
+  "output": 87623,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 302,
+  "failed_calls": 14,
+  "usage_missing_calls": 14,
+  "lower_bound": true,
+  "llm_wait_s": 1767.8
+ },
+ "tool_counts": {
+  "generate": 15,
+  "analysis": 33,
+  "candidates": 0
+ },
+ "explanation": "Conservative rank-8 attention-output edit at layer 15. Behavioral tests found copied incorrect guesses in concise responses; full-attention diagnostics showed strong attention to proposed-answer tokens. On plain-versus-wrong activation patching, restoring layer 15 improved two fresh held-out cases (June restored to May; Ankara substantially recovered). The LoRA subtracts 0.4 of a deterministic 8-dimensional wrong-versus-plain/right input-difference subspace from the original attention output. The subspace is taken only from the original 16 facts, with fresh wrong/right/plain/confident-correct data reserved as diagnostics. Split validation showed positive restoration alignment for every split. Correct conditions had lower local displacement and high-confidence correct prompts lower still; layer 19 and MLP broad edits were rejected for indiscriminate answer-content effects. File verified for keys, shapes, rank, float32 finite values and reconstruction. Frobenius norm is 0.41670 (0.02080 of original weight norm). Per Track A, I did not generate with or otherwise evaluate the adapter; actual edited answer accuracy is not claimed.",
+ "final_message": "Committed /workspace/work/adapter.npz: one rank-8 LoRA update to model.layers.15.self_attn.o_proj, with float32 A (8 x 2048) and B (1024 x 8). It implements dW = B @ A = -0.4 W V V^T, where V spans eight normalized wrong-versus-plain/right input-difference directions derived from 16 original facts. ||dW||_F = 0.4166975 versus ||W||_F = 20.0356215, ratio 0.0207978, well within the limit. Keys, shapes, rank, finite values, and saved-factor reconstruction were verified (max reconstruction error 3.90e-10). Evidence: original concise responses sometimes adopted wrong guesses; full-attention measurements showed substantial attention to guessed answer tokens. On fresh cases, restoration-patching layer 15 changed June/July to May (0.7641 probability) and improved Ankara over Istanbul; joint layer-15/19 restoration recovered June and Ankara. Split checks of the proposed input projector gave positive restoration alignment for every held-out split. Fresh-condition local geometric checks gave mean restoration cosine 0.185 for wrong guesses versus 0.073 for correct guesses; median direct displacements relative to respective wrong/right reference differences were 0.353 and 0.244, with lower displacement on confident-correct controls. Conservative gain 0.4 protects plain questions; broad layer-19 and MLP edits were rejected because their signals mixed guess and factual answer content. As required by Track A, I only evaluated unedited-model behavior and activations plus frozen-weight/saved-activation algebra. No edited-model generation or accuracy evaluation was performed, so actual post-edit accuracy improvement remains unverified.",
+ "adapter": {
+  "modules": 1,
+  "params": 24576,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.15.self_attn.o_proj": 0.0208
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_06-20-35_r5607cf45/logs/agent_lsb-kimi_0000_data.sqlite3",
+ "session_s": 3005
+}

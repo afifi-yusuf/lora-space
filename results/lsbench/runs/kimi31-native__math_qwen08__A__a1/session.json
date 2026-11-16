@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 572,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 2171677,
+  "output": 38646,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 32,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 331.5
+ },
+ "tool_counts": {
+  "generate": 6,
+  "analysis": 5,
+  "candidates": 0
+ },
+ "explanation": "Rank-1, context-gated final-layer LoRA that promotes </think> only at the initial boxed-math thinking state. Untouched-model tests showed this escapes nonterminating verification loops and restores ordinary step-by-step boxed answers; gate, shape, rank, norm, and finite-value audits passed, with ||dW||/||W||=0.13496.",
+ "final_message": "Built /workspace/work/math_lora.npz: a rank-1 LoRA on model.layers.23.mlp.down_proj only. Diagnosis: the untouched thinking-mode model repeatedly derived results but entered \u201cWait / re-read / double-check\u201d loops; all 32 diagnostic generations hit 2,048 tokens without a final answer, and six longer easy-problem runs all hit 8,192 tokens. Thinking-disabled controls normally terminated with step-by-step boxed answers, and forcing the exact closing token </think> restored the same behavior, including natural following newlines. The adapter therefore implements a narrow, one-time mode switch rather than attempting to train mathematical knowledge. Its A vector is an activation-engineered gate for the initial boxed-math thinking state; its B vector is aligned with the final-norm-scaled tied embedding of </think>. Held-out initial math prompts used only for gate checks had responses 0.956\u20131.029, while non-math controls and normal answer trajectories were centered near zero. Local direct attribution predicts approximately a 9-logit increase for </think> at initial math states. Contract audit: A is 1x3584, B is 1024x1, dW is 1024x3584 and rank 1; ||dW||_F = 2.21565 versus ||W||_F = 16.41718 (ratio 0.13496, limit 82.08591). The file contains exactly the two required keys and only finite float32 values. No edited-model generation or edited-network evaluation was performed.",
+ "adapter": {
+  "modules": 1,
+  "params": 4608,
+  "max_rank": 1,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.135
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_01-43-35_r88540cb3/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 621
+}

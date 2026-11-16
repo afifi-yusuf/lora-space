@@ -1,0 +1,33 @@
+{
+ "status": "committed",
+ "wall_s": 693,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 6094277,
+  "output": 70188,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 60,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 535.5
+ },
+ "tool_counts": {
+  "generate": 5,
+  "analysis": 20,
+  "candidates": 0
+ },
+ "explanation": "Single-site rank-8 closed-form LoRA on model.layers.23.mlp.down_proj. It transfers the empirically beneficial concise-code instruction shift at identical reply tokens, with noncoding zero-target regularization. Chosen over earlier-layer and mixed-site alternatives using unedited activation patches and held-out activation recovery; ||dW||/||W||=0.03864, with low unused-noncoding perturbation.",
+ "final_message": "Built and verified a rank-8 LoRA adapter at candidates/final_instruction.npz, editing only model.layers.23.mlp.down_proj.\n\nEvidence and construction: I created 24 varied Python function tasks with executable edge-case tests. The unedited model passed 9/24; concise code-only elicitation passed 13/24, while a stronger generic edge-case instruction regressed to 9/24. On eight separate tasks, concise elicitation improved 4/8 to 5/8. I verified the y=Wx module orientation and residual identities numerically to floating-point precision. Clean activation patches at an identical function-body prefix showed that early/mid residual states did not flip the original docstring decision, whereas the concise final residual did. I therefore fit a single final-layer map using closed-form ridge regression and rank truncation, pairing original and concise prompts with exactly the same replies (both original and concise code) to avoid confounding instruction effects with different algorithms. Noncoding replies had zero target and strong retention weighting.\n\nThe resulting ||dW||/||W|| is 0.03864, well below the 5.0 cap. On untouched coding tasks, weight-space validation recovered 0.77 of the early-body target shift and 0.49 over whole replies (R^2). On six unused noncoding conversations, mean perturbation was 3.56% of the original MLP output and 1.99% of final-residual norm. The saved file was reloaded and checked for exact key names, shapes (A: 8x3584, B: 1024x8), finite values, rank, and exact B@A reconstruction. No edited-model generation or edited-network simulation was performed. The intervention targets the observed verbosity/formatting failure mode; it is not expected to repair every algorithmic error.",
+ "adapter": {
+  "modules": 1,
+  "params": 36864,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0386
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_01-44-52_r8431fe7b/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 741
+}

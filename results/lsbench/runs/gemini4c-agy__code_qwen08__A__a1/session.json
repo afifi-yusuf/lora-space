@@ -1,0 +1,38 @@
+{
+ "status": "committed",
+ "wall_s": 10163,
+ "provider_queue_excluded_s": 2382.4,
+ "llm_tokens": {
+  "input": 15982499,
+  "output": 189399,
+  "cache_read": 0,
+  "cache_write": 0,
+  "calls": 130,
+  "failed_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 9297.1
+ },
+ "tool_counts": {
+  "generate": 12,
+  "analysis": 33,
+  "candidates": 0
+ },
+ "explanation": "Closed-form mechanistic LoRA adapter (6 modules: L18.mlp.down_proj r=2, L19.self_attn.o_proj r=2, L21.linear_attn.out_proj r=1, L21.mlp.down_proj r=2, L22.mlp.down_proj r=1, L23.mlp.down_proj r=3) addressing Qwen3.5-0.8B's three dominant Python chat-coding failure modes while preserving general chat (<0.153 max logit shift across 989 general-chat positions): (1) task-agnostic resid.19 query-routing at 'def' and 'def <ident>' when an assert is present so L19/L23 copy the exact asserted function signature instead of paraphrasing English verbs/suffixes, (2) single-newline '\\n' -> '```' fence closure after top-level return statements (counteracting L21.H15's \\n\\n\\n push without affecting indented early returns) plus backup Cat B2 assert-loop escape, and (3) clean pos-0 ```python fence initiation on coding prompts.",
+ "final_message": "# Closed-Form Mechanistic LoRA Adapter for Qwen3.5-0.8B Python Coding\n\n## 1. Empirical Diagnosis of Unedited Model (`thinking=False`)\nTo diagnose what actually goes wrong when `Qwen3.5-0.8B` answers 1\u20132 sentence chat Python function prompts (with or without an example `assert`), we constructed two 32-task development benchmarks (`dev_batch_1.json`, `dev_batch_2.json`), a 32-prompt non-coding general-chat suite (`general_prompts.json`), and an untouched 16-task held-out diagnostic set (`heldout_batch.json`, never used in adapter construction), evaluating unedited greedy generations (`adapter=\"\"`).\n\nThree dominant, universal, non-algorithmic failure modes accounted for over half of all preventable test failures across both dev and held-out sets:\n1. **Self-Destructing Trailing `# Test cases` & 2,048-Token `assert` Loops (`47%\u201372%` of generations)**:\n   - After completing a working function's final `    return <expr>`, the model emits `\\n\\n\\n` or `\\n\\n` (`9/10` traced functions) instead of `\\n` and appends `# Test cases\\nassert ...` inside the same ```python code block.\n   - Because `Qwen3.5-0.8B` cannot mentally simulate multi-step execution on invented test inputs, **36%\u201340% of otherwise 100%-correct functions self-destruct**: either an invented `assert` has a wrong expected value (`AssertionError` on load) or line-level `assert` induction enters a 2,048-token repetition loop (`31.2%` of held-out tasks), leaving the ```python fence unclosed (`SyntaxError`).\n   - Stripping trailing non-definition statements raised `dev_batch_2` pass rate from `7/32` (`21.9%`) to `11/32` (`34.4%`, `+57%` relative).\n2. **`assert <func_name>` Paraphrasing & Suffix Hallucination (`20%\u201325%` of MBPP-style prompts)**:\n   - When the English prompt says `\"Write a function to sort ...\"` or `\"reverse ...\"` or `\"find the second smallest unique ...\"` alongside `\\nassert rank_players(...)` / `assert rev_words(...)` / `assert second_smallest(...)` / `assert kth_unique(...)`, the model frequently defi",
+ "adapter": {
+  "modules": 6,
+  "params": 46080,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.18.mlp.down_proj": 0.1221,
+   "model.layers.23.mlp.down_proj": 0.0038,
+   "model.layers.21.mlp.down_proj": 0.0033,
+   "model.layers.19.self_attn.o_proj": 0.0264,
+   "model.layers.21.linear_attn.out_proj": 0.0025,
+   "model.layers.22.mlp.down_proj": 0.0033
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-16_03-20-53_r87e1b5e0/logs/agent_lsb-antigravity_0000_data.sqlite3",
+ "session_s": 10212
+}

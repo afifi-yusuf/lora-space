@@ -1,0 +1,89 @@
+{
+ "run": "kimi31-native__code_qwen08__A__a1",
+ "entry": "kimi31-native",
+ "label": "Kimi K3.1 Pro (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "7d4084a4a60436bc",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2963,
+  "normalized": 15.5,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2963,
+   "mbpp_plus": 0.2328,
+   "humaneval_base": 0.3232,
+   "humaneval_plus": 0.2866,
+   "mbpp_buckets": {
+    "no_code": 120,
+    "wrong_output": 100,
+    "pass": 88,
+    "plus_only": 24,
+    "exception:TypeError": 23,
+    "syntax_error": 13,
+    "truncated": 2,
+    "exception:IndexError": 2,
+    "exception:AssertionError": 2,
+    "exception:ValueError": 2,
+    "timeout": 1,
+    "exception:NameError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.545
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.03
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 599
+ },
+ "cost": {
+  "gpu_hours": 0.37,
+  "session_hours": 0.21,
+  "llm_tokens": {
+   "input": 6094277,
+   "output": 70188,
+   "cache_read": 0,
+   "cache_write": 0,
+   "calls": 60,
+   "failed_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 535.5
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 36864,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0386
+  }
+ },
+ "explanation": "Single-site rank-8 closed-form LoRA on model.layers.23.mlp.down_proj. It transfers the empirically beneficial concise-code instruction shift at identical reply tokens, with noncoding zero-target regularization. Chosen over earlier-layer and mixed-site alternatives using unedited activation patches and held-out activation recovery; ||dW||/||W||=0.03864, with low unused-noncoding perturbation.",
+ "audit": {
+  "flags": {
+   "import transformers": 17
+  },
+  "clean": false
+ },
+ "finished": "2026-11-16T02:07:14Z"
+}
