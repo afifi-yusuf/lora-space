@@ -3,6 +3,8 @@ secrets.env
 *.env
 .env*
 *.pem
+gcp-sa.json
+*-sa.json
 
 # large / external artifacts
 models/
@@ -11,6 +13,10 @@ checkpoints/
 *.safetensors
 *.npy
 *.npz
+*.tar.gz
+# ...except the adapters the benchmark publishes (the site draws them)
+!results/lsbench/runs/*/adapter.npz
+!results/lsbench/pilots/*/adapter.npz
 
 # run outputs (small summaries in results/ are committed; bulky generations are not)
 results/**/generations/
@@ -18,6 +24,28 @@ results/**/*.jsonl.gz
 infra/instance_*.txt
 infra/gpu_ip.txt
 infra/*.log
+vllm_server.log
+
+# GPU-host working data: raw benchmark runs, held-out sets, Agency's logs
+runs/lsbench/
+bench/
+agency_runs/
+
+# benchmark runs archived after infrastructure failures (kept locally, not published)
+results/lsbench/superseded_retry_cap/
+
+# fleet state and account details (instance IDs, worker lists, quota cases)
+infra/grid/*.txt
+infra/grid/*.log
+infra/QUOTAS.md
+
+# built site (python -m lsbench.site) and deploy tooling
+site/
+.wrangler/
+
+# local tooling and mistyped scp targets
+.claude/
+ubuntu@*
 
 # python
 __pycache__/

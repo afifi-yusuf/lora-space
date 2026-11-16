@@ -1,6 +1,10 @@
 # Entries = editor model x harness (Frontier-CS style). v1 (2026-11-12): Track A only, 1 attempt per entry; every model on
-# Agency native plus its provider's harness. astra-minimal is the pilot reference loop (not ranked). All models are served from the Azure Foundry resource
-# `principle`; one key (AZURE_OPENAI_API_KEY in secrets.env). Prices are USD per million tokens, for the cost columns;
+# Agency native plus its provider's harness. Kimi K3.1 Pro and DeepSeek V4.1 Flash take no reasoning.effort on Azure (400
+# "Unsupported parameter"), so they run at their default: Kimi reasons by default; DeepSeek V4.1 Flash returns no
+# reasoning items (non-thinking as served). astra-minimal is the pilot reference loop (not ranked). All models are served from the Azure Foundry resource
+# `principle` (AZURE_OPENAI_API_KEY in secrets.env), except Fable 5.2 (Anthropic API, ANTHROPIC_API_KEY; not on Azure) and Gemini, which only Google serves (Vertex AI in project
+# balmy-mark-514604-i9, Chat Completions via its OpenAI-compatible endpoint, reached through lsbench.vertex_proxy, which
+# adds the service account's token from gcp-sa.json; no Agency adapter exists for Gemini CLI or Antigravity). Prices are USD per million tokens, for the cost columns;
 # fill in from the Azure price sheet before publishing (None = cost not computed).
 
 [[entry]]
@@ -69,20 +73,20 @@ effort = "xhigh"
 [[entry]]
 id = "kimi31-native"
 label = "Kimi K3.1 Pro (Agency native)"
-model = "Kimi-K3.1-Pro"
-provider = "openai_responses"
-base_url = "https://principle.openai.azure.com/openai/v1"
+model = "us.moonshotai.kimi-k3.1"           # Bedrock (US inference profile); Azure's deployment 503'd under load
+provider = "bedrock"
+base_url = "https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1"
+api_key_env = "AWS_BEARER_TOKEN"
 harness = "native"
-effort = "high"
 
 [[entry]]
-id = "kimi31-opencode"
-label = "Kimi K3.1 Pro (OpenCode)"
-model = "Kimi-K3.1-Pro"
-provider = "openai_responses"
-base_url = "https://principle.openai.azure.com/openai/v1"
-harness = "opencode"
-effort = "high"
+id = "kimi31-kimicli"
+label = "Kimi K3.1 Pro (Kimi CLI)"
+model = "us.moonshotai.kimi-k3.1"           # Bedrock (US inference profile); Azure's deployment 503'd under load
+provider = "bedrock"
+base_url = "https://bedrock-runtime.us-east-1.amazonaws.com/openai/v1"
+api_key_env = "AWS_BEARER_TOKEN"
+harness = "kimi"
 
 [[entry]]
 id = "dsv41f-native"
@@ -91,7 +95,6 @@ model = "DeepSeek-V4.1-Flash"
 provider = "openai_responses"
 base_url = "https://principle.openai.azure.com/openai/v1"
 harness = "native"
-effort = "high"
 
 [[entry]]
 id = "dsv41f-opencode"
@@ -100,10 +103,70 @@ model = "DeepSeek-V4.1-Flash"
 provider = "openai_responses"
 base_url = "https://principle.openai.azure.com/openai/v1"
 harness = "opencode"
+
+[[entry]]
+id = "dsv41f-dsh"
+label = "DeepSeek V4.1 Flash (DeepSeek Harness)"
+model = "DeepSeek-V4.1-Flash"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "dsh"
+
+[[entry]]
+id = "gemini4c-native"
+label = "Gemini 4 Carbon (Agency native)"
+model = "google/gemini-4-carbon"
+provider = "openai"
+base_url = "http://127.0.0.1:8791/v1/projects/balmy-mark-514604-i9/locations/global/endpoints/openapi"
+vertex_proxy = true
+harness = "native"
+effort = "high"
+
+[[entry]]
+id = "gemini4c-opencode"
+label = "Gemini 4 Carbon (OpenCode)"
+model = "google/gemini-4-carbon"
+provider = "openai"
+base_url = "http://127.0.0.1:8791/v1/projects/balmy-mark-514604-i9/locations/global/endpoints/openapi"
+vertex_proxy = true
+harness = "opencode"
+effort = "high"
+vertex_priority = true               # Priority PayGo; set for the math rerun after Vertex congestion on 2026-11-13
+
+[[entry]]
+id = "gemini4c-agy"
+label = "Gemini 4 Carbon (Antigravity CLI)"
+model = "google/gemini-4-carbon"
+provider = "openai"
+base_url = "http://127.0.0.1:8791/v1/projects/balmy-mark-514604-i9/locations/global/endpoints/openapi"
+vertex_proxy = true
+vertex_priority = true
+harness = "antigravity"
+effort = "high"
+
+[[entry]]
+id = "fable52-native"
+label = "Claude Fable 5.2 (Agency native)"
+model = "claude-fable-5-2"
+provider = "anthropic"
+base_url = "https://api.anthropic.com"
+api_key_env = "ANTHROPIC_API_KEY"
+harness = "native"
+effort = "high"
+
+[[entry]]
+id = "fable52-claude-code"
+label = "Claude Fable 5.2 (Claude Code)"
+model = "claude-fable-5-2"
+provider = "anthropic"
+base_url = "https://api.anthropic.com"
+api_key_env = "ANTHROPIC_API_KEY"
+harness = "claude_code"
 effort = "high"
 
 [limits]                             # identical for every entry
 wall_hours = 3.0                     # per session, Frontier-CS style hard stop
+stall_minutes = 30                   # no model or tool call finished for this long: stop as "stalled" (infra; rerun)
 generate_calls = 25
 generate_prompts = 32
 analysis_calls = 50                  # inspect, inspect_module_inputs and the interpretability tools together

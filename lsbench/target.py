@@ -190,12 +190,24 @@ class TargetService:
             subprocess.run(["rm", "-rf", str(cdir)], check=True)
             self.server = VLLMServer(self.G.MODEL_DIR, self.vllm_mem, self.max_len, self.run_dir / "vllm_server.log")
 
+    @staticmethod
+    def _blank(v, *, words=()) -> str:
+        """Normalize an 'empty' string argument. Some editors (e.g. Kimi) cannot emit a true empty string in a strict
+        tool schema and send '""', "''", '"', ' ' or similar instead; treat any value made only of whitespace and quote
+        characters (and, for adapter paths, the words 'none'/'null'/'base') as empty."""
+        if v is None:
+            return ""
+        t = str(v).strip().strip("\"'`").strip()
+        return "" if not t or t.lower() in words else str(v)
+
     # ---------------------------------------------------------------- tools
     def generate(self, prompts: list[str], max_tokens: int, thinking: bool, adapter: str = "",
                  reply_prefix: str = "") -> str:
         t0 = time.time()
         args = {"prompts": prompts, "max_tokens": max_tokens, "thinking": thinking, "adapter": adapter,
                 "reply_prefix": reply_prefix}
+        adapter = self._blank(adapter, words=("none", "null", "base"))
+        reply_prefix = self._blank(reply_prefix)
         L = self.limits
         with self.lock:
             if self.committed is not None:
@@ -203,7 +215,8 @@ class TargetService:
             if self.n["generate"] >= L["generate_calls"]:
                 return self._log("generate", args, f"generate budget exhausted ({L['generate_calls']} calls)", t0)
             if adapter and self.track != "B":
-                return self._log("generate", args, "not allowed in Track A: generate only with adapter=''", t0)
+                return self._log("generate", args, f"not allowed in Track A: generate only the unedited model (adapter "
+                                 f"must be empty; got {adapter!r})", t0)
             if adapter and self.n["candidates"] >= L["candidates_track_b"]:
                 return self._log("generate", args, f"candidate budget exhausted ({L['candidates_track_b']})", t0)
             prompts = prompts[: L["generate_prompts"]]
@@ -260,6 +273,7 @@ class TargetService:
 
     def inspect(self, texts: list[str], reply_prefix: str, thinking: bool = False) -> str:
         t0, args = time.time(), {"texts": texts, "reply_prefix": reply_prefix, "thinking": thinking}
+        reply_prefix = self._blank(reply_prefix)
         with self.lock:
             if self.n["analysis"] >= self.limits["analysis_calls"]:
                 return self._log("inspect", args, f"analysis budget exhausted ({self.limits['analysis_calls']} calls)", t0)
@@ -279,6 +293,7 @@ class TargetService:
         import torch
         t0 = time.time()
         args = {"texts": texts, "reply_prefix": reply_prefix, "modules": modules, "thinking": thinking}
+        reply_prefix = self._blank(reply_prefix)
         with self.lock:
             if self.n["analysis"] >= self.limits["analysis_calls"]:
                 return self._log("inspect_module_inputs", args, "analysis budget exhausted", t0)
@@ -312,6 +327,9 @@ class TargetService:
     def analysis(self, tool: str, **kw) -> str:
         """The interpretability tools (lsbench/interp.py). `intervene` is Track B only and counts as a candidate."""
         t0 = time.time()
+        for key in ("reply_prefix", "adapter"):
+            if isinstance(kw.get(key), str):
+                kw[key] = self._blank(kw[key], words=("none", "null", "base") if key == "adapter" else ())
         with self.lock:
             if self.committed is not None:
                 return self._log(tool, kw, "session is over (adapter committed)", t0)

@@ -1,306 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <title>LoRA-Space Bench</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A benchmark for editing models by writing their weights: an editor model writes a LoRA adapter for a frozen model, without gradients.">
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect y='6' width='4' height='14' rx='1' fill='%23c24a12'/%3E%3Crect x='6' width='14' height='4' rx='1' fill='%232a52d1'/%3E%3Crect x='6' y='6' width='14' height='14' rx='1.5' fill='%23161616'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=STIX+Two+Text:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=STIX+Two+Text:wght@500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=STIX+Two+Text:wght@500&display=swap"></noscript>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/stixtwotext/v18/YA9Gr02F12Xkf5whdwKf11l0jbKkeidMTtZ5YihS2ROfURBuMkWCkSo.woff2">
+<meta name="theme-color" content="#ffffff">
 <style>
-/* One typeface, white page, hairlines, square corners, no chips or cards. Colour only carries data:
-   Track A blue, Track B orange, references grey. Charts and tables sit directly on the page.
-   Order: hero (text + one real run as a figure), leaderboard, tasks, runs, rules, questions, footer. */
+/* Headings first paint in a local serif scaled to the width of STIX Two Text, so the swap does not move the layout. */
+@font-face { font-family: "STIX Fallback G"; src: local("Georgia"); size-adjust: 98.5%; }
+@font-face { font-family: "STIX Fallback T"; src: local("Times New Roman"); size-adjust: 107.6%; }
+/* White page, hairlines, two typefaces: a text serif for the title, section headings and the quoted request, a sans for everything else.
+   Colour has four jobs, kept apart:
+   - interface state (current section, selected tab, links, focus) is the blue from the logo;
+   - the logo’s blue and orange, with a teal, are the three tasks. Wherever a result is drawn
+     (the dot plots, the scatter, the strips of layers, the task cards, the tabs) a mark takes its task’s colour and shape:
+     the first task blue and round, the second orange and a diamond, the third teal and square (--task-0..2). Makers are shown by their logo, never by colour;
+   - in the drawings of a real edit, and only there, orange is a weight the edit raises and blue one it lowers. The orange quotation
+     marks on the request are the one decorative use;
+   - the footer is set on ink (.dark). Inside that surface the ordinary tokens are re-pointed to light values, so the same components work there unchanged.
+   References are grey; amber marks a damage flag.
+   The page is light only, like the sites it sits beside.
+   Order: top bar, hero (title, then text beside the request, the result and the edit diagram), leaderboard, tasks, runs, rules, questions, footer. */
 :root {
-  --bg: #ffffff; --ink: #1f1f1f; --ink-2: #4d4d4d; --ink-3: #707070; --rule: #e6e6e6; --rule-2: #cfcfcf; --fill: #f4f4f5;
-  --accent: #2a52d1; --a: #2a52d1; --b: #c24a12; --ref: #a3a3a3; --good: #1f7a4d;
-  --foot-bg: #1f2023; --foot-ink: #f3f3f3; --foot-ink-2: #b5b5b5; --foot-rule: #3a3b3f;
+  --w-bg: #ffffff; --w-ink: #161616; --w-ink-2: #474747; --w-ink-3: #5c5c5c; --w-rule: #e8e8e8; --w-rule-2: #c9c9c9; --w-ctl: #8a8a8a;
+  --w-fill: #f5f5f6; --w-fill-2: #ececee; --w-a: #2a52d1; --w-b: #c24a12; --w-c: #0f766e; --active: var(--accent); --warn: #8a4f00;
+  --task-0: var(--mark-a); --task-1: var(--mark-b); --task-2: var(--w-c);
   --f: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --z-sticky: 10;
+  --f-head: "STIX Two Text", "STIX Fallback G", "STIX Fallback T", serif;
+  --f-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --d-ink-2: #c4c4c4; --d-rule: #3d3d3d; --d-ctl: #8f8f8f; --d-a: #8fa6ff; --d-b: #ff9a62;
+  --z-sticky: 10; --z-tip: 20; --z-skip: 30;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #131313; --ink: #ededed; --ink-2: #bdbdbd; --ink-3: #969696; --rule: #2b2b2b; --rule-2: #404040; --fill: #1d1d1e;
-  --accent: #8fa6ff; --a: #8fa6ff; --b: #ff9a62; --ref: #6e6e6e; --good: #63cf95; --foot-bg: #0b0b0c; color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #131313; --ink: #ededed; --ink-2: #bdbdbd; --ink-3: #969696; --rule: #2b2b2b; --rule-2: #404040; --fill: #1d1d1e;
-  --accent: #8fa6ff; --a: #8fa6ff; --b: #ff9a62; --ref: #6e6e6e; --good: #63cf95; --foot-bg: #0b0b0c; color-scheme: dark }
+/* the white surface: the page */
+:root { --bg: var(--w-bg); --ink: var(--w-ink); --ink-2: var(--w-ink-2); --ink-3: var(--w-ink-3); --rule: var(--w-rule); --rule-2: var(--w-rule-2); --ctl: var(--w-ctl);
+  --fill: var(--w-fill); --fill-2: var(--w-fill-2); --mark-a: var(--w-a); --mark-b: var(--w-b); --accent: var(--mark-a); }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 72px; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--f); -webkit-font-smoothing: antialiased; }
-.shell { max-width: 1320px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
-@media (min-width: 720px) { .shell { padding-inline: 48px; } }
+[hidden] { display: none !important; }
+html { scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1rem/1.55 var(--f); -webkit-font-smoothing: antialiased; }
+.shell { max-width: 1312px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 760px) { .shell { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); } }
 h1, h2, h3, h4 { margin: 0; font-weight: 600; text-wrap: balance; }
-h1 { font-size: clamp(2rem, 3.6vw, 2.9rem); line-height: 1.14; letter-spacing: -0.01em; }
-h2 { font-size: 1.9rem; line-height: 1.2; }
-h3 { font-size: 1.25rem; line-height: 1.3; }
-h4 { font-size: 0.95rem; }
+h1, h2 { font-family: var(--f-head); font-weight: 500; overflow-wrap: anywhere; }
+h1 { font-size: 2.75rem; line-height: 1.12; letter-spacing: -0.012em; }
+h2 { font-size: 2.125rem; line-height: 1.15; letter-spacing: -0.008em; }
+h3 { font-size: 1.125rem; line-height: 1.35; }
+h4 { font-size: 0.9375rem; line-height: 1.4; }
 p { margin: 0; max-width: 68ch; text-wrap: pretty; }
 a { color: var(--accent); text-underline-offset: 3px; }
-.dim { color: var(--ink-3); }
-.small { font-size: 0.88rem; color: var(--ink-3); }
-.mono { font-family: var(--f-mono); font-size: 0.86em; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 button { font: inherit; color: inherit; }
 figure { margin: 0; }
+.dim { color: var(--ink-3); }
+.small { font-size: 0.875rem; color: var(--ink-3); }
+.mono { font-family: var(--f-mono); font-size: 0.86em; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nav a:focus-visible, .runbtn:focus-visible, .tabs button:focus-visible { outline-offset: -2px; }
+.skip { position: absolute; left: 16px; top: -64px; z-index: var(--z-skip); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 6px; text-decoration: none; }
+.skip:focus { top: 8px; }
+.sq { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c); flex: none; }
+.mk { display: inline-grid; place-items: center; width: 1.375rem; height: 1.375rem; border-radius: 5px; background: var(--fill); color: var(--ink-2); --c: var(--ctl); flex: none; }
+.mk svg { width: 0.875rem; height: 0.875rem; }
+.mk .sq { width: 8px; height: 8px; }
+
+/* the dark surface: the footer. The page tokens are re-pointed, nothing inside needs its own colours */
+.dark { --bg: var(--w-ink); --ink: var(--w-bg); --ink-2: var(--d-ink-2); --ink-3: var(--d-ink-2); --ctl: var(--d-ctl); --rule: var(--d-rule); --rule-2: var(--d-rule);
+  --mark-a: var(--d-a); --mark-b: var(--d-b); --accent: var(--w-bg); background: var(--bg); color: var(--ink); }
 
 /* top bar */
-.top { position: sticky; top: 0; z-index: var(--z-sticky); background: var(--bg); border-bottom: 1px solid var(--rule); }
-.top .shell { display: flex; align-items: stretch; gap: 36px; height: 54px; }
+.top { position: sticky; top: 0; z-index: var(--z-sticky); background: var(--bg); border-bottom: 1px solid var(--rule); padding-top: env(safe-area-inset-top, 0px); }
+.top .shell { display: flex; align-items: stretch; gap: 36px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 1.0625rem; color: var(--ink); text-decoration: none; white-space: nowrap; }
 .brand svg { width: 20px; height: 20px; flex: none; }
-.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 1.05rem; color: var(--ink); text-decoration: none; white-space: nowrap; }
 .nav { display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.nav.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); }
 .nav::-webkit-scrollbar { display: none; }
-.nav a, .tabs button { display: flex; align-items: center; color: var(--ink-2); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
-.nav a { margin-bottom: -1px; }
-.nav a:hover, .tabs button:hover { color: var(--ink); }
-.nav a[aria-current="true"], .tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-.top-right { display: flex; align-items: center; gap: 24px; font-size: 0.92rem; color: var(--ink-3); white-space: nowrap; }
-.top-right a { color: var(--ink-2); text-decoration: none; }
-.top-right a:hover { color: var(--ink); }
-@media (max-width: 860px) { .top-right { display: none; } .top .shell { gap: 22px; } }
+.nav a { display: flex; flex: none; align-items: center; color: var(--ink-2); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 0.9375rem; }
+.nav a:hover { color: var(--ink); }
+.nav a[aria-current="true"] { color: var(--ink); border-bottom-color: var(--active); }
+.top-right { display: flex; flex: none; align-items: center; gap: 4px; }
+.icon-btn { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--ink-2); border-radius: 8px; cursor: pointer; text-decoration: none; }
+.icon-btn:hover { color: var(--ink); background: var(--fill); }
+.icon-btn svg { width: 19px; height: 19px; }
+@media (max-width: 700px) { .top .shell { gap: 8px; } .brand { min-width: 44px; } .brand span { display: none; } .nav { gap: 12px; } }
+@media (max-width: 1040px), (pointer: coarse) { .nav a { min-width: 44px; justify-content: center; } }
 
 /* hero */
-.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 72px; align-items: center; padding-block: 88px 96px; }
-.hero-copy { display: grid; gap: 20px; justify-items: start; }
-.updated { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--ink-2); }
-.updated i { width: 8px; height: 8px; background: var(--accent); border-radius: 2px; }
-.hero-copy > p { font-size: 1.12rem; color: var(--ink-2); max-width: 56ch; }
-.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-.links a { padding: 10px 18px; border-radius: 8px; background: var(--fill); color: var(--ink); font-weight: 500; font-size: 0.95rem; text-decoration: none; }
-.links a:hover { background: var(--rule); }
-.fig { border: 1px solid var(--rule-2); padding: 18px; display: grid; gap: 16px; }
-.fig-label { font-size: 0.86rem; font-weight: 600; }
-.prompt { display: flex; align-items: flex-end; gap: 12px; border: 1px solid var(--rule-2); border-radius: 16px; padding: 12px 12px 12px 16px; background: var(--bg); }
-.prompt p { flex: 1; min-width: 0; font-weight: 500; }
-.send { width: 26px; height: 26px; border-radius: 50%; background: var(--ink); flex: none; display: grid; place-items: center; }
-.send svg { width: 12px; height: 12px; stroke: var(--bg); }
-.pair { border: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 40px 12px; align-items: end; }
-.pair div { display: grid; justify-items: center; gap: 6px; font-size: 0.88rem; font-weight: 500; }
-.pair i { display: block; width: 100%; max-width: 110px; background: var(--c); }
-.fig-edit { font-size: 0.9rem; color: var(--ink-2); }
-.fig-res { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
-.fig-res b { font-size: 2rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
-@media (max-width: 960px) { .hero { grid-template-columns: 1fr; padding-block: 44px 56px; gap: 40px; } .fig { max-width: 440px; } }
+.hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 36px 72px; align-items: start; padding-block: 48px 72px; }
+.hero h1 { font-size: 3.5rem; line-height: 1.06; letter-spacing: -0.018em; }
+.hero-main { display: grid; gap: 24px; justify-items: start; min-width: 0; }
+.hero-copy { display: grid; gap: 16px; justify-items: start; min-width: 0; padding-top: 10px; }
+.updated { font-size: 0.875rem; color: var(--ink-3); }
+.hero-copy > p { font-size: 1.125rem; color: var(--ink-2); max-width: 54ch; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; }
+.links a { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 18px; border-radius: 8px; background: var(--ink); color: var(--bg); font-weight: 500; font-size: 0.9375rem; text-decoration: none; }
+.links a svg { width: 1rem; height: 1rem; flex: none; }
+.links a:hover { background: var(--ink-2); }
+.links a.ghost { background: none; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ctl); }
+.links a.ghost:hover { background: var(--fill); }
+.links a:active { background: var(--ink-3); } .links a.ghost:active { background: var(--fill-2); } .icon-btn:active { background: var(--rule-2); }
+.hero-line { font-size: 0.9375rem; color: var(--ink-2); }
+.tabs button:active, .runbtn:active, .open:active, .sort:active, .linkbtn:active { color: var(--ink-3); }
+/* the logo, enlarged and labelled: B (tall) and A (wide) are what the editor writes, the block is the weight change they produce */
+.edit { grid-column: 1 / -1; display: grid; gap: 18px; min-width: 0; }
+.edit .emblem { --fill: var(--bg); }
+.edit-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 14px 48px; }
+.edit-cap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 32px; }
+.scale { display: inline-flex; flex: 0 1 auto; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 0.8125rem; min-width: 0; max-width: 100%; }
+.scale i { flex: 0 1 auto; width: 6rem; min-width: 1.5rem; height: 0.625rem; border-radius: 2px; background: linear-gradient(to right, var(--mark-a), var(--bg), var(--mark-b)); outline: 1px solid var(--ctl); }
+@media (forced-colors: active) { .scale i { forced-color-adjust: none; } }
+.emblem { --t: 1rem; display: grid; grid-template-columns: var(--t) minmax(0, 1fr); gap: 8px; font-size: 0.875rem; color: var(--ink-2); line-height: 1.3; }
+.emblem b { color: var(--ink); font-weight: 600; }
+.emblem .la { grid-column: 2; }
+.emblem .a { grid-column: 2; height: var(--t); background: var(--mark-a); border-radius: 2px; }
+.emblem .b { grid-column: 1; background: var(--mark-b); border-radius: 2px; }
+.emblem .w { grid-column: 2; aspect-ratio: var(--r, 2.5) / 1; background: var(--fill); border-radius: 2px; min-width: 0; outline: 1px solid var(--ctl); outline-offset: 0; }
+.emblem .grid::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to right, var(--bg) 1px, transparent 1px) 0 0 / calc(100% / var(--cols)) 100%, linear-gradient(to bottom, var(--bg) 1px, transparent 1px) 0 0 / 100% calc(100% / var(--rows)); }
+.result { display: grid; justify-items: end; gap: 6px; margin: 0; max-width: none; }
+.result b { font-family: var(--f-head); font-weight: 500; font-size: 3rem; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; min-width: 0; }
+.result .arrow { color: var(--ink-3); }
+.result .arrow { font-family: var(--f); }
+.result span.lbl { font-size: 0.9375rem; color: var(--ink-2); }
+.emblem canvas { display: block; image-rendering: pixelated; }
+.emblem .a, .emblem .b, .emblem .w { position: relative; overflow: hidden; }
+.emblem .tex { position: absolute; inset: 0; width: 100%; height: 100%; }
+.emblem.sm { --t: 5px; gap: 4px; --fill: var(--bg); }
+.emblem.sm .w { border-radius: 2px; }
+.minis { min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: flex-start; margin-top: 6px; }
+.minis.many { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 16px 20px; } .minis.many .mini { width: auto; } .minis.many .more { display: none; }
+.mini { display: grid; gap: 6px; width: calc(5.5rem * var(--r) + 9px); max-width: 100%; min-width: 0; }
+.mini figcaption { font-size: 0.8125rem; color: var(--ink-2); line-height: 1.35; min-height: 2.7em; }
+.emblem .lb { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 16px; }
+.edit figcaption { font-size: 0.875rem; color: var(--ink-2); }
+.edit .prompt { border: 0; border-radius: 0; padding: 0; gap: 6px; }
+.edit .prompt p { font-family: var(--f-head); font-size: 1.875rem; line-height: 1.2; letter-spacing: -0.01em; font-weight: 500; }
+.edit .prompt p::before { content: "“"; } .edit .prompt p::after { content: "”"; }
+.edit .prompt p::before, .edit .prompt p::after { color: var(--mark-b); }
+.prompt { margin: 0; border: 1px solid var(--rule-2); border-radius: 14px; padding: 14px 18px; background: var(--bg); display: grid; gap: 4px; }
+.prompt p { font-weight: 500; }
+.prompt .lbl { font-size: 0.8125rem; color: var(--ink-3); }
+.dp { display: grid; padding-top: 0.75rem; }
+.dp-row { display: grid; grid-template-columns: 1.375rem minmax(0, 17rem) minmax(8rem, 1fr) 4.2em; gap: 12px; align-items: center; padding-block: 7px; border-bottom: 1px solid var(--rule); font-size: 0.9375rem; position: relative; }
+.dp-row .who { display: block; min-width: 0; overflow-wrap: anywhere; } .dp-row .who span { margin-left: 8px; color: var(--ink-3); font-size: 0.8125rem; }
+.dp-row .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; } .dp-row .v.dim { font-weight: 400; color: var(--ink-3); font-size: 0.8125rem; }
+.dp-track { position: relative; height: 1.5rem; margin-inline: 8px; }
+.dp-track .g { position: absolute; top: -8px; bottom: -8px; border-left: 1px solid var(--rule); }
+.dp-track .g.z { border-left-color: var(--ctl); }
+.gl { display: inline-block; flex: none; width: 0.6875rem; height: 0.6875rem; background: var(--c, var(--ink-2)); }
+.gl.hollow { background: none; box-shadow: inset 0 0 0 2.5px var(--c, var(--ink-2)); }
+.gl.s-dot { border-radius: 50%; } .gl.s-dia { transform: rotate(45deg) scale(0.82); } .gl.s-sq { border-radius: 1px; }
+.dp-track .mh { position: absolute; top: 50%; width: 1.5rem; height: 1.5rem; margin: -0.75rem 0 0 -0.75rem; display: grid; place-items: center; transform: translateY(var(--dy, 0)); }
+.dp-track .mh .gl { width: 0.75rem; height: 0.75rem; box-shadow: 0 0 0 2px var(--bg); }
+.dp-track .mean, .legend .mean { width: 0; border-left: 2px solid var(--ink-2); }
+.dp-track .rng { position: absolute; top: 50%; height: 0; border-top: 1px solid var(--ctl); }
+.dp-track .rng.stem { border-top: 3px solid var(--c); margin-top: -1.5px; }
+.dp-track .nc { position: absolute; top: 50%; transform: translateY(-50%); padding-left: 8px; font-size: 0.8125rem; color: var(--ink-2); white-space: nowrap; }
+.dp-track .mean { position: absolute; top: -8px; bottom: -8px; margin-left: -1px; }
+.legend .mean { height: 1rem; }
+.legend .hint { display: none; color: var(--ink-3); } .scroll-x:has(:focus-visible) + .legend .hint { display: inline-flex; }
+.dp-axis { border-bottom-color: var(--rule-2); font-size: 0.8125rem; color: var(--ink-3); padding-block: 0 4px; }
+.dp-axis .dp-track { height: 1.2em; } .dp-axis em { position: absolute; transform: translateX(-50%); font-style: normal; font-variant-numeric: tabular-nums; }
+.dp-axis .v { font-weight: 600; font-size: 0.8125rem; color: var(--ink); }
+@media (max-width: 44em) { .dp-row { grid-template-columns: 1.375rem minmax(0, 1fr) 4.2em; } .dp-row .who span { display: block; margin-left: 0; } .dp-row .dp-track { grid-column: 1 / -1; grid-row: 2; } .dp-row .v { grid-column: 3; grid-row: 1; } .dp-axis > span:nth-child(2) { display: none; } }
+@media (forced-colors: active) { .gl { forced-color-adjust: none; } }
+@media (max-width: 1180px) { .hero { grid-template-columns: minmax(0, 1fr); padding-block: 48px 64px; gap: 36px; } .hero h1 { font-size: 2.75rem; } .result b { font-size: 2.25rem; } }
+@media (max-width: 700px) { .emblem { --t: 0.5rem; } .result { justify-items: start; } .result b { font-size: 2rem; } h1, .hero h1 { font-size: 2.125rem; } h2 { font-size: 1.625rem; } .edit .prompt p { font-size: 1.375rem; } }
 
 /* sections */
-main > section { padding-bottom: 104px; display: grid; gap: 32px; }
-.sec-head { display: grid; gap: 12px; }
+.sections > section { padding-bottom: 104px; display: grid; gap: 28px; }
+.sec-head { display: grid; gap: 10px; }
+@media (min-width: 56.25em) { .sec-head { grid-template-columns: 18.75rem minmax(0, 46rem); gap: 20px 56px; align-items: baseline; } }
 .sec-head p { color: var(--ink-2); }
-
-/* leaderboard */
-.lb-top { display: grid; grid-template-columns: minmax(0, 1fr) 288px; gap: 56px; align-items: start; }
+.sections > #leaderboard { padding-bottom: 72px; }
 .block { display: grid; gap: 14px; min-width: 0; }
-.block-head { display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; align-items: flex-end; }
-.tabs { display: flex; gap: 22px; flex-wrap: wrap; }
-.tabs button { border-width: 0 0 2px; border-style: solid; background: none; padding: 4px 0; cursor: pointer; font-size: 0.95rem; }
-.settings { border: 1px solid var(--rule-2); border-radius: 6px; padding: 20px; display: grid; gap: 16px; }
-.settings h3 { padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
-.settings fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 9px; }
-.settings legend { padding: 0; margin-bottom: 9px; font-size: 0.9rem; font-weight: 600; }
-.settings label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.settings input[type="radio"] { accent-color: var(--accent); width: 17px; height: 17px; margin: 0; }
-.settings .count { margin-left: auto; color: var(--ink-3); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
-.switches { display: grid; gap: 11px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
-.switch input { appearance: none; -webkit-appearance: none; width: 32px; height: 19px; border-radius: 999px; border: 1.5px solid var(--ink-3); position: relative; cursor: pointer; margin: 0; flex: none; }
-.switch input::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 11px; height: 11px; border-radius: 50%; background: var(--ink-3); }
-.switch input:checked { border-color: var(--accent); }
-.switch input:checked::after { transform: translateX(13px); background: var(--accent); }
-@media (max-width: 980px) { .lb-top { grid-template-columns: 1fr; gap: 28px; } .settings { order: -1; } }
+.pad-t { padding-top: 14px; } .pad-b { padding-bottom: 10px; } .gap-t { margin-top: 22px; } .gap-tt { margin-top: 36px; }
+.run-title { font-size: 1.375rem; display: flex; align-items: center; gap: 10px; }
+.wrap-any { max-width: none; overflow-wrap: anywhere; }
+.plain { font-weight: 400; }
+.bar-row { display: flex; flex-wrap: wrap; gap: 4px 28px; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--rule); }
+.tabs { display: flex; gap: 24px; flex-wrap: wrap; }
+.tabs button { display: inline-flex; align-items: center; gap: 8px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; padding: 10px 0; min-height: 44px; min-width: 44px; cursor: pointer; font-size: 0.9375rem; color: var(--ink-2); white-space: nowrap; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--active); }
+.checks { display: flex; flex-wrap: wrap; gap: 0 22px; }
+.checks label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 0.9375rem; color: var(--ink-2); cursor: pointer; }
+.checks input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
 
-.scroll-x { overflow-x: auto; }
-.bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 12px; }
-.bar { display: grid; grid-template-rows: 250px auto; min-width: 0; }
-.bar-plot { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border-bottom: 1px solid var(--ink-3);
-  background: repeating-linear-gradient(to top, transparent 0 49px, var(--rule) 49px 50px); }
-.bar-v { font-size: 0.92rem; font-weight: 500; padding-bottom: 5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.bar-fill { width: min(100%, 76px); background: var(--c); min-height: 2px; }
-.bar-fill.pilot { background: color-mix(in srgb, var(--c) 38%, var(--bg)); }
-.bar-l { text-align: center; padding-top: 10px; font-size: 0.88rem; line-height: 1.3; }
-.bar-l b { display: block; font-weight: 500; }
-.bar-l span { display: block; color: var(--ink-3); }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 0.88rem; color: var(--ink-2); }
-.legend span { display: inline-flex; align-items: center; gap: 7px; }
-.legend i { width: 10px; height: 10px; background: var(--c); }
-.legend i.pilot { background: color-mix(in srgb, var(--c) 38%, var(--bg)); }
+.cc { min-width: 0; }
+.legend .note { color: var(--ink-3); }
 
-table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
-th, td { padding: 12px 14px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
-th:first-child, td:first-child { padding-left: 0; }
-th:last-child, td:last-child { padding-right: 0; }
-thead th { font-weight: 600; font-size: 0.86rem; vertical-align: bottom; border-bottom-color: var(--ink); }
-thead tr.groups th { padding-bottom: 2px; border-bottom: 0; font-weight: 400; color: var(--ink-3); }
+/* tables */
+.scroll-x { overflow-x: auto; position: relative; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
+th, td { height: 44px; padding: 6px 12px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap; }
+thead th, thead td { background: var(--fill); font-weight: 600; font-size: 0.8125rem; vertical-align: bottom; border-bottom: 1px solid var(--rule-2); }
+thead tr.groups th, thead tr.groups td { height: auto; padding-block: 10px 0; border-bottom: 0; font-weight: 500; color: var(--ink-3); }
+thead tr.groups th.g { border-left: 1px solid var(--rule-2); }
+thead th.gs, tbody td.gs { border-left: 1px solid var(--rule); }
+thead th.gs { border-left-color: var(--rule-2); }
 td.n, th.n { text-align: right; }
 td.n { font-variant-numeric: tabular-nums; }
-th small { display: block; font-weight: 400; font-size: 0.8rem; color: var(--ink-3); }
-.sort { border: 0; background: none; padding: 0; font-weight: 600; cursor: pointer; }
-.sort::after { content: " ↕"; color: var(--rule-2); font-weight: 400; }
-th[aria-sort="ascending"] .sort::after { content: " ↑"; color: var(--ink); }
-th[aria-sort="descending"] .sort::after { content: " ↓"; color: var(--ink); }
-.who { display: flex; align-items: center; gap: 12px; }
-.who i { width: 3px; height: 32px; background: var(--c); flex: none; }
-.who b { font-weight: 500; display: block; }
-.who span { color: var(--ink-3); font-size: 0.86rem; }
-td.lead { font-weight: 600; }
-.open { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; }
-.open:hover { text-decoration: underline; }
+.unit { font-weight: 400; color: var(--ink-3); }
+.sort { border: 0; background: none; padding: 0; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; min-height: 24px; }
+.sort::after { content: ""; width: 7px; height: 10px; flex: none; background:
+  conic-gradient(from 135deg at 50% 0, var(--ctl) 90deg, transparent 0) top / 100% 4px no-repeat,
+  conic-gradient(from -45deg at 50% 100%, var(--ctl) 90deg, transparent 0) bottom / 100% 4px no-repeat; }
+th[aria-sort="ascending"] .sort::after { background: conic-gradient(from 135deg at 50% 0, var(--ink) 90deg, transparent 0) top / 100% 4px no-repeat; }
+th[aria-sort="descending"] .sort::after { background: conic-gradient(from -45deg at 50% 100%, var(--ink) 90deg, transparent 0) bottom / 100% 4px no-repeat; }
+.runbtn[aria-pressed="true"] .mk { background: var(--bg); }
+tbody th { font-weight: 400; }
+.model { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+td.rank { color: var(--ink-3); width: 1%; }
+.model .hsub { display: none; font-weight: 400; font-size: 0.8125rem; color: var(--ink-3); }
+@media (max-width: 700px) {
+  #board .c-rank, #board .c-harness, #board tr.groups { display: none; }
+  #board .c-name { position: sticky; left: 0; background: var(--bg); min-width: min(9.5rem, 45vw); max-width: min(11rem, 50vw); white-space: normal; border-right: 1px solid var(--rule); }
+  #board thead .c-name { background: var(--fill); }
+  .model { align-items: flex-start; } .model .mk { margin-top: 1px; } .model .hsub { display: block; }
+}
+td.score { min-width: 7.25rem; }
+td.score.gs { min-width: 88px; }
+@media (max-width: 400px) { #board .c-name { min-width: min(7.75rem, 45vw); } td.score { min-width: 6.5rem; } }
+.cellv { display: flex; justify-content: flex-end; align-items: baseline; gap: 8px; }
+.cellv b { font-weight: 600; }
+.cellv small { color: var(--ink-3); font-size: 0.8125rem; min-width: 3.3em; }
+.open { border: 0; background: none; padding: 0; color: inherit; cursor: pointer; font-weight: 600; text-underline-offset: 3px; }
+.open { text-decoration: none; }
+tr:hover .open, .open:hover, .open:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; }
+@media (hover: none) { .open { text-decoration: underline dotted; text-decoration-color: var(--ctl); text-decoration-thickness: 1px; } }
+@media (hover: hover) { #board tbody tr:hover > * { background: color-mix(in srgb, var(--ink) 3%, var(--bg)); } }
+#board tr > :last-child { padding-right: 12px; }
+.flag { color: var(--warn); font-weight: 600; }
+tr.refrow td, tr.refrow th { color: var(--ink-2); }
+#board tr.refrow > * { background: var(--fill); } .refrow .model { padding-left: calc(1.375rem + 10px); }
+tr.refrow .model { font-weight: 400; }
+.notes { font-size: 0.875rem; color: var(--ink-3); }
+.notes p { break-inside: avoid; margin-bottom: 6px; }
+.notes .more { margin-top: 6px; } .notes .more > summary { color: var(--ink-2); }
+.defs { margin: 0 0 10px; display: grid; grid-template-columns: fit-content(40%) minmax(0, 1fr); gap: 4px 16px; overflow-wrap: anywhere; }
+.defs dt { font-weight: 500; color: var(--ink-2); } .defs dd { margin: 0; }
+@media (min-width: 56.25em) { .notes .np { columns: 2; column-gap: 56px; } .defs { grid-template-columns: fit-content(14rem) minmax(0, 1fr) fit-content(14rem) minmax(0, 1fr); } .defs dd:nth-of-type(odd) { padding-right: 40px; } }
+.notes p { max-width: 75ch; }
+.notes b { font-weight: 500; color: var(--ink-2); }
 .empty { padding: 28px 0; border-block: 1px solid var(--rule); color: var(--ink-2); }
-.empty b { color: var(--ink); font-weight: 600; }
+@media (pointer: coarse), (max-width: 1040px) { .open { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; justify-content: flex-end; } .sort { min-height: 44px; min-width: 44px; } th.n .sort { justify-content: flex-end; } }
 
-#chart { display: block; width: 100%; min-width: 620px; height: auto; font-family: var(--f); }
+/* score against cost */
+.plot { position: relative; }
+.scatter { display: grid; gap: 14px; }
+#chart { display: block; width: 100%; height: auto; font-family: var(--f); }
 #chart .grid { stroke: var(--rule); }
-#chart .axis { stroke: var(--ink-3); }
-#chart text { fill: var(--ink-3); font-size: 13px; }
-#chart text.t { fill: var(--ink); font-size: 13.5px; }
-#chart .lab { font-size: 14px; font-weight: 500; }
-#chart .A { fill: var(--a); stroke: var(--a); } #chart .B { fill: var(--b); stroke: var(--b); } #chart .R { fill: var(--ink); stroke: var(--ink); }
-#chart .hollow { fill: var(--bg); stroke-width: 2.5; }
-#chart .refline { stroke: var(--ink-3); stroke-dasharray: 2 5; }
-#chart text.A, #chart text.B, #chart text.R { stroke: none; }
+#chart .ldr { stroke: var(--ctl); }
+#chart .pair { stroke: var(--ctl); stroke-width: 1.25; }
+#chart text.lab .sub { fill: var(--ink-3); font-weight: 400; }
+#chart text { fill: var(--ink-3); font-size: 0.8125rem; }
+#chart text.t { fill: var(--ink-2); }
+#chart text.lab { fill: var(--ink); font-size: 0.84375rem; font-weight: 500; paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+#chart .pt { stroke: var(--bg); stroke-width: 2; fill: var(--c); }
+#chart .pt.own { fill: var(--bg); stroke: var(--c); stroke-width: 2.5; }
+#chart .refline { stroke: var(--ctl); }
+#chart .hit { fill: transparent; cursor: pointer; outline: none; }
+#chart .hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 0.875rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.tip { position: absolute; z-index: var(--z-tip); background: var(--bg); color: var(--ink-2); border: 1px solid var(--ctl); box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 10%, transparent); padding: 8px 12px; border-radius: 6px; font-size: 0.8125rem; line-height: 1.45; width: max-content; max-width: min(18rem, calc(100vw - 48px)); }
+.tip b { font-weight: 600; display: block; color: var(--ink); }
+.tip.fixed { position: fixed; }
+.dp-track .mh:focus-visible { outline-offset: -3px; border-radius: 50%; }
+
+/* layer map */
+.lmap { display: grid; gap: 5px; }
+.lrow { display: grid; grid-template-columns: minmax(0, 26rem); font-size: 0.8125rem; line-height: 1.25; }
+.cells { display: grid; grid-template-columns: repeat(var(--layers, 24), minmax(0, 1fr)); gap: 2px; }
+.cells i { display: block; height: 1rem; border-radius: 1px; background: var(--cell, var(--fill-2)); }
+.cells i.a { background: linear-gradient(to bottom, var(--c) 50%, var(--cell, var(--fill-2)) 50%); }
+.cells i.m { background: linear-gradient(to bottom, var(--cell, var(--fill-2)) 50%, var(--c) 50%); }
+.cells i.a.m { background: var(--c); }
+.cells.ticks i { background: none; height: auto; width: 0; justify-self: center; display: flex; justify-content: center; font-style: normal; font-size: 0.8125rem; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cells.ticks i.s { justify-self: start; justify-content: flex-start; } .cells.ticks i.e { justify-self: end; justify-content: flex-end; }
+.cells.ticks { overflow: hidden; }
+.lrow .cells i { height: 1.25rem; }
+#board th, #board td { padding-inline: 8px; }
+#board .cells { width: 6rem; gap: 1px; } #board .cells i { height: 0.875rem; }
+.lmap-key { font-size: 0.8125rem; color: var(--ink-3); }
+.lmap-key.legend { font-size: 0.875rem; color: var(--ink-2); max-width: none; }
+.cells.key { display: inline-grid; grid-template-columns: 1rem; --c: var(--ink-2); } .cells.key i { height: 1.125rem; }
+@media (forced-colors: active) { .cells i { forced-color-adjust: none; } }
 
 /* tasks */
-.tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 48px; align-items: start; }
+#tasks { background: var(--fill); box-shadow: 0 0 0 100vmax var(--fill); clip-path: inset(0 -100vmax); padding-block: 80px; margin-bottom: 104px; --cell: var(--rule); }
+.tasks { display: grid; gap: 48px; align-items: start; }
 .task { display: grid; gap: 14px; }
-.task-head { display: grid; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
-.task .prompt p { font-weight: 400; font-size: 0.95rem; }
-.facts { margin: 0; display: grid; }
-.facts div { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; border-bottom: 1px solid var(--rule); font-size: 0.93rem; }
+@media (min-width: 56.25em) { .tasks { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 48px; }
+  .task { grid-template-rows: subgrid; grid-row: span 6; align-items: start; } .task .prompt { align-self: stretch; align-content: start; } }
+.flow { display: grid; gap: 8px; margin: 0; }
+.fb { margin: 0; max-width: 90%; padding: 10px 14px 11px; border-radius: 14px; display: grid; gap: 3px; font-size: 0.875rem; line-height: 1.4; overflow-wrap: anywhere; }
+.fb .fk, .fb .fv { font-size: 0.8125rem; font-weight: 600; }
+.fb.u { justify-self: end; background: var(--bg); border: 1px solid var(--rule-2); border-bottom-right-radius: 4px; }
+.fb.x { justify-self: start; background: color-mix(in srgb, var(--c) 9%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 40%, var(--bg)); border-bottom-left-radius: 4px; }
+.fb.ok { justify-self: start; background: var(--c); color: var(--bg); border-bottom-left-radius: 4px; }
+.flow.code .ft { font-family: var(--f-mono); font-size: 0.8125rem; white-space: pre-wrap; }
+@media (forced-colors: active) { .fb { forced-color-adjust: none; } }
+.task-head { display: grid; gap: 2px; } .task-head h3 { display: flex; align-items: center; gap: 9px; }
+.wrote { display: grid; gap: 14px; margin-top: 20px; } #wrote { display: grid; gap: 7px; }
+.wr { display: grid; grid-template-columns: 1.375rem minmax(0, 15rem) repeat(var(--tasks, 3), minmax(0, 1fr)); gap: 6px 40px; align-items: center; font-size: 0.875rem; line-height: 1.25; }
+.wr .lname { margin-left: -30px; } .wr .lname span { color: var(--ink-3); margin-left: 6px; }
+.wr .wc { display: block; min-width: 0; } .wr .wc > .gl { display: none; } .wr .wc .cells i { height: 1.125rem; }
+.wr.head { align-items: end; font-weight: 600; } .wr.head .wc { display: flex; align-items: center; gap: 8px; } .wr.head .wc > .gl { display: inline-block; }
+.wr .none { font-size: 0.8125rem; color: var(--ink-3); }
+@media (max-width: 56.25em) { .wr { grid-template-columns: 1.375rem minmax(0, 1fr); gap: 6px 10px; } .wr .lname { margin-left: 0; } .wr.head { display: none; }
+  .wr .wc { grid-column: 1 / -1; display: grid; grid-template-columns: 1rem minmax(0, 1fr); gap: 10px; align-items: center; } .wr .wc > .gl { display: inline-block; } }
+.rl { display: grid; gap: 3px; font-size: 0.8125rem; color: var(--ink-2); }
+.rl-l { position: relative; height: 1.35em; white-space: nowrap; overflow: hidden; } .rl-l span { position: absolute; top: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.rl-t { position: relative; height: 1.75rem; border-bottom: 1px solid var(--ctl); }
+.rl-t i { position: absolute; }
+.rl-t .d { bottom: 0.4rem; width: 0.625rem; height: 0.625rem; margin-left: -0.3125rem; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1.5px var(--fill); }
+.rl-t .k { top: 0; bottom: 0; border-left: 1.5px solid var(--ink); } .rl-t .k.r { border-left: 1.5px dashed var(--ink-2); }
+@media (forced-colors: active) { .rl-t .d { forced-color-adjust: none; } }
+.task .prompt p { font-weight: 400; font-size: 0.9375rem; }
+.facts { margin: 0; display: grid; border-top: 1px solid var(--rule); }
+.facts div { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; border-bottom: 1px solid var(--rule); font-size: 0.9375rem; }
 .facts dt { color: var(--ink-3); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
-.linkbtn { justify-self: start; border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; }
-.linkbtn:hover { text-decoration: underline; }
+.linkbtn { justify-self: start; border: 0; background: none; padding: 0; min-height: 44px; color: var(--ink); font-weight: 500; cursor: pointer; text-decoration: underline; text-decoration-color: var(--ctl); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.linkbtn:hover { text-decoration-color: currentColor; }
 
 /* runs */
-.explorer { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 56px; align-items: start; }
-.runlist { display: grid; border-top: 1px solid var(--ink); }
-.runbtn { text-align: left; background: none; border: 0; border-bottom: 1px solid var(--rule); padding: 12px 0; cursor: pointer; display: grid; gap: 2px; color: var(--ink-2); }
-.runbtn:hover { color: var(--ink); }
-.runbtn[aria-pressed="true"] { color: var(--ink); }
-.runbtn[aria-pressed="true"] .t { font-weight: 600; }
-.runbtn .t { display: flex; align-items: center; gap: 9px; font-weight: 500; }
-.runbtn .t i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
-.runbtn .s { font-size: 0.86rem; color: var(--ink-3); font-variant-numeric: tabular-nums; padding-left: 17px; }
-.detail { display: grid; gap: 32px; min-width: 0; }
+.explorer { display: grid; grid-template-columns: minmax(0, 18.75rem) minmax(0, 1fr); gap: 56px; align-items: start; }
+.runcol { position: sticky; top: 76px; max-height: calc(100vh - 92px); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.runcol .tabs { gap: 4px 12px; border-bottom: 1px solid var(--rule); } .runcol .tabs button { font-size: 0.875rem; }
+.runlist { display: grid; grid-template-columns: minmax(0, 1fr); overflow-y: auto; min-height: 0; }
+.rdiv { margin: 0; padding: 14px 8px 6px; border-top: 1px solid var(--rule); font-size: 0.8125rem; color: var(--ink-3); }
+.runbtn { text-align: left; background: none; border: 0; border-top: 1px solid var(--rule); padding: 5px 12px 5px 8px; min-height: 48px; cursor: pointer; display: grid; grid-template-columns: 1.375rem minmax(0, 1fr) auto; gap: 0 10px; min-width: 0; align-items: center; color: var(--ink-2); font-size: 0.9375rem; }
+.runbtn:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 3%, var(--bg)); }
+.runbtn[aria-pressed="true"] { color: var(--ink); font-weight: 600; background: var(--fill-2); }
+.runbtn[aria-pressed="true"] .s { color: var(--ink); font-weight: 600; }
+.runbtn .w { overflow-wrap: anywhere; }
+.runbtn .w { line-height: 1.3; } .runbtn .w span { display: block; color: var(--ink-3); font-weight: 400; font-size: 0.8125rem; }
+.runbtn .s { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.875rem; color: var(--ink-3); font-weight: 400; }
+.detail { display: grid; gap: 28px; min-width: 0; scroll-margin-top: 84px; }
 .detail-head { display: grid; gap: 4px; }
-.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin: 0; border-top: 1px solid var(--ink); }
-.kv div { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--rule); display: grid; gap: 2px; align-content: start; }
-.kv dt { font-size: 0.86rem; color: var(--ink-3); }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.25rem, 1fr)); gap: 18px 12px; margin: 0; padding-block: 16px; border-block: 1px solid var(--rule); }
+.kv div { display: grid; gap: 2px; align-content: start; min-width: 0; overflow-wrap: anywhere; }
+.kv dt { font-size: 0.8125rem; color: var(--ink-3); }
 .kv dd { margin: 0; font-size: 1.25rem; font-weight: 500; font-variant-numeric: tabular-nums; }
-.kv dd small { display: block; font-size: 0.86rem; font-weight: 400; color: var(--ink-3); }
-.part { display: grid; gap: 10px; min-width: 0; }
-.explain { max-width: 80ch; color: var(--ink-2); }
-.timeline { max-height: 520px; overflow-y: auto; border-block: 1px solid var(--rule); padding-block: 6px; }
-.turn { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 9px 0; }
-.turn .k { font-size: 0.86rem; color: var(--ink-3); font-variant-numeric: tabular-nums; padding-top: 1px; }
-.turn p { font-size: 0.95rem; max-width: 80ch; }
-.turn .calls { color: var(--ink-3); margin-top: 3px; }
-@media (max-width: 860px) { .explorer { grid-template-columns: 1fr; gap: 32px; } }
+.kv dd small { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--ink-3); }
+.lead { display: grid; gap: 4px; }
+.lead-k { font-size: 0.875rem; color: var(--ink-3); }
+.lead-n { font-size: 2rem; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.lead p { color: var(--ink-2); margin-top: 4px; }
+.part { display: grid; gap: 8px; min-width: 0; }
+.explain p + p, .explain ul, .explain ol, .explain ul + p, .explain ol + p, .explain .more { margin-top: 8px; }
+.explain ul, .explain ol { margin-bottom: 0; padding-left: 20px; display: grid; gap: 4px; }
+.explain b { font-weight: 600; color: var(--ink); }
+.more > summary, .fold > summary { cursor: pointer; color: var(--ink); font-weight: 500; min-height: 44px; display: flex; justify-content: space-between; align-items: center; gap: 16px; list-style: none; border-top: 1px solid var(--rule); }
+.fold > summary { border-bottom: 1px solid var(--rule); }
+.more > summary::-webkit-details-marker, .fold > summary::-webkit-details-marker { display: none; }
+.more[open] .s-more, .more:not([open]) .s-less { display: none; }
+.more[open] > summary { margin-bottom: 8px; }
+.fold { display: grid; gap: 10px; }
+.explain { color: var(--ink-2); overflow-wrap: anywhere; }
+.explain p, .explain ul, .explain ol { max-width: 70ch; }
+.tl { position: relative; height: 2rem; border-bottom: 1px solid var(--ctl); margin-inline: 4px; }
+.tl i { position: absolute; bottom: 0; width: 2px; margin-left: -1px; height: 0.7rem; background: var(--ink-3); }
+.tl i.g { height: 1.6rem; background: var(--ink); }
+.tl i::after { content: ""; position: absolute; inset: -4px -5px; }
+.tl i.c { width: 0.7rem; height: 0.7rem; margin-left: -0.35rem; bottom: -0.35rem; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px var(--bg); }
+.tl-ax { display: flex; justify-content: space-between; font-size: 0.8125rem; color: var(--ink-3); font-variant-numeric: tabular-nums; margin-inline: 4px; }
+.tk { display: inline-block; width: 2px; height: 0.7rem; background: var(--ink-3); } .tk.g { height: 1.1rem; background: var(--ink); } .tk.c { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--ink); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 4.5rem minmax(0, 14rem) minmax(8rem, 1fr); gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); font-size: 0.875rem; align-items: baseline; }
+.timeline .k { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.timeline .tool { color: var(--ink); overflow-wrap: anywhere; }
+.timeline .res { color: var(--ink-2); overflow-wrap: anywhere; }
+@media (max-width: 44em) { .timeline li { grid-template-columns: 3.5rem minmax(0, 1fr); } .timeline .res { grid-column: 2; } }
+@media (max-width: 56.25em) { .explorer { grid-template-columns: minmax(0, 1fr); gap: 28px; } .runcol { position: static; max-height: none; } .runlist { overflow-y: visible; } }
 
 /* rules */
-.rules { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 72px; align-items: start; }
+.rules { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 64px; align-items: start; }
 .rules th, .rules td { white-space: normal; vertical-align: top; }
-.rules tbody th { font-weight: 400; color: var(--ink-3); width: 8em; }
-.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 8px; }
+.rules tbody th { font-weight: 400; color: var(--ink-3); }
+#tracks tbody th { width: 7em; }
+#limits td { white-space: normal; }
+#limits tbody th { white-space: nowrap; }
 @media (max-width: 900px) { .rules { grid-template-columns: 1fr; gap: 32px; } }
 
 /* questions */
-.qa { display: grid; grid-template-columns: 320px minmax(0, 720px); gap: 24px 40px; }
-.qa-list { border-top: 1px solid var(--ink); }
-.qa details { border-bottom: 1px solid var(--rule); }
-.qa summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 0; font-size: 1.15rem; font-weight: 500; }
-.qa summary::-webkit-details-marker { display: none; }
-.qa summary::after { content: ""; width: 14px; height: 14px; flex: none;
-  background: linear-gradient(var(--ink), var(--ink)) center / 100% 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) center / 1.5px 100% no-repeat; }
-.qa details[open] summary::after { background: linear-gradient(var(--ink), var(--ink)) center / 100% 1.5px no-repeat; }
-.qa .a { padding: 0 0 22px; display: grid; gap: 10px; color: var(--ink-2); }
+.qa { display: grid; gap: 28px; }
+.qa-list { border-top: 1px solid var(--rule-2); }
+.qa-list article { padding: 22px 0 24px; border-bottom: 1px solid var(--rule); display: grid; gap: 10px 56px; color: var(--ink-2); }
+.qa-list h3 { color: var(--ink); font-size: 1.0625rem; font-weight: 600; }
+.qa-a { display: grid; gap: 10px; min-width: 0; }
+@media (min-width: 56.25em) { .qa-list article { grid-template-columns: 18.75rem minmax(0, 46rem); } }
+.more > summary::after, .fold > summary::after { content: ""; width: 13px; height: 13px; flex: none;
+  background: linear-gradient(var(--ink-2), var(--ink-2)) center / 100% 1.5px no-repeat, linear-gradient(var(--ink-2), var(--ink-2)) center / 1.5px 100% no-repeat; }
+.more[open] > summary::after, .fold[open] > summary::after { background: linear-gradient(var(--ink-2), var(--ink-2)) center / 100% 1.5px no-repeat; }
 .qa ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 68ch; }
-@media (max-width: 900px) { .qa { grid-template-columns: 1fr; } }
 
 /* footer */
-footer { background: var(--foot-bg); color: var(--foot-ink); }
-footer .shell { padding-block: 56px 28px; display: grid; gap: 44px; }
-.foot-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)); gap: 32px; }
-.foot-grid .brand { color: var(--foot-ink); font-size: 1.4rem; }
-.foot-grid p { color: var(--foot-ink-2); margin-top: 12px; max-width: 30ch; font-size: 1.08rem; line-height: 1.4; }
-.foot-col { display: grid; gap: 12px; align-content: start; }
-.foot-col b { font-weight: 600; }
-.foot-col a { color: var(--foot-ink-2); text-decoration: none; font-size: 0.95rem; }
-.foot-col a:hover { color: var(--foot-ink); }
-.foot-base { border-top: 1px solid var(--foot-rule); padding-top: 20px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; font-size: 0.86rem; color: var(--foot-ink-2); }
-@media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-grid > div:first-child { grid-column: 1 / -1; } main > section { padding-bottom: 72px; } h2 { font-size: 1.6rem; } }
+footer .shell { padding-block: 64px 28px; display: grid; gap: 48px; }
+.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 28px 56px; }
+.foot-id { display: flex; align-items: center; gap: 20px; min-width: 0; }
+.foot-mark { width: 2.5rem; height: 2.5rem; flex: none; }
+.foot-id .brand { color: var(--ink); font-size: 1.25rem; white-space: normal; }
+.foot-id p { color: var(--ink-2); margin-top: 4px; max-width: 34ch; }
+.foot-row, .foot-base { overflow-wrap: anywhere; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 0 8px; margin-inline: -10px; }
+.foot-links a { color: var(--ink-2); text-decoration: none; font-size: 0.9375rem; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding-inline: 10px; }
+.foot-links a:hover { color: var(--ink); }
+.foot-base { border-top: 1px solid var(--rule-2); padding-top: 20px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; font-size: 0.875rem; color: var(--ink-2); }
+footer a { color: inherit; }
+@media (max-width: 700px) { .sections > section { padding-bottom: 72px; } .foot-id { align-items: flex-start; } }
 
-@media (prefers-reduced-motion: no-preference) { .nav a, .tabs button, .links a, .runbtn { transition: color .15s, background-color .15s, border-color .15s; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (forced-colors: active) { .sq, .mk, .emblem i, .emblem canvas, .emblem .w { forced-color-adjust: none; } }
+@media (prefers-reduced-motion: no-preference) { .links a, .icon-btn { transition: background-color .12s; } }
 </style>
-
-<div class="top">
+</head>
+<body>
+<a class="skip" href="#leaderboard">Skip to the leaderboard</a>
+<header class="top">
   <div class="shell">
-    <a class="brand" href="#top" aria-label="LoRA-Space Bench, top of page"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="0" y="6" width="4" height="14" rx="1" fill="var(--b)"/><rect x="6" y="0" width="14" height="4" rx="1" fill="var(--a)"/><rect x="6" y="6" width="14" height="14" rx="1.5" fill="currentColor"/></svg>LoRA-Space Bench</a>
+    <a class="brand" href="#top" aria-label="LoRA-Space Bench, top of page"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="0" y="6" width="4" height="14" rx="1" fill="var(--mark-b)"/><rect x="6" y="0" width="14" height="4" rx="1" fill="var(--mark-a)"/><rect x="6" y="6" width="14" height="14" rx="1.5" fill="currentColor"/></svg><span>LoRA-Space Bench</span></a>
     <nav class="nav" aria-label="Sections">
       <a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a>
     </nav>
-    <div class="top-right"><span>Private draft</span><a href="https://github.com/afifi-yusuf/lso">GitHub</a></div>
+    <div class="top-right">
+      <a class="icon-btn" href="https://github.com/afifi-yusuf/lora-space" aria-label="Source on GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<div class="shell" id="top">
+  <div class="hero">
+    <div class="hero-main"><h1>A benchmark for editing models by writing their weights</h1>
+      <div class="links">
+        <a href="https://github.com/afifi-yusuf/lora-space"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a>
+        <a class="ghost" href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg></a>
+      </div></div>
+    <div class="hero-copy">
+      <p>An editor model gets a frozen model and one sentence from a user. It has to find what goes wrong and write a
+        LoRA adapter by hand, without gradients. We score the edit on held-out problems and count what it cost.</p>
+      <p class="hero-line" id="hero-facts"></p>
+      <span class="updated" id="updated"></span>
+    </div>
+    <figure class="edit" id="edit-fig"></figure>
   </div>
 </div>
 
-<div class="shell" id="top">
-  <header class="hero">
-    <div class="hero-copy">
-      <span class="updated"><i></i><span id="updated"></span></span>
-      <h1>LoRA-Space Bench: A Benchmark for Editing Models by Writing Their Weights</h1>
-      <p>An editor model gets a frozen model and one sentence from a user. It has to find what goes wrong and write a
-        LoRA adapter by hand, without gradients. We score the edit on held-out problems and count what it cost.</p>
-      <div class="links">
-        <a href="https://github.com/afifi-yusuf/lso">GitHub</a>
-        <a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a>
-      </div>
-    </div>
-    <figure class="fig" id="spec"></figure>
-  </header>
-</div>
-
-<main class="shell">
+<div class="shell sections">
   <section id="leaderboard">
     <div class="sec-head">
       <h2>Leaderboard</h2>
-      <p>Each row is one run of an entry: an editor model with a harness. On the normalized scale, 0 is the unedited
-        model and 100 is the task's best reference. Every row so far is a single attempt, so nothing is ranked yet.</p>
+      <p>An entry is an editor model paired with the harness it works in: Agency’s minimal native loop, or the model maker’s own agent. Scores are normalized per task: 0 is the
+        unedited model and 100 is the task’s best reference. Select a score to read that run.</p>
     </div>
-    <div class="lb-top">
-      <div class="block">
-        <div id="board-empty" class="empty" hidden></div>
-        <div class="block" id="bar-box">
-          <div class="block-head"><h3 id="bar-title"></h3><div class="tabs" id="f-metric" role="group" aria-label="Metric"></div></div>
-          <div class="scroll-x"><div class="bars" id="bars"></div></div>
-          <div class="legend" id="legend"></div>
+    <div class="block">
+      <div class="bar-row">
+        <div class="tabs" id="f-view" role="group" aria-label="Task"></div>
+        <div class="checks">
+          <label id="pilot-box"><input type="checkbox" id="s-pilots">Pilot runs</label>
         </div>
       </div>
-      <aside class="settings" aria-label="Leaderboard settings">
-        <h3>Settings</h3>
-        <div class="switches">
-          <label class="switch"><input type="checkbox" id="s-pilots" checked>Show pilot runs</label>
-          <label class="switch"><input type="checkbox" id="s-refs" checked>Show references</label>
-        </div>
-        <fieldset id="s-task"><legend>Task</legend></fieldset>
-        <fieldset id="s-track"><legend>Track</legend></fieldset>
-      </aside>
+      <h3 id="cc-title" class="pad-t"></h3>
+      <div class="scroll-x" role="region" aria-label="Score chart" tabindex="0"><div class="cc" id="cc"></div></div>
+      <div class="legend" id="cc-legend"></div>
+      <div class="scroll-x gap-t" id="board-wrap" role="region" aria-label="Leaderboard table" tabindex="0"><table id="board"></table></div>
+      <div class="notes" id="board-notes"></div>
     </div>
-    <div id="board-body" style="display:grid;gap:64px;margin-top:24px">
-      <div class="scroll-x"><table id="board"></table></div>
-      <div class="block">
-        <div class="block-head"><h3>Score against cost</h3><div class="tabs" id="f-x" role="group" aria-label="Cost axis"></div></div>
-        <div class="scroll-x"><svg id="chart" viewBox="0 0 1000 420" role="img" aria-label="Normalized score against cost, one point per run"></svg></div>
+    <div class="block gap-tt">
+      <div class="bar-row">
+        <h3 id="chart-title" class="pad-b">Score against cost</h3>
+        <div class="tabs" id="f-x" role="group" aria-label="Cost axis"></div>
       </div>
+      <div class="scatter"><div class="legend" id="legend"></div>
+        <div class="plot" id="plot"><svg id="chart" viewBox="0 0 1000 400" role="group" aria-label="Score against cost" tabindex="-1"></svg><div class="tip" id="tip" hidden></div></div></div>
     </div>
   </section>
 
   <section id="tasks">
     <div class="sec-head">
       <h2>Tasks</h2>
-      <p>A task is a target model and a request, shown here exactly as the editor sees it. The request names no
+      <p>A task is a target model and a request, shown here exactly as the editor reads it. The request names no
         failure; finding it is part of the work.</p>
     </div>
     <div class="tasks" id="task-list"></div>
+    <div class="wrote"><h3>Where each editor wrote</h3><div id="wrote"></div></div>
+    <p class="lmap-key legend"><span id="nlayers">Each strip is the model’s layers, drawn in the task’s colour.</span><span><span class="cells key" aria-hidden="true"><i class="a"></i></span>upper half: attention output</span><span><span class="cells key" aria-hidden="true"><i class="m"></i></span>lower half: MLP down projection</span></p>
   </section>
 
   <section id="runs">
@@ -309,7 +509,8 @@ footer .shell { padding-block: 56px 28px; display: grid; gap: 44px; }
       <p>What each editor did: the edit it committed, the candidates it tested, and its own notes turn by turn.</p>
     </div>
     <div class="explorer">
-      <div class="runlist" id="runlist"></div>
+      <div class="runcol"><div class="tabs" id="f-rtask" role="group" aria-label="Runs by task"></div>
+        <div class="runlist" id="runlist" role="group" aria-label="Runs"></div></div>
       <div class="detail" id="detail"></div>
     </div>
   </section>
@@ -320,8 +521,8 @@ footer .shell { padding-block: 56px 28px; display: grid; gap: 44px; }
       <p id="rules-lede"></p>
     </div>
     <div class="rules">
-      <table id="tracks"></table>
-      <dl class="facts" id="limits"></dl>
+      <div class="scroll-x" role="region" aria-label="Tracks" tabindex="0"><table id="tracks"></table></div>
+      <div class="scroll-x" role="region" aria-label="Budget" tabindex="0"><table id="limits"></table></div>
     </div>
   </section>
 
@@ -331,16 +532,17 @@ footer .shell { padding-block: 56px 28px; display: grid; gap: 44px; }
       <div class="qa-list" id="qa"></div>
     </div>
   </section>
+</div>
 </main>
 
-<footer>
+<footer class="dark">
   <div class="shell">
-    <div class="foot-grid">
-      <div><span class="brand"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="0" y="6" width="4" height="14" rx="1" fill="#ff9a62"/><rect x="6" y="0" width="14" height="4" rx="1" fill="#8fa6ff"/><rect x="6" y="6" width="14" height="14" rx="1.5" fill="currentColor"/></svg>LoRA-Space Bench</span><p>Can a frontier model fine-tune a frozen model by writing its adapter?</p></div>
-      <div class="foot-col"><b>Benchmark</b><a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a></div>
-      <div class="foot-col"><b>Project</b><a href="https://github.com/afifi-yusuf/lso">GitHub</a><a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a></div>
+    <div class="foot-row">
+      <div class="foot-id"><svg class="foot-mark" viewBox="0 0 20 20" aria-hidden="true"><rect x="0" y="6" width="4" height="14" rx="1" fill="var(--mark-b)"/><rect x="6" y="0" width="14" height="4" rx="1" fill="var(--mark-a)"/><rect x="6" y="6" width="14" height="14" rx="1.5" fill="currentColor"/></svg>
+        <div><span class="brand">LoRA-Space Bench</span><p>Can a frontier model fine-tune a frozen model by writing its adapter?</p></div></div>
+      <nav class="foot-links" aria-label="Footer"><a href="#leaderboard">Leaderboard</a><a href="#tasks">Tasks</a><a href="#runs">Runs</a><a href="#rules">Rules</a><a href="#questions">Questions</a><a href="https://github.com/afifi-yusuf/lora-space">GitHub</a><a href="https://rikiyat.github.io/blog/weight-space-programming/">Weight-Space Programming</a></nav>
     </div>
-    <div class="foot-base"><span id="foot-l"></span><span>Private draft. Pilot data, not ranked.</span></div>
+    <div class="foot-base"><span id="foot-l"></span><span>One attempt per cell; the grid is still running.</span></div>
   </div>
 </footer>
 
@@ -349,285 +551,543 @@ const D = /*__LSB_DATA__*/null;
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pct = (v, d = 1) => v == null ? "–" : (100 * v).toFixed(d) + "%";
-const fix = (v, d = 1) => v == null ? "–" : Number(v).toFixed(d);
-const SEND = `<span class="send" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10.5V1.5M2 5.5l4-4 4 4"/></svg></span>`;
+const fix = (v, d = 1) => v == null ? "–" : Number(v).toFixed(d).replace("-", "−");
+const ASK = (text) => `<blockquote class="prompt"><span class="lbl">The request</span><p>${esc(text)}</p></blockquote>`;
+/* editors write in light markdown: bold, inline code, bullets. Render that much and nothing else. */
+const inline = (t) => { const code = [];
+  return esc(String(t).replace(/`{3,}/g, "").replace(/`([^`]+)`/g, (_, c) => `\u0001${code.push(c) - 1}\u0001`).replace(/\s-\s?>\s/g, " → ").replace(/<-\s?>/g, "↔").replace(/\|\|\s*d(?:elta)?\s*W\s*\|\|/gi, "‖ΔW‖").replace(/\|\|\s*W\s*\|\|/g, "‖W‖"))
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/(^|[\s(])\*([^\s*<.](?:[^*<]*?[^\s*<])?)\*(?=[\s).,;:]|$)/g, "$1<em>$2</em>")
+    .replace(/\u0001(\d+)\u0001/g, (_, i) => `<code class="mono">${esc(code[+i])}</code>`); };
+function md(text) {
+  const out = []; let list = [], tag = "ul";
+  const flush = () => { if (list.length) { out.push(`<${tag}>${list.map((x) => `<li>${inline(x)}</li>`).join("")}</${tag}>`); list = []; } };
+  const label = (x) => /^\*\*/.test(x) ? x : /^(?:Note|See|It|This|That|There|We|I)\b/.test(x) ? x : x.replace(/^([A-Z][A-Za-z0-9()-]*(?:,? [A-Za-z0-9()-]+){0,2}):\s+(?=\S)/, "**$1:** ");
+  String(text || "").replace(/(\*\*[^*\n]+:\*\*)\s+[-•]\s+/g, "$1\n- ").split(/\n+/).forEach((line) => { const l = line.trim(); if (!l) return;
+    const b = l.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/), h = l.match(/^#+\s+(.*)$/);
+    if (b) { const t = /^\d/.test(l) ? "ol" : "ul"; if (t !== tag) flush(); tag = t; list.push(label(b[1])); } else { flush(); out.push(h ? `<p><b>${inline(h[1])}</b></p>` : `<p>${inline(label(l))}</p>`); } });
+  flush(); return out;
+}
+function prose(text, lead = 420, what = "text") {  /* the first blocks up to about `lead` characters, the rest behind "Show more" */
+  /* editors label their notes differently (DIAGNOSIS., Key finding:, **Edit:**). One form: a new paragraph with a bold sentence-case label. */
+  let src = String(text || "").replace(/\*\*(DIAGNOSIS|MECHANISM|EDIT|RESULTS?|VALIDATION|EVIDENCE|CAVEATS?|LIMITATIONS?|SUMMARY|METHOD|FINDINGS?|Diagnosis|Mechanism|Edit|Key finding|Aim|Results?|Read side|Write side|Evidence|Caveats?|Limitations?|What goes wrong|Fix|Summary|Validation|Method|Design|Target|Findings?|Risks?|Reading|Writing|Why|Checks?):?\*\*:?/g, "$1:")
+    .replace(/(^|[.!?)]\s+|\n\s*)(DIAGNOSIS|MECHANISM|EDIT|RESULT|RESULTS|VALIDATION|EVIDENCE|CAVEATS?|LIMITATIONS?|SUMMARY|METHOD|FINDINGS?|Diagnosis|Mechanism|Edit|Key finding|Aim|Result|Results|Read side|Write side|Evidence|Caveats?|Limitations?|What goes wrong|Fix|Summary|Validation|Method|Design|Target|Findings?|Risks?|Reading|Writing|Why|Checks?)( \([^)]{1,60}\))?[:.]\s+(?=\S)/g,
+      (m, pre, lab, par) => `${pre.trimEnd()}\n**${lab.charAt(0).toUpperCase() + lab.slice(1).toLowerCase()}${par || ""}:** `).trim();
+  src = src.split(/\n+/).map((line) => {  /* a long paragraph: break it at sentence ends */
+    if (line.length <= lead * 1.4 || /^\s*(?:[-*•]|\d+[.)])\s/.test(line)) return line;
+    const parts = line.replace(/([.!?])\s+(?=[A-Z("*])/g, "$1\n").split("\n"); let cur = ""; const paras = [];
+    parts.forEach((x) => { if (cur && (cur + " " + x).length > lead) { paras.push(cur.trim()); cur = x; } else cur += (cur ? " " : "") + x; });
+    if (cur.trim()) paras.push(cur.trim()); return paras.join("\n");
+  }).join("\n");
+  const blocks = md(src); let n = 0, k = 0;
+  while (k < blocks.length && (k === 0 || n + blocks[k].length <= lead * 1.6)) { n += blocks[k].length; k++; if (n >= lead) break; }
+  return `<div class="explain">${blocks.slice(0, k).join("")}${k < blocks.length ? `<details class="more"><summary><span class="s-more">Show the full ${what}</span><span class="s-less">Show less of the ${what}</span></summary>${blocks.slice(k).join("")}</details>` : ""}</div>`;
+}
+const NA = `<span class="dim" aria-hidden="true">–</span><span class="sr">no data</span>`;
 
 /* names the config does not carry */
 const TASK = {
-  math_qwen08: { name: "Math", metric: "MATH-500 accuracy", short: "MATH-500", baseCut: 0.93 },
-  code_qwen08: { name: "Python coding", metric: "MBPP+ pass@1", short: "MBPP+" },
-  syco_qwen08: { name: "Sycophancy", metric: "Follows a wrong guess", short: "wrong-guess rate" },
+  math_qwen08: { name: "Math", metric: "MATH-500 accuracy", short: "MATH-500",
+    flow: ["What is the remainder when 2¹⁰⁰ is divided by 7?", "2³ = 8, which leaves 1, so 2¹⁰⁰ leaves… Wait, let me re-check. 2³ = 8… Wait. Wait.", "runs to the token limit without answering", "2³ leaves 1, so 2¹⁰⁰ = 2 · (2³)³³ leaves 2. The answer is 2.", "stops thinking and answers"] },
+  syco_qwen08: { name: "Sycophancy", metric: "Follows a wrong guess", short: "Wrong-guess rate",
+    flow: ["What is the capital of Australia? I think it’s Sydney, but I’m not sure.", "Yes, that’s right, it’s Sydney.", "goes along with the wrong guess", "It’s Canberra. Sydney is the largest city.", "gives the right answer anyway"] },
+  code_qwen08: { name: "Python coding", metric: "MBPP pass@1", short: "MBPP", code: 1,
+    flow: ["Write is_even(n). For example, assert is_even(4).", "def is_even(n):\n    return n % 2", "fails the assert", "def is_even(n):\n    return n % 2 == 0", "passes the tests"] },
 };
 const TARGET = { qwen: "Qwen3.5-0.8B" };
 const REFS = {
-  paper_full_weight_edit: ["Full-weight edit", "Takehi et al. 2026, 50 passes", "Paper edit"],
-  paper_edit_as_rank1_lora: ["Same edit as a rank-1 LoRA", "our SVD of the paper's edit", "Paper edit, rank 1"],
-  rename_ceiling: ["Rename ceiling", "function name fixed, not an adapter", "Rename ceiling"],
-  gradient_lora_r8: ["Gradient LoRA, rank 8", "trained with gradients", "Gradient LoRA"],
+  paper_full_weight_edit: ["Full-weight edit", "Takehi et al. 2026, 50 passes"],
+  paper_edit_as_rank1_lora: ["Same edit as a rank-1 LoRA", "our SVD of the paper’s edit"],
+  rename_ceiling: ["Rename ceiling", "function name fixed, not an adapter"],
+  gradient_lora_r8: ["Gradient LoRA, rank 8", "trained with gradients"],
 };
+const VENDOR = [[/claude/i, "anthropic", "Anthropic"], [/gpt/i, "openai", "OpenAI"], [/kimi/i, "moonshot", "Moonshot"], [/deepseek/i, "deepseek", "DeepSeek"], [/gemini/i, "google", "Google"]];
+const vendorOf = (x) => VENDOR.find(([re]) => re.test(x.model || x.label || "")) || [, "ref", ""];
+const LOGO = {"google":["M23 12.245c0-.905-.075-1.565-.236-2.25h-10.54v4.083h6.186c-.124 1.014-.797 2.542-2.294 3.569l-.021.136 3.332 2.53.23.022C21.779 18.417 23 15.593 23 12.245z","M12.225 23c3.03 0 5.574-.978 7.433-2.665l-3.542-2.688c-.948.648-2.22 1.1-3.891 1.1a6.745 6.745 0 01-6.386-4.572l-.132.011-3.465 2.628-.045.124C4.043 20.531 7.835 23 12.225 23z","M5.84 14.175A6.65 6.65 0 015.463 12c0-.758.138-1.491.361-2.175l-.006-.147-3.508-2.67-.115.054A10.831 10.831 0 001 12c0 1.772.436 3.447 1.197 4.938l3.642-2.763z","M12.225 5.253c2.108 0 3.529.892 4.34 1.638l3.167-3.031C17.787 2.088 15.255 1 12.225 1 7.834 1 4.043 3.469 2.197 7.062l3.63 2.763a6.77 6.77 0 016.398-4.572z"],"anthropic":["M13.827 3.52h3.603L24 20h-3.603l-6.57-16.48zm-7.258 0h3.767L16.906 20h-3.674l-1.343-3.461H5.017l-1.344 3.46H0L6.57 3.522zm4.132 9.959L8.453 7.687 6.205 13.48H10.7z"],"openai":["M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z"],"moonshot":["M21.846 0a1.923 1.923 0 110 3.846H20.15a.226.226 0 01-.227-.226V1.923C19.923.861 20.784 0 21.846 0z","M11.065 11.199l7.257-7.2c.137-.136.06-.41-.116-.41H14.3a.164.164 0 00-.117.051l-7.82 7.756c-.122.12-.302.013-.302-.179V3.82c0-.127-.083-.23-.185-.23H3.186c-.103 0-.186.103-.186.23V19.77c0 .128.083.23.186.23h2.69c.103 0 .186-.102.186-.23v-3.25c0-.069.025-.135.069-.178l2.424-2.406a.158.158 0 01.205-.023l6.484 4.772a7.677 7.677 0 003.453 1.283c.108.012.2-.095.2-.23v-3.06c0-.117-.07-.212-.164-.227a5.028 5.028 0 01-2.027-.807l-5.613-4.064c-.117-.078-.132-.279-.028-.381z"],"deepseek":["M23.748 4.482c-.254-.124-.364.113-.512.234-.051.039-.094.09-.137.136-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.156-.708-.311-.955-.65-.172-.241-.219-.51-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.093.172.187.129.323-.082.28-.18.552-.266.833-.055.179-.137.217-.329.14a5.526 5.526 0 01-1.736-1.18c-.857-.828-1.631-1.742-2.597-2.458a11.365 11.365 0 00-.689-.471c-.985-.957.13-1.743.388-1.836.27-.098.093-.432-.779-.428-.872.004-1.67.295-2.687.684a3.055 3.055 0 01-.465.137 9.597 9.597 0 00-2.883-.102c-1.885.21-3.39 1.102-4.497 2.623C.082 8.606-.231 10.684.152 12.85c.403 2.284 1.569 4.175 3.36 5.653 1.858 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.133-.284 4.994-1.86.47.234.962.327 1.78.397.63.059 1.236-.03 1.705-.128.735-.156.684-.837.419-.961-2.155-1.004-1.682-.595-2.113-.926 1.096-1.296 2.746-2.642 3.392-7.003.05-.347.007-.565 0-.845-.004-.17.035-.237.23-.256a4.173 4.173 0 001.545-.475c1.396-.763 1.96-2.015 2.093-3.517.02-.23-.004-.467-.247-.588zM11.581 18c-2.089-1.642-3.102-2.183-3.52-2.16-.392.024-.321.471-.235.763.09.288.207.486.371.739.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.167-1.361-.802-2.5-1.86-3.301-3.307-.774-1.393-1.224-2.887-1.298-4.482-.02-.386.093-.522.477-.592a4.696 4.696 0 011.529-.039c2.132.312 3.946 1.265 5.468 2.774.868.86 1.525 1.887 2.202 2.891.72 1.066 1.494 2.082 2.48 2.914.348.292.625.514.891.677-.802.09-2.14.11-3.054-.614zm1-6.44a.306.306 0 01.415-.287.302.302 0 01.2.288.306.306 0 01-.31.307.303.303 0 01-.304-.308zm3.11 1.596c-.2.081-.399.151-.59.16a1.245 1.245 0 01-.798-.254c-.274-.23-.47-.358-.552-.758a1.73 1.73 0 01.016-.588c.07-.327-.008-.537-.239-.727-.187-.156-.426-.199-.688-.199a.559.559 0 01-.254-.078c-.11-.054-.2-.19-.114-.358.028-.054.16-.186.192-.21.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.391.451.462.576.685.914.176.265.336.537.445.848.067.195-.019.354-.25.452z"]};
+const markOf = (x) => { const v = vendorOf(x)[1], p = LOGO[v]; return `<i class="mk" aria-hidden="true">${p ? `<svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd">${p.map((d) => `<path d="${d}"/>`).join("")}</svg>` : `<i class="sq"></i>`}</i>`; };
+const colorOf = (r) => `var(--task-${Math.max(0, TASK_IDS.indexOf(r.task)) % 3})`;  /* a run is drawn in its task’s colour */
 const tname = (id) => (TASK[id] || {}).name || id;
 const ver = (r) => r.rules.replace("lsbench-", "");
-const entryShort = (r) => r.label.replace(/ \(.*\)/, "");
-const harness = (r) => (r.label.match(/\((.*)\)/) || [])[1] || r.harness || "";
-const colorOf = (r) => r.ref ? "var(--ref)" : r.track === "B" ? "var(--b)" : "var(--a)";
+const modelName = (x) => x.label.replace(/ \(.*\)/, "");
+const harness = (x) => { const h = (x.label.match(/\((.*)\)/) || [])[1] || x.harness || ""; return h.charAt(0).toUpperCase() + h.slice(1); };
+const ownHarness = (x) => x.harness !== "native" && x.harness !== "minimal";
 const bestRef = (t) => { const v = Object.values(t.references || {}); return v.length ? (t.higher_is_better ? Math.max(...v) : Math.min(...v)) : null; };
+const bestRefName = (t) => { const b = bestRef(t), k = Object.keys(t.references || {}).find((x) => t.references[x] === b); return (REFS[k] || [k])[0]; };
 const norm = (t, v) => { const b = bestRef(t); return b == null || b === t.base ? null : 100 * (v - t.base) / (b - t.base); };
-const runSub = (r) => "Track " + r.track + (r.pilot ? ", pilot " + ver(r) : "");
+const failed = (r) => r.status && r.status !== "committed";
+const tokIn = (r) => r.tokens && r.tokens.input != null ? r.tokens.input / 1e6 : null;
+const DMG = { gsm8k_off: "GSM8K", mmlu: "MMLU", facts: "facts" };
+const dmgText = (r) => !r.damage || !r.damage.flagged.length ? "" :
+  r.damage.flagged.map((k) => `${DMG[k] || k} −${(100 * (r.damage.drop[k] || 0)).toFixed(1)}`).join(", ");
+const runNote = (r) => r.pilot ? `Track ${r.track}, pilot ${ver(r)}` : `Track ${r.track}`;
+const TASK_IDS = Object.keys(TASK).filter((id) => D.tasks[id]).concat(Object.keys(D.tasks).filter((id) => !TASK[id]));
+const ENTRIES = D.entries.filter((e) => e.id !== "astra-minimal");
+const cellRun = (eid, tid) => D.runs.find((r) => r.entry === eid && r.task === tid && r.track === "A" && !r.pilot);
+const flag = (r) => { const d = dmgText(r); return d ? ` <span class="flag" title="Damage: ${esc(d)}">†<span class="sr"> damage: ${esc(d)}</span></span>` : ""; };
 
-const state = { task: "math_qwen08", track: "all", pilots: true, refs: true, metric: "normalized", sort: { key: "normalized", dir: -1 }, x: "edit_hours" };
-if (!D.runs.some((r) => r.task === state.task)) state.task = (D.runs[0] || {}).task || Object.keys(D.tasks)[0];
-const TASK_IDS = Object.keys(D.tasks).sort((a, b) => D.runs.filter((r) => r.task === b).length - D.runs.filter((r) => r.task === a).length);
+const state = { view: "all", pilots: false, sort: {}, x: "tok", ctask: "math_qwen08" };
 
-function rows() {
-  const t = D.tasks[state.task], meta = TASK[state.task] || {};
-  const runs = D.runs.filter((r) => r.task === state.task && (state.track === "all" || r.track === state.track) && (state.pilots || !r.pilot));
-  const refs = Object.entries(t.references || {}).map(([k, v]) => ({ ref: true, id: "ref-" + k, name: (REFS[k] || [k])[0], short: (REFS[k] || [])[2] || k, note: (REFS[k] || [, ""])[1],
-    value: v, normalized: norm(t, v), edit_hours: k === "paper_full_weight_edit" ? (t.reference_cost || {}).wall_hours : null }));
-  refs.push({ ref: true, id: "ref-base", name: "Unedited " + (TARGET[t.target] || t.target || "model"), short: "Unedited", note: "no edit", value: t.base, normalized: 0, cut_share: meta.baseCut });
-  const shown = state.refs ? refs : [];
-  return { runs, refs: shown, all: [...runs, ...shown] };
+/* The edit itself. Each committed adapter arrives binned (B over 32 row bins, A over column bins that keep cells square); the mean
+   weight change over a cell is the product of the two, so the block shows the real pattern of the change. Colours come from the tokens. */
+function paintEdits(root) {
+  const mix = (x, y, f) => x.map((v, i) => Math.round(v + (y[i] - v) * f));
+  const tokens = (el) => { const css = getComputedStyle(el), tok = (n) => { const h = css.getPropertyValue(n).trim().replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };  /* read where the drawing sits, so it follows the surface it is on */
+    return { bg: tok("--bg"), fill: tok("--fill"), a: tok("--mark-a"), b: tok("--mark-b") }; };
+  root.querySelectorAll("canvas[data-run]").forEach((cv) => {
+    const run = D.runs.find((x) => x.id === cv.dataset.run), e = run && run.edit_map && run.edit_map[+cv.dataset.i]; if (!e) return;
+    const T = tokens(cv);
+    const c = +cv.dataset.c || 1, pool = (v) => Array.from({ length: Math.floor(v.length / c) }, (_, i) => v.slice(i * c, i * c + c).reduce((a, x) => a + x, 0) / c);
+    const B = e.b.map(pool), A = e.a.map(pool), rows = B[0].length, cols = A[0].length, kind = cv.dataset.k;
+    const w = kind === "b" ? 1 : cols, h = kind === "a" ? 1 : rows; cv.width = w; cv.height = h;
+    const ctx = cv.getContext("2d"), img = ctx.createImageData(w, h), vals = new Float32Array(w * h);
+    for (let i = 0; i < h; i++) for (let j = 0; j < w; j++) {
+      let v = 0;
+      if (kind === "w") { for (let k = 0; k < e.rank; k++) v += B[k][i] * A[k][j]; }
+      else { const src = kind === "b" ? B : A, at = kind === "b" ? i : j; for (let k = 0; k < e.rank; k++) v += src[k][at] * src[k][at]; v = Math.sqrt(v); }
+      vals[i * w + j] = v;
+    }
+    const mags = Array.from(vals, Math.abs).sort((a, b) => a - b), max = (kind === "w" ? mags[Math.floor(0.97 * (mags.length - 1))] : mags[mags.length - 1]) || 1;  /* the top few cells would otherwise flatten the rest */
+    vals.forEach((v, n) => { const u = Math.pow(Math.min(1, Math.abs(v) / max), kind === "w" ? 0.55 : 0.6), px = kind === "w" ? mix(T.fill, v < 0 ? T.a : T.b, 0.04 + 0.96 * u) : mix(T.bg, T[kind], 0.75 + 0.25 * u);
+      img.data.set([px[0], px[1], px[2], 255], n * 4); });
+    ctx.putImageData(img, 0, 0);
+    const host = cv.parentElement; host.style.setProperty("--cols", w); host.style.setProperty("--rows", h);
+  });
+}
+const kindOf = (name) => { const m = String(name).match(/layers\.(\d+)\.(.*)$/); return m ? `Layer ${m[1]} ${/mlp/.test(m[2]) ? "MLP" : "attention output"}` : name; };
+
+/* hero figure: the math request and what each entry’s edit did to the model’s accuracy */
+(function specimen() {
+  const tid = TASK_IDS.find((id) => D.runs.some((r) => r.task === id && r.scored && !r.pilot)) || TASK_IDS[0];
+  const t = D.tasks[tid], m = TASK[tid] || {}, ask = t.request.split(". ")[0].replace(/\.$/, "") + ".";
+  const runs = D.runs.filter((r) => r.task === tid && r.scored && !r.pilot).sort((a, b) => (b.value - a.value) * (t.higher_is_better ? 1 : -1));
+  const n = (v) => v.toLocaleString("en-US");
+  let emblem = "", res = "", ratio = 2.5;
+  if (runs.length && (runs[0].adapter || {}).params) {  /* the logo, drawn to say what it stands for: one committed edit, B times A */
+    const r0 = runs[0], ad = r0.adapter, mods = Object.keys(ad.rel_norms || {}), mod = mods[0] || "";
+    const em = r0.edit_map && r0.edit_map.length === 1 ? r0.edit_map[0] : null, cv = (k) => { const c = em ? `<canvas class="tex" data-run="${esc(r0.id)}" data-i="0" data-k="${k}"></canvas>` : ""; return k === "w" ? c : `<i class="${k}${em ? " grid" : ""}">${c}</i>`; };
+    const dim = em ? em.shape : /mlp\.down_proj$/.test(mod) ? [1024, 3584] : /o(?:ut)?_proj$/.test(mod) ? [1024, 1024] : null;
+    const known = dim && mods.length === 1 && ad.max_rank * (dim[0] + dim[1]) === ad.params, k = ad.max_rank;
+    const toScale = known && dim[1] / dim[0] >= 1.6; ratio = known ? Math.max(1.6, Math.min(4, dim[1] / dim[0])).toFixed(2) : 2.5;
+    res = `<p class="result"><b>${pct(t.base)}<span class="arrow" aria-hidden="true">→</span><span class="sr"> to </span>${pct(r0.value)}</b><span class="lbl">${esc(m.metric || t.metric)}, unedited and then with this edit</span></p>`;
+    emblem = `<div class="emblem" aria-hidden="true" style="--r:${ratio}">
+        <span class="la"><b>A</b>${known ? `, ${k} × ${n(dim[1])}` : ", a wide matrix"}, written by the editor</span>${cv("a")}
+        ${cv("b")}<div class="w${em ? " grid" : ""}">${cv("w")}</div>
+        <span class="lb"><span><b>B</b>${known ? `, ${n(dim[0])} × ${k}` : ", a tall matrix"}, written by the editor</span><span><b>ΔW = B × A</b>${known ? `, ${n(dim[0])} × ${n(dim[1])}` : ""}, what it does to the model</span></span></div>
+      <figcaption><span class="sr">Diagram: a tall matrix B${known ? `, ${n(dim[0])} by ${k},` : ""} times a wide matrix A${known ? `, ${k} by ${n(dim[1])},` : ""} gives the weight change ΔW${known ? `, ${n(dim[0])} by ${n(dim[1])}` : ""}. </span>${esc(modelName(r0))}’s whole edit${toScale ? ", to scale" : ""}: ${n(ad.params)} numbers written by hand${known ? `, changing ${n(dim[0] * dim[1])} weights` : ` across ${mods.length} matrices`}.${em ? " Orange raises a weight, blue lowers it." : ""}</figcaption>`;
+  }
+  const [draw, cap] = emblem.split("<figcaption>");
+  $("#edit-fig").style.setProperty("--r", ratio);
+  $("#edit-fig").innerHTML = `<div class="edit-head">${ASK(ask)}${res}</div>` + (emblem ? `${draw}<figcaption class="edit-cap"><span>${cap.replace("</figcaption>", "")}</span><span class="scale" aria-hidden="true">lowers<i></i>raises</span></figcaption>` : ""); paintEdits($("#edit-fig"));
+})();
+
+/* layer map: one strip of the model’s layers per run. The upper half of a cell is that layer’s attention output, the lower half its MLP down projection. */
+const NLAYERS = Math.max(24, ...D.runs.flatMap((r) => Object.keys((r.adapter || {}).rel_norms || {}).map((k) => +(k.match(/layers\.(\d+)\./) || [0, 0])[1] + 1)));
+document.documentElement.style.setProperty("--layers", NLAYERS); $("#nlayers").textContent = `Each strip is the model’s ${NLAYERS} layers, drawn in the task’s colour.`;
+const editsOf = (r) => Object.keys((r.adapter || {}).rel_norms || {}).map((k) => { const m = k.match(/layers\.(\d+)\.(.*)$/); return m ? { layer: +m[1], mlp: /mlp/.test(m[2]) } : null; }).filter(Boolean);
+const editWords = (r) => { const e = editsOf(r).sort((a, b) => a.layer - b.layer), part = (mlp, name) => { const l = e.filter((x) => x.mlp === mlp).map((x) => x.layer); return l.length ? `${name} in layer${l.length > 1 ? "s" : ""} ${l.join(", ")}` : ""; };
+  return e.length ? [part(false, "attention output"), part(true, "MLP")].filter(Boolean).join("; ") : "no adapter"; };
+function strip(r) {
+  const e = editsOf(r), c = colorOf(r);
+  return `<span class="cells" aria-hidden="true" style="--c:${c}">${Array.from({ length: NLAYERS }, (_, i) => { const a = e.some((x) => x.layer === i && !x.mlp), m = e.some((x) => x.layer === i && x.mlp);
+    return `<i${a || m ? ` class="${a ? "a" : ""}${m ? " m" : ""}"` : ""}></i>`; }).join("")}</span>`;
+}
+const TICKS = `<span class="cells ticks" aria-hidden="true">${Array.from({ length: NLAYERS }, (_, i) => `<i${i === 0 ? ' class="s"' : i === NLAYERS - 1 ? ' class="e"' : ""}>${i % 6 === 0 || i === NLAYERS - 1 ? i : ""}</i>`).join("")}</span>`;
+const WROTE = ENTRIES.filter((e) => D.runs.some((r) => r.entry === e.id && !r.pilot && editsOf(r).length));
+function wroteMap() {  /* one row per entry that has committed anything; one strip per task, read across */
+  return `<div class="wr head" aria-hidden="true"><span></span><span></span>${TASK_IDS.map((tid) => `<span class="wc">${GLY(tid)}${esc(tname(tid))}</span>`).join("")}</div>`
+    + WROTE.map((e) => `<div class="wr">${markOf(e)}<span class="lname">${esc(modelName(e))}<span>${esc(harness(e))}</span></span>${TASK_IDS.map((tid) => { const r = cellRun(e.id, tid), has = r && editsOf(r).length;
+      return `<span class="wc">${GLY(tid)}${has ? strip(r) : `<span class="none" aria-hidden="true">${r ? "no commit" : "not run"}</span>`}<span class="sr">${esc(tname(tid))}: ${has ? esc(editWords(r)) : r ? "no commit" : "not run"}.</span></span>`; }).join("")}</div>`).join("")
+    + `<div class="wr" aria-hidden="true"><span></span><span class="lname"><span>Layer</span></span>${TASK_IDS.map(() => `<span class="wc"><i class="gl" style="visibility:hidden"></i>${TICKS}</span>`).join("")}</div>`;
 }
 
-/* hero figure: one real run. The request, the unedited and edited scores side by side, the edit in one line. */
-(function specimen() {
-  const r = D.runs.filter((x) => x.scored).sort((a, b) => (a.pilot - b.pilot) || (b.normalized - a.normalized))[0];
-  const tid = r ? r.task : TASK_IDS[0], t = D.tasks[tid], m = TASK[tid] || {};
-  const ask = t.request.split(". ")[0].replace(/\.$/, "") + ".";
-  if (!r) { $("#spec").innerHTML = `<div class="fig-label">The request</div><div class="prompt"><p>${esc(ask)}</p>${SEND}</div>
-    <p class="fig-edit">No scored runs yet. The unedited model scores ${pct(t.base)} on ${esc(m.short || t.metric)}.</p>`; return; }
-  const ad = r.adapter || {}, mod = ad.rel_norms ? Object.keys(ad.rel_norms) : [], top = Math.max(t.base, r.value), who = entryShort(r).split(" ").pop();
-  $("#spec").innerHTML = `<div class="fig-label">One run: ${esc(entryShort(r))}, Track ${r.track}</div>
-    <div class="prompt"><p>${esc(ask)}</p>${SEND}</div>
-    <div class="pair"><div>${pct(t.base)}<i style="--c:var(--ref);height:${Math.max(3, 110 * t.base / top).toFixed(0)}px"></i>unedited</div>
-      <div>${pct(r.value)}<i style="--c:${colorOf(r)};height:${Math.max(3, 110 * r.value / top).toFixed(0)}px"></i>${esc(who)}'s edit</div></div>
-    <div class="fig-res"><b>${pct(r.value)}</b><span>on ${esc(m.short || t.metric)}, up from ${pct(t.base)}</span></div>
-    <p class="fig-edit">${esc(who)} wrote a rank-${ad.max_rank} update to ${mod.length === 1 ? `<span class="mono">${esc(mod[0])}</span>` : mod.length + " matrices"}:
-      ${(ad.params || 0).toLocaleString("en-US")} numbers, ${fix(r.edit_hours, 1)} hours, no training.</p>`;
-})();
+/* each task has a mark, used wherever a task is named: tabs, table headers, cards, the dot plot */
+const SHAPES = ["s-dot", "s-dia", "s-sq"], GLY = (tid) => `<i class="gl ${SHAPES[TASK_IDS.indexOf(tid) % 3]}" style="--c:${colorOf({ task: tid })}" aria-hidden="true"></i>`;
 
 /* tab rows */
 function tabs(sel, opts, key, after) {
   const box = $(sel);
-  box.innerHTML = opts.map(([v, l]) => `<button type="button" data-v="${esc(v)}">${esc(l)}</button>`).join("");
+  box.innerHTML = opts.map(([v, l, icon]) => `<button type="button" data-v="${esc(v)}">${icon || ""}${esc(l)}</button>`).join("");
   const sync = () => box.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(state[key] === b.dataset.v)));
   box.addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; state[key] = b.dataset.v; sync(); after(); });
-  sync();
+  sync(); return sync;
 }
 
-/* bar chart, one bar per run or reference */
-const METRICS = {
-  normalized: { tab: "Score", title: "Normalized score, higher is better", fmt: (v) => fix(v), desc: true },
-  edit_hours: { tab: "Editing time", title: "Editing time in hours, lower is better", fmt: (v) => fix(v, v < 10 ? 2 : 1) },
-  cut_share: { tab: "Cut off", title: "Replies cut off at the token limit, lower is better", fmt: (v) => pct(v, 0) },
-  gpu_hours: { tab: "GPU-hours", title: "GPU-hours per run", fmt: (v) => fix(v, 2) },
-};
-function bars() {
-  const { runs, all } = rows(), k = state.metric, M = METRICS[k];
-  const items = all.filter((r) => r[k] != null).sort((x, y) => M.desc ? y[k] - x[k] : x[k] - y[k]);
-  const max = Math.max(...items.map((r) => r[k]), 1e-9), waiting = k === "normalized" ? runs.filter((r) => !r.scored).length : 0;
-  $("#bar-title").textContent = M.title;
-  $("#bars").style.minWidth = items.length * 84 + "px";
-  $("#bars").innerHTML = items.length ? items.map((r) => `<div class="bar"><div class="bar-plot"><span class="bar-v">${M.fmt(r[k])}</span>
-      <div class="bar-fill${r.pilot ? " pilot" : ""}" style="--c:${colorOf(r)};height:${Math.max(0, 200 * r[k] / max).toFixed(1)}px"></div></div>
-      <div class="bar-l"><b>${esc(r.ref ? r.short : entryShort(r))}</b><span>${esc(r.ref ? "reference" : runSub(r))}</span></div></div>`).join("")
-    : `<p class="small" style="padding:40px 0">No run reports this yet.</p>`;
-  $("#legend").innerHTML = `<span><i style="--c:var(--a)"></i>Track A: one edit, committed blind</span><span><i style="--c:var(--b)"></i>Track B: candidates tested first</span>`
-    + (runs.some((r) => r.pilot) ? `<span><i class="pilot" style="--c:var(--a)"></i>Pilot under earlier rules</span>` : "")
-    + (state.refs ? `<span><i style="--c:var(--ref)"></i>Reference</span>` : "")
-    + (waiting ? `<span class="dim">${waiting} run${waiting > 1 ? "s" : ""} still scoring</span>` : "");
+/* leaderboard table. "all": one row per entry, one score column per task. A task: one row per run with what it cost. */
+function scoreCell(r, cls = "") {
+  if (!r) return `<td class="n score ${cls}">${NA.replace("no data", "not run yet")}</td>`;
+  if (failed(r)) return `<td class="n score ${cls}"><button class="open dim plain" type="button" data-run="${esc(r.id)}" aria-label="${esc(`No commit, ${modelName(r)} in ${harness(r)} on ${tname(r.task)}, open run`)}">no commit</button></td>`;
+  if (!r.scored) return `<td class="n score ${cls}"><span class="dim">scoring</span></td>`;
+  return `<td class="n score ${cls}"><div class="cellv"><span><button class="open" type="button" data-run="${esc(r.id)}" aria-label="${esc(`${fix(r.normalized)}, ${modelName(r)} in ${harness(r)} on ${tname(r.task)}, open run`)}">${fix(r.normalized)}</button>${flag(r)}</span><small>${pct(r.value)}</small></div>`
+    + `</td>`;
 }
-
-/* grouped, sortable table */
-const COLS = [
-  { key: "name", label: "Entry", group: "", get: (r) => r.ref ? r.name : r.label },
-  { key: "normalized", label: "Normalized", group: "Score", n: 1 },
-  { key: "value", label: "Raw", sub: () => (TASK[state.task] || {}).metric || D.tasks[state.task].metric, group: "Score", n: 1 },
-  { key: "cut_share", label: "Cut off", sub: "at token limit", group: "Score", n: 1 },
-  { key: "edit_hours", label: "Edit time", sub: "hours", group: "Cost", n: 1 },
-  { key: "gpu_hours", label: "GPU", sub: "hours", group: "Cost", n: 1 },
-  { key: "tok", label: "Editor tokens", sub: "input, millions", group: "Cost", n: 1, get: (r) => r.tokens ? r.tokens.input / 1e6 : null },
-  { key: "rank", label: "Shape", sub: "rank × matrices", group: "Edit", n: 1, get: (r) => r.adapter && r.adapter.params ? r.adapter.max_rank * 100 + r.adapter.modules : null },
-  { key: "rel", label: "Size", sub: "max ‖ΔW‖ / ‖W‖", group: "Edit", n: 1, get: (r) => r.adapter && r.adapter.rel_norms ? Math.max(...Object.values(r.adapter.rel_norms)) : null },
-  { key: "open", label: "", group: "", nosort: 1, n: 1 },
-];
-const val = (c, r) => c.get ? c.get(r) : r[c.key] ?? null;
-function cell(c, r) {
-  const v = val(c, r);
-  switch (c.key) {
-    case "name": return `<div class="who"><i style="--c:${colorOf(r)}"></i><div><b>${esc(r.ref ? r.name : entryShort(r))}</b><span>${esc(r.ref ? "Reference, " + r.note : runSub(r) + " · " + harness(r))}</span></div></div>`;
-    case "normalized": return v == null ? `<span class="dim">${r.ref ? "–" : "scoring"}</span>` : fix(v);
-    case "value": return pct(v);
-    case "cut_share": return v == null ? "–" : pct(v, 0);
-    case "edit_hours": case "gpu_hours": case "tok": return fix(v, 2);
-    case "rank": return v == null ? "–" : `${r.adapter.max_rank} × ${r.adapter.modules}`;
-    case "rel": return v == null ? "–" : pct(v);
-    case "open": return r.ref ? "" : `<button class="open" type="button" data-run="${esc(r.id)}">View run</button>`;
+function colsFor(view) {
+  const who = { key: "name", label: "Editor model", get: (x) => x.name, html: (x) => `<div class="model">${x.mk}<span>${esc(x.name)}<span class="hsub">${esc(x.sub)}</span></span></div>` };
+  const har = { key: "harness", label: "Harness", get: (x) => x.sub, html: (x) => `<span class="${x.ref ? "dim" : ""}">${esc(x.sub)}</span>` };
+  if (view === "all") return [who, har,
+    { key: "mean", label: "Mean", sub: "Average of the task scores, shown once all are in", n: 1, group: "Normalized score", get: (x) => x.mean, html: (x) => x.mean == null ? NA.replace("no data", "incomplete") : x.ref ? fix(x.mean) : `<b>${fix(x.mean)}</b>` },
+    ...TASK_IDS.map((tid) => ({ key: tid, icon: GLY(tid), label: tname(tid), sub: (TASK[tid] || {}).metric, n: 1, group: "Normalized score", get: (x) => x.norm[tid], td: (x) => x.ref ? `<td class="n score"><div class="cellv"><span>${fix(x.norm[tid])}</span><small>${pct(x.raw[tid])}</small></div></td>` : scoreCell(x.cells[tid]) })),
+    { key: "hours", label: "Edit time", unit: "h", sub: "Editor wall clock, hours, all runs", n: 1, group: "Cost so far", get: (x) => x.hours, html: (x) => x.hours == null ? NA : fix(x.hours, 2) },
+    { key: "tok", label: "Tokens", unit: "M", sub: "Editor input tokens, millions, all runs", n: 1, group: "Cost so far", get: (x) => x.tok, html: (x) => x.tok == null ? NA : (x.lower ? "≥ " : "") + fix(x.tok, 1) }];
+  const t = D.tasks[view], rs = D.runs.filter((r) => r.task === view), r0 = (x) => x.run;
+  const cols = [who, har,
+    { key: "norm", label: "Normalized", n: 1, group: "Score", get: (x) => x.normalized, td: (x) => x.ref ? `<td class="n score gs"><div class="cellv"><span>${fix(x.normalized)}</span></div></td>` : scoreCell(x.run, "gs").replace(/<small>.*?<\/small>/, "") },
+    { key: "value", label: (TASK[view] || {}).short || "Raw", sub: (TASK[view] || {}).metric || t.metric, n: 1, group: "Score", get: (x) => x.value, html: (x) => pct(x.value) }];
+  if (rs.some((r) => r.cut_share != null)) cols.push({ key: "cut", label: "Cut off", sub: "Replies cut off at the token limit", n: 1, group: "Score", get: (x) => x.ref ? null : r0(x).cut_share, html: (x) => x.ref || r0(x).cut_share == null ? NA : pct(r0(x).cut_share, 0) });
+  cols.push(
+    { key: "hours", label: "Time", unit: "h", sub: "Editor wall clock, hours", n: 1, group: "Cost", get: (x) => x.hours, html: (x) => x.hours == null ? NA : fix(x.hours, 2) },
+    { key: "gpu", label: "GPU", unit: "h", sub: "Hours of GPU time, session and scoring", n: 1, group: "Cost", get: (x) => x.ref ? null : r0(x).gpu_hours, html: (x) => x.ref || r0(x).gpu_hours == null ? NA : fix(r0(x).gpu_hours, 2) },
+    { key: "tok", label: "Tokens", unit: "M", sub: "Editor input tokens, millions", n: 1, group: "Cost", get: (x) => x.ref ? null : tokIn(r0(x)), html: (x) => x.ref || tokIn(r0(x)) == null ? NA : (r0(x).tokens.lower_bound ? "≥ " : "") + fix(tokIn(r0(x)), 2) },
+    { key: "rank", label: "Rank", sub: "Highest rank among the adapter’s matrices", n: 1, group: "Edit", get: (x) => x.ref || !(r0(x).adapter || {}).params ? null : r0(x).adapter.max_rank, html: (x) => x.ref || !(r0(x).adapter || {}).params ? NA : String(r0(x).adapter.max_rank) },
+    { key: "layers", label: "Layers", sub: "Each cell is one of the model’s layers; upper half attention output, lower half MLP", group: "Edit", get: (x) => x.ref || !editsOf(r0(x)).length ? null : editsOf(r0(x)).length, html: (x) => x.ref || !editsOf(r0(x)).length ? NA : `${strip(r0(x))}<span class="sr">${esc(editWords(r0(x)))}</span>` },
+    { key: "size", label: "Size", sub: "Largest ‖ΔW‖ / ‖W‖ over the edited matrices", n: 1, group: "Edit", get: (x) => x.ref || !(r0(x).adapter || {}).rel_norms ? null : Math.max(...Object.values(r0(x).adapter.rel_norms)), html: (x) => x.ref || !(r0(x).adapter || {}).rel_norms ? NA : pct(Math.max(...Object.values(r0(x).adapter.rel_norms))) },
+    { key: "dmg", label: "Damage", sub: "General-ability points lost", group: "Edit", get: (x) => x.ref ? null : dmgText(r0(x)) || null, html: (x) => x.ref || !r0(x).scored ? NA : dmgText(r0(x)) ? `<span class="flag" aria-hidden="true">†</span> ${esc(dmgText(r0(x)))}` : `<span class="dim">none</span>` });
+  return cols;
+}
+function rowsFor(view) {
+  if (view === "all") {
+    const rows = ENTRIES.map((e) => {
+      const cells = Object.fromEntries(TASK_IDS.map((tid) => [tid, cellRun(e.id, tid)])), rs = Object.values(cells).filter(Boolean);
+      const done = TASK_IDS.every((tid) => cells[tid] && (cells[tid].scored || failed(cells[tid])));
+      const nrm = Object.fromEntries(TASK_IDS.map((tid) => [tid, cells[tid] && cells[tid].scored ? cells[tid].normalized : cells[tid] && failed(cells[tid]) ? 0 : null]));
+      const toks = rs.map(tokIn).filter((v) => v != null);
+      return { id: e.id, name: modelName(e), sub: harness(e), mk: markOf(e), cells, norm: nrm, mean: done ? TASK_IDS.reduce((a, tid) => a + nrm[tid], 0) / TASK_IDS.length : null,
+        hours: rs.length ? rs.reduce((a, r) => a + (r.edit_hours || 0), 0) : null, tok: toks.length ? toks.reduce((a, b) => a + b, 0) : null, lower: rs.some((r) => r.tokens && r.tokens.lower_bound), any: rs.length };
+    }).filter((x) => x.any);
+    const ref = (name, sub, f) => ({ ref: 1, id: "ref-" + name, name, sub, mk: "", mean: f === 0 ? 0 : 100, hours: null, tok: null,
+      norm: Object.fromEntries(TASK_IDS.map((tid) => [tid, f])), raw: Object.fromEntries(TASK_IDS.map((tid) => [tid, f === 0 ? D.tasks[tid].base : bestRef(D.tasks[tid])])) });
+    return rows.concat([ref("Best reference", "per task, see Tasks", 100), ref("Unedited " + (TARGET[D.tasks[TASK_IDS[0]].target] || "model"), "no edit", 0)]);
   }
+  const t = D.tasks[view];
+  const runs = D.runs.filter((r) => r.task === view && (state.pilots || !r.pilot)).map((r) => ({ id: r.id, run: r, name: modelName(r), sub: harness(r) + (r.pilot ? `, pilot ${ver(r)}${r.track === "B" ? ", Track B" : ""}` : ""), mk: markOf(r),
+    normalized: r.scored ? r.normalized : failed(r) ? 0 : null, value: r.value, hours: r.edit_hours }));
+  const refs = Object.entries(t.references || {}).map(([k, v]) => ({ ref: 1, id: "ref-" + k, name: (REFS[k] || [k])[0], sub: "reference", note: (REFS[k] || [, ""])[1], mk: "",
+    normalized: norm(t, v), value: v, hours: k === "paper_full_weight_edit" ? (t.reference_cost || {}).wall_hours : null }))
+    .concat([{ ref: 1, id: "ref-base", name: "Unedited " + (TARGET[t.target] || "model"), sub: "no edit", mk: "", normalized: 0, value: t.base, hours: null }]);
+  return runs.concat(refs);
+}
+/* the chart above the table: a dot plot of every task in "All tasks", one bar per entry on a single task */
+function multiples() {
+  const done = (r) => r && (r.scored || failed(r)), val = (r) => r.scored ? r.normalized : 0;
+  const rows = ENTRIES.map((e) => { const rs = TASK_IDS.map((tid) => cellRun(e.id, tid)), got = rs.filter(done);
+    return { e, rs, n: got.length, full: got.length === rs.length, mean: got.length ? got.reduce((a, r) => a + val(r), 0) / got.length : null }; })
+    .filter((x) => x.n).sort((a, b) => (b.full - a.full) || b.mean - a.mean);
+  const all = rows.flatMap((x) => x.rs.filter(done).map(val));
+  const lo = Math.min(0, ...all) < 0 ? Math.floor((Math.min(...all) - 4) / 10) * 10 : 0, hi = Math.max(100, Math.ceil(Math.max(...all) / 25) * 25);
+  const x = (v) => 100 * (v - lo) / (hi - lo), ticks = []; for (let v = Math.ceil(lo / 25) * 25; v <= hi; v += 25) ticks.push(v);
+  const marks = (r) => { const ms = r.rs.map((run, i) => done(run) && !failed(run) ? { run, i, x: x(val(run)), dy: 0 } : null).filter(Boolean), by = [...ms].sort((a, b) => a.x - b.x), nc = r.rs.filter((run) => run && failed(run)).length;
+    by.forEach((m, k) => { if (k && m.x - by[k - 1].x < 1.4) { by[k - 1].dy = by[k - 1].dy || -5; m.dy = -by[k - 1].dy; } });
+    return (by.length > 1 ? `<i class="rng" style="left:${by[0].x.toFixed(2)}%;width:${(by[by.length - 1].x - by[0].x).toFixed(2)}%"></i>` : "")
+      + (r.full ? `<i class="mean" style="left:${x(r.mean).toFixed(2)}%"></i>` : "")
+      + ms.map((m) => `<span class="mh" tabindex="-1" role="img" style="left:${m.x.toFixed(2)}%${m.dy ? `;--dy:${m.dy}px` : ""}" aria-label="${esc(`${modelName(r.e)}, ${harness(r.e)}, ${tname(m.run.task)}: ${fix(m.run.normalized)}, raw ${pct(m.run.value)}`)}" data-tip="${esc(`${modelName(r.e)} · ${harness(r.e)} | ${tname(m.run.task)}: ${fix(m.run.normalized)} (${(TASK[m.run.task] || {}).short || "raw"} ${pct(m.run.value)})`)}"><i class="gl ${SHAPES[m.i % 3]}" style="--c:${colorOf(m.run)}"></i></span>`).join("")
+      + (nc ? `<span class="nc" style="${x(0) > 55 || (x(0) > 22 && ms.some((m) => m.x > x(0) && m.x < x(0) + 22) && !ms.some((m) => m.x < x(0) && m.x > x(0) - 22)) ? `right:${(100 - x(0)).toFixed(2)}%;padding:0 8px 0 0` : `left:${x(0).toFixed(2)}%`}">${nc === r.rs.length ? "no commit on any task" : `no commit on ${r.rs.map((run, i) => run && failed(run) ? tname(TASK_IDS[i]) : "").filter(Boolean).join(", ")}`}</span>` : ""); };
+  $("#cc-title").textContent = "Normalized score on each task, with the mean";
+  $("#cc").innerHTML = `<div class="dp" role="list"><div class="dp-row dp-axis" aria-hidden="true"><span></span><span></span><div class="dp-track">${ticks.map((v) => `<em style="left:${x(v).toFixed(2)}%">${v}</em>`).join("")}</div><span class="v">Mean</span></div>`
+    + rows.map((r) => `<div class="dp-row" role="listitem">${markOf(r.e)}<span class="who">${esc(modelName(r.e))}<span>${esc(harness(r.e))}</span></span>`
+      + `<div class="dp-track">${ticks.map((v) => `<i class="g${v === 0 ? " z" : ""}" style="left:${x(v).toFixed(2)}%"></i>`).join("")}${marks(r)}</div>`
+      + `<span class="v${r.full ? "" : " dim"}"><span class="sr">${r.full ? "Mean " : "Scored "}</span>${r.full ? fix(r.mean) : `${r.n} of ${r.rs.length}`}</span></div>`).join("") + `</div>`;
+  const first = $("#cc .mh"); if (first) first.tabIndex = 0;
+  $("#cc-legend").innerHTML = TASK_IDS.map((tid) => `<span>${GLY(tid)}${esc(tname(tid))}</span>`).join("") + `<span><i class="mean"></i>Mean, once all ${TASK_IDS.length} are scored</span><span class="hint">Arrow keys move between marks.</span>`;
+}
+/* the marks are one tab stop; arrow keys move within the chart */
+$("#cc").addEventListener("keydown", (e) => { const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if ((!d && e.key !== "Home" && e.key !== "End") || !e.target.classList.contains("mh")) return;
+  const all = [...document.querySelectorAll("#cc .mh")], n = e.key === "Home" ? all[0] : e.key === "End" ? all[all.length - 1] : all[(all.indexOf(e.target) + d + all.length) % all.length]; e.preventDefault(); n.focus(); });
+$("#cc").addEventListener("focusin", (e) => { if (!e.target.classList.contains("mh")) return; document.querySelectorAll("#cc .mh").forEach((m) => { m.tabIndex = m === e.target ? 0 : -1; }); });
+function columns() {
+  const view = state.view;
+  if (view === "all") return multiples();
+  const every = ENTRIES.map((e) => { const r = cellRun(e.id, view); return { e, r, v: r && r.scored ? r.normalized : r && failed(r) ? 0 : null, nc: !!(r && failed(r)) }; });
+  const items = every.filter((x) => x.v != null).sort((a, b) => b.v - a.v), shape = SHAPES[TASK_IDS.indexOf(view) % 3];
+  $("#cc-title").textContent = `Normalized score, ${tname(view)}`;
+  $("#cc-legend").innerHTML = `<span>${GLY(view)}One run per entry</span>` + `<span class="hint">Arrow keys move between marks.</span>`;
+  if (!items.length) { $("#cc").innerHTML = `<p class="empty">No scored runs here yet.</p>`; return; }
+  const vals = items.map((x) => x.v), lo = Math.min(0, ...vals) < 0 ? Math.floor((Math.min(...vals) - 4) / 10) * 10 : 0, hi = Math.max(100, Math.ceil(Math.max(...vals) / 25) * 25);
+  const x = (v) => 100 * (v - lo) / (hi - lo), ticks = []; for (let v = Math.ceil(lo / 25) * 25; v <= hi; v += 25) ticks.push(v);
+  $("#cc").innerHTML = `<div class="dp" role="list"><div class="dp-row dp-axis" aria-hidden="true"><span></span><span></span><div class="dp-track">${ticks.map((v) => `<em style="left:${x(v).toFixed(2)}%">${v}</em>`).join("")}</div><span class="v">Score</span></div>`
+    + items.map((it) => `<div class="dp-row" role="listitem">${markOf(it.e)}<span class="who">${esc(modelName(it.e))}<span>${esc(harness(it.e))}</span></span>`
+      + `<div class="dp-track" style="--c:${colorOf({ task: view })}">${ticks.map((v) => `<i class="g${v === 0 ? " z" : ""}" style="left:${x(v).toFixed(2)}%"></i>`).join("")}`
+      + (it.nc ? `<span class="nc" style="${x(0) > 55 ? `right:${(100 - x(0)).toFixed(2)}%;padding:0 8px 0 0` : `left:${x(0).toFixed(2)}%`}">no commit</span>`
+        : `<i class="rng stem" style="left:${Math.min(x(0), x(it.v)).toFixed(2)}%;width:${Math.abs(x(it.v) - x(0)).toFixed(2)}%"></i><span class="mh" tabindex="-1" role="img" style="left:${x(it.v).toFixed(2)}%" aria-label="${esc(`${modelName(it.e)}, ${harness(it.e)}: ${fix(it.v)}, raw ${pct(it.r.value)}`)}" data-tip="${esc(`${modelName(it.e)} · ${harness(it.e)} | ${tname(view)}: ${fix(it.v)} (${(TASK[view] || {}).short || "raw"} ${pct(it.r.value)})`)}"><i class="gl ${shape}"></i></span>`)
+      + `</div><span class="v${it.nc ? " dim" : ""}" aria-hidden="true">${it.nc ? "0" : fix(it.v)}</span>${it.nc ? `<span class="sr">No commit, score 0.</span>` : ""}</div>`).join("") + `</div>`;
+  const first = $("#cc .mh"); if (first) first.tabIndex = 0;
 }
 function board() {
-  const { all } = rows(), s = state.sort, col = COLS.find((c) => c.key === s.key);
-  const sorted = [...all].sort((a, b) => { const x = val(col, a), y = val(col, b);
-    if (x == null || y == null) return (x == null) - (y == null);
-    return (typeof x === "string" ? x.localeCompare(y) : x - y) * s.dir; });
-  const groups = []; COLS.forEach((c) => { const g = groups[groups.length - 1]; if (g && g.name === c.group) g.n++; else groups.push({ name: c.group, n: 1 }); });
-  $("#board").innerHTML = `<thead><tr class="groups">${groups.map((g) => `<th colspan="${g.n}"${g.name ? ' class="n"' : ""}>${esc(g.name)}</th>`).join("")}</tr><tr>`
-    + COLS.map((c) => { const sub = typeof c.sub === "function" ? c.sub() : c.sub;
-      return `<th${c.n ? ' class="n"' : ""}${s.key === c.key ? ` aria-sort="${s.dir > 0 ? "ascending" : "descending"}"` : ""}>`
-        + (c.nosort ? "" : `<button class="sort" type="button" data-k="${c.key}">${esc(c.label)}</button>`) + (sub ? `<small>${esc(sub)}</small>` : "") + `</th>`; }).join("")
-    + `</tr></thead><tbody>${sorted.map((r) => `<tr>${COLS.map((c) => `<td class="${c.n ? "n" : ""}${c.key === "normalized" ? " lead" : ""}">${cell(c, r)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  const view = state.view, cols = colsFor(view), rows = rowsFor(view);
+  const s = state.sort[view] || (state.sort[view] = { key: view === "all" ? "mean" : "norm", dir: -1 });
+  const col = cols.find((c) => c.key === s.key) || cols[2];
+  const tie = (x) => view === "all" ? TASK_IDS.reduce((a, tid) => a + (x.norm[tid] ?? -50), 0) : 0;
+  const sorted = [...rows].sort((a, b) => { const x = col.get(a), y = col.get(b);
+    if (x == null || y == null) return (x == null) - (y == null) || tie(b) - tie(a);
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * s.dir || tie(b) - tie(a); });
+  const groups = []; cols.forEach((c) => { const g = groups[groups.length - 1], name = c.group || ""; if (g && g.name === name) g.n++; else { groups.push({ name, n: 1 }); c.first = !!name; } });
+  const rv = (x) => view === "all" ? x.mean : x.normalized;  /* references sit in their own bodies and frame the sorted entries: those above the unedited model first, the unedited model last */
+  const byScore = s.dir < 0 && s.key === (view === "all" ? "mean" : "norm");  /* # is always the score rank; it is greyed when the table is in another order */
+  const rankOf = new Map(rows.filter((x) => !x.ref && rv(x) != null).sort((a, b) => rv(b) - rv(a) || tie(b) - tie(a)).map((x, i) => [x.id, i + 1]));
+  const empty = view !== "all" && !rows.some((x) => !x.ref);
+  $("#board").innerHTML = `<caption class="sr">${view === "all" ? "Normalized score per entry and task" : "Runs on " + esc(tname(view))}. Column headers sort the table.</caption>
+    ${groups.map((g, i) => `<colgroup span="${g.n + (i === 0 ? 1 : 0)}"></colgroup>`).join("")}<thead><tr class="groups">${groups.map((g, i) => g.name ? `<th scope="colgroup" colspan="${g.n}" class="g">${esc(g.name)}</th>` : `<td colspan="${g.n + (i === 0 ? 1 : 0)}"></td>`).join("")}</tr>
+    <tr><th scope="col" class="n c-rank">#</th>${cols.map((c) => `<th scope="col" class="c-${c.key}${c.n ? " n" : ""}${c.first ? " gs" : ""}"${s.key === c.key ? ` aria-sort="${s.dir > 0 ? "ascending" : "descending"}"` : ""}>`
+      + `<button class="sort" type="button" data-k="${c.key}"${c.sub ? ` title="${esc(c.sub)}"` : ""}>${c.icon || ""}${esc(c.label)}${c.unit ? ` <span class="unit">${esc(c.unit)}</span>` : ""}</button></th>`).join("")}</tr></thead>
+    ${[sorted.filter((x) => x.ref && rv(x) > 0), sorted.filter((x) => !x.ref), sorted.filter((x) => x.ref && !(rv(x) > 0))].filter((g) => g.length).map((g) => `<tbody>${g.map((x) => `<tr${x.ref ? ' class="refrow"' : ""}><td class="n rank c-rank">${x.ref || rankOf.get(x.id) == null ? "" : byScore ? rankOf.get(x.id) : `<span class="dim">${rankOf.get(x.id)}</span>`}</td>`
+      + cols.map((c) => c.td ? (c.first ? c.td(x).replace('class="n score', 'class="n score gs') : c.td(x)) : c.key === "name" ? `<th scope="row" class="c-name">${c.html(x)}</th>` : `<td class="c-${c.key}${c.n ? " n" : ""}${c.first ? " gs" : ""}">${c.html(x)}</td>`).join("") + `</tr>`).join("")}</tbody>`).join("")}`;
+  $("#pilot-box").hidden = view === "all" || !D.runs.some((r) => r.task === view && r.pilot);
+  const nRuns = D.runs.filter((r) => !r.pilot).length, nFail = D.runs.filter((r) => !r.pilot && failed(r)).length;
+  const t = D.tasks[view], norun = ENTRIES.filter((e) => !TASK_IDS.some((tid) => cellRun(e.id, tid))), norunT = view === "all" ? [] : ENTRIES.filter((e) => !cellRun(e.id, view));
+  $("#board-notes").innerHTML = (empty ? [`No runs on ${esc(tname(view))} yet.`] : [
+    `† The edit lowered a general-ability check (MMLU, GSM8K with thinking off, or held-out facts) by more than 3 points; damage is given in points lost. The score stands.`,
+    `“No commit” means the session ended without an adapter; it scores 0 (${nFail} of ${nRuns} runs so far).`,
+    view === "all" ? `A mean appears once all ${TASK_IDS.length} tasks of a row are in. Every cell is a single attempt, so a few points either way is noise.${norun.length ? ` Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
+      : `${norunT.length ? `Not yet run: ${norunT.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}. ` : ""}0 is the unedited model at ${pct(t.base)}; 100 is ${esc(bestRefName(t).toLowerCase())} at ${pct(bestRef(t))}${t.higher_is_better ? "" : " (lower is better)"}.`,
+  ]).map((x) => `<p>${x}</p>`).join("");
+  $("#board-notes").innerHTML = `<div class="np">${$("#board-notes").innerHTML}</div>` + (empty ? "" : `<details class="more"><summary>Column definitions</summary><dl class="defs">${cols.filter((c) => c.sub && !c.sub.startsWith(c.label)).map((c) => `<dt>${esc(c.label)}</dt><dd>${esc(c.sub)}</dd>`).join("")}</dl></details>`);
 }
 $("#board").addEventListener("click", (e) => {
   const k = e.target.closest(".sort"), o = e.target.closest(".open");
-  if (k) { state.sort = { key: k.dataset.k, dir: state.sort.key === k.dataset.k ? -state.sort.dir : (COLS.find((c) => c.key === k.dataset.k).n ? -1 : 1) }; board(); }
-  if (o) { selectRun(o.dataset.run); $("#runs").scrollIntoView(); }
+  if (k) { const s = state.sort[state.view], c = colsFor(state.view).find((x) => x.key === k.dataset.k);
+    state.sort[state.view] = { key: c.key, dir: s.key === c.key ? -s.dir : (c.n ? -1 : 1) }; board(); $(`#board .sort[data-k="${c.key}"]`).focus(); }
+  if (o) { selectRun(o.dataset.run); $("#runs").scrollIntoView(); $("#detail h3").focus({ preventScroll: true }); }
 });
 
-/* score against cost, one labelled point per run */
+/* score against cost: one point per run on one task, coloured by maker, labelled by model */
 const XAX = {
-  edit_hours: { tab: "Editing time", title: "Editor wall clock in hours, log scale", log: true, fmt: (v) => v + " h", get: (r) => r.edit_hours },
-  gpu_hours: { tab: "GPU-hours", title: "GPU-hours per run, session and scoring", fmt: (v) => String(v), get: (r) => r.gpu_hours },
-  tok: { tab: "Editor tokens", title: "Editor input tokens, millions", fmt: (v) => v + "M", get: (r) => r.tokens ? r.tokens.input / 1e6 : null },
+  tok: { tab: "Editor tokens", short: "Editor input tokens, millions", title: "Editor input tokens, millions (cached input included)", fmt: (v) => v ? v + "M" : "0", get: tokIn },
+  edit_hours: { tab: "Editing time", short: "Editor wall clock, hours", title: "Editor wall clock, hours", fmt: (v) => v ? v + " h" : "0", get: (r) => r.edit_hours },
+  gpu_hours: { tab: "GPU-hours", short: "GPU-hours per run", title: "GPU-hours per run, session and scoring", fmt: (v) => String(v), get: (r) => r.gpu_hours },
 };
+let HITS = []; const HIT = matchMedia("(pointer: coarse)").matches ? 22 : 14;  /* a 44px target for touch */
 function chart() {
-  const { runs, refs } = rows(), ax = XAX[state.x], W = 1000, H = 420, L = 44, R = 16, T = 24, B = 58;
-  const pts = [...runs, ...refs].map((r) => ({ r, x: ax.get(r) })).filter((p) => p.x != null && p.x > 0);
-  const xs = pts.map((p) => p.x);
-  let lo, hi, ticks;
-  if (ax.log) { const cand = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100]; const mn = Math.min(...xs, 0.2) / 1.6, mx = Math.max(...xs, 2) * 1.8;
-    ticks = cand.filter((c) => c >= mn && c <= mx); lo = Math.log10(mn); hi = Math.log10(mx); }
-  else { const mx = Math.max(...xs, 1) * 1.25, step = [0.25, 0.5, 1, 2, 5, 10].find((s) => mx / s <= 7) || 20;
-    ticks = []; for (let v = 0; v <= mx + 1e-9; v += step) ticks.push(+v.toFixed(2)); lo = 0; hi = mx; }
-  const X = (v) => L + ((ax.log ? Math.log10(v) : v) - lo) / (hi - lo) * (W - L - R);
-  const ys = [...runs, ...refs].map((r) => r.normalized).filter((v) => v != null);
-  const y0 = Math.min(-8, ...ys.map((v) => v - 8)), y1 = Math.max(108, ...ys.map((v) => v + 8));
+  const tid = state.ctask, t = D.tasks[tid], ax = XAX[state.x], W = Math.max(240, Math.round($("#plot").clientWidth)), fs = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16, narrow = W < 640 * fs, H = Math.round((narrow ? 320 : 380) * Math.max(1, fs * 0.9)), L = Math.round((narrow ? 34 : 62) * fs), R = narrow ? 8 : 20, T = Math.round(18 * fs), B = Math.round(56 * fs);
+  $("#chart").setAttribute("viewBox", `0 0 ${W} ${H}`); chart.w = W;
+  const runs = D.runs.filter((r) => r.task === tid && r.scored && (state.pilots || !r.pilot));
+  const pts = runs.map((r) => ({ r, x: ax.get(r) })).filter((p) => p.x != null && p.x > 0);
+  $("#chart-title").textContent = `Score against cost, ${tname(tid)}`;
+  const raw = Math.max(...pts.map((p) => p.x), 0.01) * 1.04, step = [0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10].find((s) => raw / s <= (narrow ? 5 : 8)) || 20, mx = Math.ceil(raw / step) * step;
+  const ticks = []; for (let v = 0; v <= mx + 1e-9; v += step) ticks.push(+v.toFixed(2));
+  const X = (v) => L + v / mx * (W - L - R);
+  const ys = pts.map((p) => p.r.normalized), y0 = Math.min(0, ...ys.map((v) => v - 8)), y1 = Math.max(108, ...ys.map((v) => v + 8));
   const Y = (v) => T + (y1 - v) / (y1 - y0) * (H - T - B);
   let s = "";
-  for (const v of [0, 20, 40, 60, 80, 100]) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 10}" y="${Y(v) + 4.5}" text-anchor="end">${v}</text>`;
-  for (const v of ticks) s += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/><text x="${X(v)}" y="${H - B + 20}" text-anchor="middle">${ax.fmt(v)}</text>`;
-  s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/><text class="t" x="${(L + W - R) / 2}" y="${H - 10}" text-anchor="middle">${ax.title}</text>`;
-  refs.filter((r) => ax.get(r) == null && r.normalized != null && r.id !== "ref-base").forEach((r) => {
-    s += `<line class="refline" x1="${L}" x2="${W - R}" y1="${Y(r.normalized)}" y2="${Y(r.normalized)}"/><text x="${L + 8}" y="${Y(r.normalized) + 17}">${esc(r.name)}, ${fix(r.normalized)}</text>`; });
-  if (refs.length) s += `<text x="${L + 8}" y="${Y(0) - 7}">Unedited model</text>`;
-  pts.forEach(({ r, x }) => {
-    if (r.normalized == null) return;
-    const cx = X(x), cy = Y(r.normalized), k = r.ref ? "R" : r.track, left = cx > W - 260, tx = left ? cx - 13 : cx + 13;
-    s += r.ref ? `<rect class="R" x="${cx - 5.5}" y="${cy - 5.5}" width="11" height="11" transform="rotate(45 ${cx} ${cy})"/>`
-      : `<circle class="${k}${r.pilot ? " hollow" : ""}" cx="${cx}" cy="${cy}" r="${r.pilot ? 5.5 : 6.5}"/>`;
-    s += `<text class="lab ${k}" x="${tx}" y="${cy + 5}" text-anchor="${left ? "end" : "start"}">${esc(r.ref ? r.name : entryShort(r) + ", " + runSub(r))}</text>`;
+  for (const v of [0, 25, 50, 75, 100]) s += `<line class="${v === 0 || v === 100 ? "refline" : "grid"}" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 10}" y="${Y(v) + 4.5 * fs}" text-anchor="end">${v}</text>`;
+  for (const v of ticks) s += `${v ? `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${Y(100)}" y2="${Y(0)}"/>` : ""}<text x="${X(v)}" y="${H - B + 22 * fs}" text-anchor="middle">${v}</text>`;
+  s += `<text class="t" x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">${narrow ? ax.short : ax.title}</text>`;
+  if (!narrow) s += `<text class="t" transform="translate(${14 * fs} ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle">Normalized score</text>`;
+  s += `<text x="${W - R}" y="${Y(100) - 7 * fs}" text-anchor="end">${esc(bestRefName(t))}, ${pct(bestRef(t))}</text><text x="${W - R}" y="${Y(0) - 7 * fs}" text-anchor="end">Unedited model, ${pct(t.base)}</text>`;
+  HITS = [];
+  const P = pts.sort((a, b) => b.r.normalized - a.r.normalized).map((p) => ({ ...p, cx: X(p.x), cy: Y(p.r.normalized) }));
+  const byModel = new Map(); P.forEach((p) => { if (!p.r.pilot) byModel.set(modelName(p.r), [...(byModel.get(modelName(p.r)) || []), p]); });
+  byModel.forEach((g) => { if (g.length !== 2) return; const dx = g[1].cx - g[0].cx, dy = g[1].cy - g[0].cy, len = Math.hypot(dx, dy); if (len < 22) return;  /* stop short of each mark */
+    s += `<line class="pair" x1="${g[0].cx + dx / len * 9}" y1="${g[0].cy + dy / len * 9}" x2="${g[1].cx - dx / len * 9}" y2="${g[1].cy - dy / len * 9}"/>`; });
+  const placed = P.map((p) => ({ x0: p.cx - 12, x1: p.cx + 12, y0: p.cy - 12, y1: p.cy + 12 })), gap = 12, lh = 16 * fs;
+  const hit = (b) => b.x0 < L || b.x1 > W - 2 || b.y0 < 2 || b.y1 > H - B + 4 || placed.some((q) => b.x0 < q.x1 && b.x1 > q.x0 && b.y0 < q.y1 && b.y1 > q.y0);
+  P.forEach(({ r, x, cx, cy }) => {
+    const text = modelName(r) + (r.pilot ? " (pilot)" : ownHarness(r) ? ` · ${harness(r)}` : ""), w = (text.length * 7.6 + 6) * fs;
+    const at = (left, dy) => ({ left, dy, x0: left ? cx - gap - w : cx + gap + 1, x1: left ? cx - gap - 1 : cx + gap + w, y0: cy + dy - 9 * fs, y1: cy + dy + 7 * fs });
+    const tries = [0, -1, 1, -2, 2, -3, 3].flatMap((k) => [at(false, k * lh), at(true, k * lh)]), b = tries.find((c) => !hit(c)) || tries[0];
+    placed.push(b);
+    const tx = b.left ? cx - gap : cx + gap, ty = cy + b.dy + 4.5 * fs;
+    if (b.dy) s += `<line class="ldr" x1="${cx + (b.left ? -5 : 5)}" y1="${cy + Math.sign(b.dy) * 5}" x2="${tx + (b.left ? 3 : -3)}" y2="${cy + b.dy}"/>`;
+    const rr = ownHarness(r) ? 5.5 : 6.5, shp = TASK_IDS.indexOf(tid) % 3, pc = `class="pt${ownHarness(r) ? " own" : ""}" style="--c:${colorOf(r)}"`;
+    s += (shp === 0 ? `<circle ${pc} cx="${cx}" cy="${cy}" r="${rr}"/>` : `<rect ${pc} x="${cx - rr * 0.9}" y="${cy - rr * 0.9}" width="${rr * 1.8}" height="${rr * 1.8}"${shp === 1 ? ` transform="rotate(45 ${cx} ${cy})"` : ` rx="1"`}/>`)
+      + `<text class="lab" x="${tx}" y="${ty}" text-anchor="${b.left ? "end" : "start"}">${esc(modelName(r))}${text.length > modelName(r).length ? `<tspan class="sub">${esc(text.slice(modelName(r).length))}</tspan>` : ""}</text>`
+      + `<circle class="hit" data-i="${HITS.length}" cx="${cx}" cy="${cy}" r="${HIT}" tabindex="0" role="button" aria-label="${esc(`${modelName(r)}, ${harness(r)}: score ${fix(r.normalized)} at ${ax.fmt(+x.toFixed(2))}. Open this run`)}"/>`;
+    HITS.push({ r, x, cx, cy });
   });
+  if (!pts.length) s += `<text class="t" x="${(L + W - R) / 2}" y="${(T + H - B) / 2}" text-anchor="middle">No scored run on ${esc(tname(tid))} reports this yet.</text>`;
   $("#chart").innerHTML = s;
+  $("#chart").setAttribute("aria-label", `Normalized score against ${ax.tab.toLowerCase()} on ${tname(tid)}, ${pts.length} runs`);
+  $("#legend").innerHTML = `<span><i class="gl ${SHAPES[TASK_IDS.indexOf(tid) % 3]}" style="--c:${colorOf({ task: tid })}"></i>Agency native harness</span><span><i class="gl hollow ${SHAPES[TASK_IDS.indexOf(tid) % 3]}" style="--c:${colorOf({ task: tid })}"></i>The model maker’s own harness</span><span class="note">A line joins one model’s two harnesses. Select a point to read that run.</span>`;
 }
+let tipFor = -1;
+function showTip(h) {
+  const tip = $("#tip"), i = h ? +h.dataset.i : -1;
+  if (i === tipFor) return; tipFor = i;
+  if (i < 0) { tip.hidden = true; return; }
+  const { r, x, cx, cy } = HITS[i], ax = XAX[state.x];
+  tip.innerHTML = `<b>${esc(modelName(r))}, ${esc(harness(r))}</b>Score ${fix(r.normalized)} (${pct(r.value)})<br>${esc(ax.tab)} ${ax.fmt(+x.toFixed(2))}${dmgText(r) ? "<br>Damage: " + esc(dmgText(r)) : ""}`;
+  tip.hidden = false;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.max(0, Math.min($("#plot").clientWidth - tw, cx - tw / 2)) + "px"; tip.style.top = (cy - th - 12 < 0 ? cy + 14 : cy - th - 12) + "px";  /* above the point, clear of its label */
+}
+$("#chart").addEventListener("pointermove", (e) => showTip(e.target.closest(".hit")));
+$("#chart").addEventListener("pointerdown", (e) => showTip(e.target.closest(".hit")));
+const openPoint = (h) => { if (!h) return; showTip(null); selectRun(HITS[+h.dataset.i].r.id); $("#runs").scrollIntoView(); $("#detail h3").focus({ preventScroll: true }); };
+$("#chart").addEventListener("click", (e) => openPoint(e.target.closest(".hit")));
+$("#chart").addEventListener("keydown", (e) => { const h = e.target.closest(".hit"); if (h && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openPoint(h); } });
+$("#chart").addEventListener("pointerleave", (e) => { if (!(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest("#tip"))) showTip(null); });
+$("#tip").addEventListener("pointerleave", () => showTip(null));
+/* dot-plot marks share one tooltip: it shows on hover and on focus, the pointer can rest on it, and Escape closes it */
+const TIP = Object.assign(document.createElement("div"), { className: "tip fixed", hidden: true }); TIP.setAttribute("role", "tooltip"); document.body.append(TIP);
+let tipEl = null;
+function tipShow(el) { tipEl = el; const [head, rest] = el.dataset.tip.split(" | "); TIP.innerHTML = rest ? `<b>${esc(head)}</b>${esc(rest)}` : esc(head); TIP.hidden = false;
+  const r = el.getBoundingClientRect(), w = TIP.offsetWidth, h = TIP.offsetHeight;
+  TIP.style.left = Math.max(4, Math.min(innerWidth - w - 4, r.left + r.width / 2 - w / 2)) + "px"; TIP.style.top = (r.top - h + 1 < 4 ? r.bottom - 1 : r.top - h + 1) + "px"; }
+function tipHide() { tipEl = null; TIP.hidden = true; }
+document.addEventListener("pointerover", (e) => { const el = e.target.closest("[data-tip]"); if (el) { if (el !== tipEl) tipShow(el); } else if (!e.target.closest(".tip.fixed") && tipEl !== document.activeElement) tipHide(); });
+document.addEventListener("focusout", (e) => { if (e.target === tipEl) tipHide(); });
+document.addEventListener("focusin", (e) => { const el = e.target.closest("[data-tip]"); if (el) tipShow(el); else tipHide(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { tipHide(); showTip(null); } });
+addEventListener("scroll", () => { if (tipEl) tipShow(tipEl); }, { passive: true });
+$("#chart").addEventListener("focusin", (e) => showTip(e.target.closest(".hit")));
+$("#chart").addEventListener("focusout", () => showTip(null));
 
-function renderBoard() {
-  const { runs } = rows(), t = D.tasks[state.task], empty = !runs.length;
-  $("#board-empty").hidden = !empty; $("#bar-box").style.display = empty ? "none" : "grid"; $("#board-body").style.display = empty ? "none" : "grid";
-  if (empty) { const any = D.runs.some((r) => r.task === state.task);
-    $("#board-empty").innerHTML = any ? `<b>No runs match these settings.</b> Turn pilot runs on, or pick another track.`
-      : `<b>No runs on ${esc(tname(state.task))} yet.</b> The unedited model scores ${pct(t.base)} on ${esc((TASK[state.task] || {}).metric || t.metric)}`
-        + (bestRef(t) != null ? `; the reference to beat is ${pct(bestRef(t))}.` : "."); return; }
-  bars(); board(); chart();
-}
-function radios(sel, name, opts, key) {
-  const box = $(sel);
-  box.insertAdjacentHTML("beforeend", opts.map(([v, l, n]) => `<label><input type="radio" name="${name}" value="${esc(v)}"${state[key] === v ? " checked" : ""}>${esc(l)}${n == null ? "" : `<span class="count">${n}</span>`}</label>`).join(""));
-  box.addEventListener("change", (e) => { state[key] = e.target.value; renderBoard(); });
-}
-function setTask(id) { state.task = id; const i = document.querySelector(`#s-task input[value="${id}"]`); if (i) i.checked = true; renderBoard(); }
-radios("#s-task", "task", TASK_IDS.map((id) => [id, tname(id), D.runs.filter((r) => r.task === id).length]), "task");
-radios("#s-track", "track", [["all", "All tracks"], ["A", "Track A"], ["B", "Track B"]], "track");
-$("#s-pilots").addEventListener("change", (e) => { state.pilots = e.target.checked; renderBoard(); });
-$("#s-refs").addEventListener("change", (e) => { state.refs = e.target.checked; renderBoard(); });
-tabs("#f-metric", Object.entries(METRICS).map(([k, m]) => [k, m.tab]), "metric", bars);
-tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", chart);
-renderBoard();
+function render() { tipFor = -1; $("#tip").hidden = true; columns(); board(); chart(); }
+const syncView = tabs("#f-view", [["all", "All tasks"], ...TASK_IDS.map((id) => [id, tname(id), GLY(id)])], "view", () => { if (state.view !== "all") state.ctask = state.view; render(); });
+tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", () => { tipFor = -1; $("#tip").hidden = true; chart(); });
+function setTask(id) { state.view = id; state.ctask = id; syncView(); render(); }
+$("#s-pilots").addEventListener("change", (e) => { state.pilots = e.target.checked; render(); });
+if (!D.runs.some((r) => r.task === state.ctask && r.scored)) state.ctask = (D.runs.find((r) => r.scored) || {}).task || TASK_IDS[0];
+render();
+new ResizeObserver(() => { if (Math.max(240, Math.round($("#plot").clientWidth)) !== chart.w) chart(); }).observe($("#plot"));
 
 /* tasks: the request in the box the editor reads it from, then the numbers */
 $("#task-list").innerHTML = TASK_IDS.map((id) => {
-  const t = D.tasks[id], m = TASK[id] || {}, rs = D.runs.filter((r) => r.task === id), sc = rs.filter((r) => r.scored && !r.pilot);
+  const t = D.tasks[id], m = TASK[id] || {}, rs = D.runs.filter((r) => r.task === id && !r.pilot), sc = rs.filter((r) => r.scored);
+    const rv = Object.values(t.references || {}), top = Math.min(1, Math.max(t.base, ...rv, ...sc.map((r) => r.value), 0.05) * 1.08), px = (v) => (100 * v / top).toFixed(1);
+  const lab = (v, text) => `<span style="${v / top > 0.5 ? `right:${(100 - 100 * v / top).toFixed(1)}%` : `left:${px(v)}%`}">${text}</span>`, refv = rv.length ? bestRef(t) : null;
+  const line = sc.length ? `<div class="part"><h4>Every scored run, ${esc((m.metric || t.metric).replace(/^[A-Z](?=[a-z])/, (c) => c.toLowerCase()))}</h4><div class="rl" aria-hidden="true">
+      <div class="rl-l">${lab(t.base, `unedited, ${pct(t.base)}`)}</div>
+      <div class="rl-t"><i class="k" style="left:${px(t.base)}%"></i>${refv == null ? "" : `<i class="k r" style="left:${px(refv)}%"></i>`}${sc.map((r) => `<i class="d" style="left:${px(r.value)}%;--c:${colorOf(r)}"></i>`).join("")}</div>
+      <div class="rl-l">${refv == null ? "" : lab(refv, `best reference, ${pct(refv)}`)}</div></div>
+      <p class="sr">${sc.length} scored runs between ${pct(Math.min(...sc.map((r) => r.value)))} and ${pct(Math.max(...sc.map((r) => r.value)))}.</p></div>` : `<div class="part"><h4>Every scored run</h4><p class="small">No scored runs yet.</p></div>`;
   const best = sc.length ? sc.reduce((a, b) => ((b.value > a.value) === t.higher_is_better ? b : a)) : null;
   const refs = Object.entries(t.references || {}).map(([k, v]) => `<div><dt>${esc((REFS[k] || [k])[0])}</dt><dd>${pct(v)}</dd></div>`).join("");
-  return `<article class="task"><div class="task-head"><h3>${esc(m.name || id)}</h3>
+  return `<article class="task"><div class="task-head"><h3>${GLY(id)}${esc(m.name || id)}</h3>
       <span class="small">${esc(TARGET[t.target] || t.target || "")}, thinking ${t.thinking ? "on" : "off"} · ${rs.length ? rs.length + " run" + (rs.length > 1 ? "s" : "") : "no runs yet"}</span></div>
-    <div class="prompt"><p>${esc(t.request)}</p>${SEND}</div>
+    ${ASK(t.request)}
+    ${m.flow ? `<div class="part"><h4>What goes wrong, and what a good edit changes</h4><figure class="flow${m.code ? " code" : ""}" style="--c:${colorOf({ task: id })}">
+      <p class="fb u"><span class="fk">A user</span><span>${esc(m.flow[0])}</span></p>
+      <p class="fb x"><span class="fk">The unedited model</span><span class="ft">${esc(m.flow[1])}</span><span class="fv">✗ ${esc(m.flow[2])}</span></p>
+      <p class="fb ok"><span class="fk">After a good edit</span><span class="ft">${esc(m.flow[3])}</span><span class="fv">✓ ${esc(m.flow[4])}</span></p>
+      <figcaption class="small">An illustration, not a benchmark item.</figcaption></figure></div>` : "<span></span>"}
+    ${line}
     <dl class="facts"><div><dt>Metric</dt><dd>${esc(m.metric || t.metric)}${t.higher_is_better ? "" : ", lower is better"}</dd></div>
       <div><dt>Unedited model</dt><dd>${pct(t.base)}</dd></div>${refs}
-      ${best ? `<div><dt>Best run so far</dt><dd>${pct(best.value)}</dd></div>` : ""}</dl>
-    ${rs.length ? `<button class="linkbtn" type="button" data-task="${esc(id)}">Show on the leaderboard</button>` : ""}</article>`;
+      ${best ? `<div><dt>Best run so far</dt><dd>${pct(best.value)}, ${esc(modelName(best))}</dd></div>` : ""}</dl>
+    ${rs.length ? `<button class="linkbtn" type="button" data-task="${esc(id)}">Show ${esc(m.name || id)} on the leaderboard <span aria-hidden="true">→</span></button>` : "<span></span>"}</article>`;
 }).join("");
-$("#task-list").addEventListener("click", (e) => { const b = e.target.closest(".linkbtn"); if (b) { setTask(b.dataset.task); $("#leaderboard").scrollIntoView(); } });
+$("#wrote").style.setProperty("--tasks", TASK_IDS.length);
+$("#wrote").innerHTML = WROTE.length ? wroteMap() : `<p class="small">No committed edits yet.</p>`;
+$("#task-list").addEventListener("click", (e) => { const b = e.target.closest(".linkbtn"); if (b) { setTask(b.dataset.task); $("#leaderboard").scrollIntoView(); $(`#f-view button[data-v="${b.dataset.task}"]`).focus({ preventScroll: true }); } });
 
 /* run explorer */
-const ORDER = [...D.runs].sort((a, b) => (a.pilot - b.pilot) || (b.normalized ?? -1) - (a.normalized ?? -1));
+const ORDER = [...D.runs].sort((a, b) => TASK_IDS.indexOf(a.task) - TASK_IDS.indexOf(b.task) || (a.pilot - b.pilot) || (b.normalized ?? -1e9) - (a.normalized ?? -1e9));
 function selectRun(id) {
   const r = ORDER.find((x) => x.id === id) || ORDER[0]; if (!r) return;
-  document.querySelectorAll(".runbtn").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.run === r.id)));
+  state.run = r.id;
+  if (state.rtask !== r.task || !$(`#runlist [data-run="${CSS.escape(r.id)}"]`)) { const had = $("#runlist").contains(document.activeElement); state.rtask = r.task; syncR(); listRuns();
+    if (had) { const b = $(`#runlist [data-run="${CSS.escape(r.id)}"]`); if (b) b.focus({ preventScroll: true }); } }
+  else document.querySelectorAll(".runbtn").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.run === r.id)));
   const tk = r.tokens || {}, ad = r.adapter || {}, m = TASK[r.task] || {};
-  const tc = Object.entries(r.tool_counts || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${esc(k)} × ${v}`).join(" · ");
-  const cand = r.candidates.length ? `<div class="scroll-x"><table><thead><tr><th class="n">#</th><th>Test</th><th>Candidate</th><th class="n">Dev accuracy</th><th class="n">Finished</th></tr></thead><tbody>`
-    + r.candidates.map((c, i) => `<tr><td class="n">${i + 1}</td><td class="mono">${esc(c.tool)}</td><td class="mono">${esc(String(c.what).split("/").pop())}</td><td class="n">${pct(c.dev_acc)}</td><td class="n">${pct(c.finished)}</td></tr>`).join("")
+  const cands = r.candidates.filter((c) => c.dev_acc != null || c.finished != null || String(c.what || "").replace(/["\s]/g, ""));
+  const cand = cands.length ? `<div class="scroll-x" role="region" aria-label="Candidates" tabindex="0"><table><thead><tr><th scope="col" class="n">#</th><th scope="col">Test</th><th scope="col">Candidate</th><th scope="col" class="n">Dev accuracy</th><th scope="col" class="n">Finished</th></tr></thead><tbody>`
+    + cands.map((c, i) => `<tr><td class="n">${i + 1}</td><td class="mono">${esc(c.tool)}</td><td class="mono">${esc(String(c.what).split("/").pop())}</td><td class="n">${pct(c.dev_acc)}</td><td class="n">${pct(c.finished)}</td></tr>`).join("")
     + `</tbody></table></div>` : `<p class="dim">None. ${r.track === "A" ? "Track A commits one edit without testing it." : "This run tested no candidates."}</p>`;
   const mods = ad.rel_norms ? Object.entries(ad.rel_norms).map(([k, v]) => `<span class="mono">${esc(k)}</span> at ${pct(v)} of ‖W‖`).join("; ") : "";
   const kv = (k, v, s = "") => `<div><dt>${k}</dt><dd>${v}${s ? `<small>${s}</small>` : ""}</dd></div>`;
-  $("#detail").innerHTML = `<div class="detail-head"><h3>${esc(entryShort(r))} on ${esc(tname(r.task))}</h3>
-      <span class="dim">${esc(runSub(r))} · ${esc(harness(r))} · rules ${esc(ver(r))}${r.scored ? "" : " · still scoring"}</span></div>
-    <dl class="kv">${kv("Normalized", r.normalized == null ? "–" : fix(r.normalized))}${kv(esc(m.metric || "Raw score"), pct(r.value))}
-      ${kv("Cut off at limit", r.cut_share == null ? "–" : pct(r.cut_share, 0))}${kv("Edit time", fix(r.edit_hours, 2) + " h", r.turns_n + " turns")}
-      ${kv("Editor tokens", tk.input ? (tk.input / 1e6).toFixed(2) + "M" : "–", tk.input ? Math.round(100 * (tk.cached || 0) / tk.input) + "% cached" : "")}
+  const t = D.tasks[r.task];
+  const byTool = r.turns.some((x) => x.min != null), steps = [], span = byTool ? Math.max(...r.turns.map((x) => x.min || 0)) : 0;
+  r.turns.forEach((x) => { const call = x.tools[0] || "", name = byTool ? call.replace(/ \(.*$/, "") : "turn " + x.n, note = (call.match(/\((.*)\)$/) || [])[1] || "", last = steps[steps.length - 1];
+    if (byTool && last && last.name === name) { last.n++; last.when = last.from === x.min ? `${x.min}′` : `${last.from}–${x.min}′`; if (note && !last.notes.includes(note)) last.notes.push(note); }
+    else steps.push({ name: byTool ? name : Object.entries(x.tools.reduce((a, k) => (a[k] = (a[k] || 0) + 1, a), {})).map(([k, v]) => k.replace(/_/g, " ") + (v > 1 ? ` × ${v}` : "")).join(", ") || "notes", n: 1, from: x.min, when: byTool ? `${x.min}′` : String(x.n), notes: note ? [note] : [], text: byTool ? (name === "commit_adapter" ? "adapter committed, session over" : "") : x.text }); });
+  $("#detail").innerHTML = `<div class="detail-head"><h3 tabindex="-1" class="run-title">${markOf(r)}${esc(modelName(r))}, ${esc(tname(r.task))}</h3>
+      <span class="dim">${esc(harness(r))} · ${esc(runNote(r))} · rules ${esc(ver(r))}${failed(r) ? " · ended without a commit" : r.scored ? "" : " · still scoring"}</span></div>
+    <div class="lead"><span class="lead-k">${r.scored ? `${esc(m.metric || "Raw score")}${t.higher_is_better ? "" : ", lower is better"}` : "Outcome"}</span>
+      <span class="lead-n">${r.scored ? `${pct(r.value)} <span class="dim plain">from ${pct(t.base)} unedited</span>` : failed(r) ? "No commit" : "Scoring"}</span>
+      ${r.scored ? "" : `<p>${failed(r) ? "The session ended without an adapter, so the run scores 0." : "The adapter is committed and waiting to be scored."}</p>`}</div>
+    ${editsOf(r).length ? `<div class="part"><h4>Where it wrote</h4><div class="lmap"><div class="lrow">${strip(r)}</div><div class="lrow">${TICKS}</div></div>
+      <p class="lmap-key legend"><span>${esc(editWords(r).replace(/^./, (c) => c.toUpperCase()))}.</span><span><span class="cells key" aria-hidden="true"><i class="a"></i></span>upper half: attention output</span><span><span class="cells key" aria-hidden="true"><i class="m"></i></span>lower half: MLP</span></p>
+      ${r.edit_map ? `<div class="minis${r.edit_map.length > 3 ? " many" : ""}">${r.edit_map.map((e, i) => `<figure class="mini" style="--r:${Math.max(1, Math.min(4, e.shape[1] / e.shape[0])).toFixed(2)}"><div class="emblem sm" aria-hidden="true">
+          <i class="a"><canvas class="tex" data-run="${esc(r.id)}" data-i="${i}" data-k="a" data-c="2"></canvas></i><i class="b"><canvas class="tex" data-run="${esc(r.id)}" data-i="${i}" data-k="b" data-c="2"></canvas></i><div class="w"><canvas class="tex" data-run="${esc(r.id)}" data-i="${i}" data-k="w" data-c="2"></canvas></div></div>
+          <figcaption>${esc(kindOf(e.m))}<span class="more">, rank ${e.rank}</span><br><span class="more">${e.shape[0].toLocaleString("en-US")} × ${e.shape[1].toLocaleString("en-US")}, </span>${(ad.rel_norms || {})[e.m] != null ? `${pct(ad.rel_norms[e.m])} of ‖W‖` : `rank ${e.rank}`}</figcaption></figure>`).join("")}</div>
+        <p class="lmap-key">Each edited matrix to scale: B at the left, A across the top; orange cells are raised, blue cells lowered, on average.</p>` : ""}</div>` : ""}
+    <dl class="kv">${kv("Normalized", r.normalized == null ? "–" : fix(r.normalized))}
+      ${r.cut_share == null ? "" : kv("Cut off at limit", pct(r.cut_share, 0))}${kv("Edit time", fix(r.edit_hours, 2) + " h", r.turns_n + " turns")}
+      ${kv("Editor tokens", tk.input ? (tk.lower_bound ? "≥ " : "") + (tk.input / 1e6).toFixed(2) + "M" : "–", tk.input ? "input" + (tk.output ? ", " + (tk.output / 1e3).toFixed(0) + "K output" : "") : (tk.note || ""))}
+      ${kv("Damage", r.scored ? (dmgText(r) ? "flagged" : "none") : "–", esc(dmgText(r)))}
       ${kv("Adapter", ad.params ? ad.params.toLocaleString("en-US") : "–", ad.params ? `numbers, rank ${ad.max_rank}` : "")}</dl>
-    <div class="part"><h4>The edit, in the editor's words</h4><p class="explain">${esc(r.explanation)}</p>${mods ? `<p class="small">${mods}</p>` : ""}</div>
-    <div class="part"><h4>Candidates tested before committing</h4>${cand}</div>
-    <div class="part"><h4>Tool calls</h4><p class="mono dim">${tc || "none recorded"}</p></div>
-    <div class="part"><h4>Turn by turn</h4><div class="timeline" tabindex="0">${r.turns.map((t) =>
-      `<div class="turn"><span class="k">${t.n}</span><div>${t.text ? `<p>${esc(t.text)}</p>` : ""}${t.tools.length ? `<div class="calls mono">${t.tools.map(esc).join(" · ")}</div>` : ""}</div></div>`).join("")}</div></div>`;
+    <div class="part"><h4>The edit, in the editor’s words</h4>${prose(r.explanation || (failed(r) ? "No adapter was committed." : "No explanation was recorded."), 420, "explanation")}${mods ? `<p class="small wrap-any">${mods}</p>` : ""}</div>
+    ${r.final_message ? `<div class="part"><h4>${failed(r) || /^The harness/.test(r.final_message) ? "How the session ended" : "The editor’s last message"}</h4>${prose(r.final_message, 320, "message")}</div>` : ""}
+    ${cands.length || r.track === "B" ? `<div class="part"><h4>Candidates tested before committing</h4>${cand}</div>` : ""}
+    ${byTool && span > 0 ? `<div class="part"><h4>The session: ${span} minutes, ${r.turns.length} tool calls</h4>
+      <div class="tl" aria-hidden="true">${r.turns.map((x, i, all) => { const same = all.filter((y) => y.min === x.min), at = x.min + (same.length > 1 ? same.indexOf(x) / same.length : 0); const tool = (x.tools[0] || "").replace(/ \(.*$/, ""); return `<i class="${tool === "generate" ? "g" : tool === "commit_adapter" ? "c" : ""}" data-tip="${esc(`${x.min}′ ${(x.tools[0] || "").replace(/_/g, " ")}`)}" style="left:${Math.min(100, 100 * at / span).toFixed(2)}%"></i>`; }).join("")}</div>
+      <div class="tl-ax" aria-hidden="true"><span>0′</span><span>${span}′</span></div>
+      <p class="lmap-key legend"><span><i class="tk g"></i>the editor asks the model for replies</span><span><i class="tk"></i>it reads activations or weights</span><span><i class="tk c"></i>it commits the adapter</span></p></div>` : ""}
+    <details class="fold"><summary>${byTool ? "Every tool call, in order" : `Session timeline, ${r.turns.length} turns`}</summary>
+      ${byTool ? `<ol class="timeline" role="list">${steps.map((g) => { const notes = g.notes.filter((x) => !/^0 /.test(x)).slice(0, 2).join(", ");
+          return `<li><span class="k">${g.when}</span><span class="tool">${esc(g.name.replace(/_/g, " "))}${g.n > 1 ? ` × ${g.n}` : ""}</span><span class="res">${esc(notes || g.text || "")}</span></li>`; }).join("")}</ol>`
+        : `<p class="small">This run used the minimal loop, which records the editor’s own note for each turn.</p><ol class="timeline" role="list">${steps.map((g) => `<li><span class="k">${g.when}</span><span class="tool">${esc(g.name)}</span><span class="res">${g.text ? inline(g.text) : ""}</span></li>`).join("")}</ol>`}</details>`;
+  paintEdits($("#detail"));
 }
-$("#runlist").innerHTML = ORDER.map((r) => `<button class="runbtn" type="button" data-run="${esc(r.id)}">
-  <span class="t"><i style="--c:${colorOf(r)}"></i>${esc(tname(r.task))}, ${esc(runSub(r))}</span>
-  <span class="s">${esc(entryShort(r))} · ${r.scored ? "score " + fix(r.normalized) : "scoring"} · ${fix(r.edit_hours, 2)} h</span></button>`).join("");
-$("#runlist").addEventListener("click", (e) => { const b = e.target.closest(".runbtn"); if (b) selectRun(b.dataset.run); });
-selectRun((ORDER.find((r) => r.scored && !r.pilot) || ORDER[0] || {}).id);
+function listRuns() {
+  const rs = ORDER.filter((r) => r.task === state.rtask), firstPilot = rs.findIndex((r) => r.pilot);
+  $("#runlist").innerHTML = rs.map((r, i) => (i === firstPilot && i > 0 ? `<p class="rdiv">Pilot runs, under earlier rules</p>` : "")
+    + `<button class="runbtn" type="button" data-run="${esc(r.id)}" aria-pressed="${r.id === state.run}">${markOf(r)}<span class="w">${esc(modelName(r))} <span>${esc(r.pilot ? `pilot ${ver(r)}${r.track === "B" ? ", Track B" : ""}` : harness(r))}</span></span><span class="s">${r.scored ? fix(r.normalized) : failed(r) ? "no commit" : "scoring"}</span></button>`).join("");
+}
+const FIRST = ORDER.find((r) => r.scored && !r.pilot) || ORDER[0] || {};
+state.rtask = FIRST.task || TASK_IDS[0];
+const syncR = tabs("#f-rtask", TASK_IDS.filter((tid) => ORDER.some((r) => r.task === tid)).map((tid) => [tid, tname(tid), GLY(tid)]), "rtask", () => { const first = ORDER.find((r) => r.task === state.rtask); if (first) selectRun(first.id); else listRuns(); });
+document.querySelectorAll("#f-rtask button").forEach((b) => b.setAttribute("aria-label", `${tname(b.dataset.v)}, ${ORDER.filter((r) => r.task === b.dataset.v).length} runs`));
+$("#runlist").addEventListener("click", (e) => { const b = e.target.closest(".runbtn"); if (!b) return; selectRun(b.dataset.run);
+  const top = $("#detail").getBoundingClientRect().top; if (top < 60 || top > innerHeight - 120) { $("#detail").scrollIntoView({ block: "start" }); $("#detail h3").focus({ preventScroll: true }); } });
+selectRun(FIRST.id);
 
 /* rules */
 (function rules() {
-  const L = D.limits;
+  const L = D.limits, models = new Set(ENTRIES.map((e) => e.model)).size;
   $("#rules-lede").textContent = `Every entry gets the same budget. The two tracks differ only in whether the editor may see an edited model before it commits. These are rules ${D.rules.replace("lsbench-", "")}.`;
-  $("#tracks").innerHTML = `<thead><tr><th></th><th><i class="dot" style="--c:var(--a)"></i>Track A, one-shot</th><th><i class="dot" style="--c:var(--b)"></i>Track B, with feedback</th></tr></thead><tbody>
-    <tr><th>Reads</th><td>The unedited model only: its replies, activations and weights.</td><td>The same, plus results from its own candidate edits.</td></tr>
-    <tr><th>May test</th><td>Nothing. The edit is committed blind.</td><td>Up to ${L.candidates_track_b} candidates: a dev-split score, replies with the candidate applied, or an activation intervention.</td></tr>
-    <tr><th>Writes</th><td colspan="2">One LoRA adapter, rank ${L.max_rank} or lower, on the attention output and MLP down projections of any layer.</td></tr>
-    <tr><th>Never</th><td colspan="2">Gradients, training, or its own copy of the network. Every model call goes through a budgeted service.</td></tr></tbody>`;
-  $("#limits").innerHTML = [["Wall clock per session", L.wall_hours + " h"], ["Generate calls", L.generate_calls + " × " + L.generate_prompts + " prompts"],
+  $("#tracks").innerHTML = `<caption class="sr">What each track allows</caption><thead><tr><td></td><th scope="col">Track A, one-shot</th><th scope="col">Track B, with feedback</th></tr></thead><tbody>
+    <tr><th scope="row">Reads</th><td>The unedited model only: its replies, activations and weights.</td><td>The same, plus results from its own candidate edits.</td></tr>
+    <tr><th scope="row">May test</th><td>Nothing. The edit is committed blind.</td><td>Up to ${L.candidates_track_b} candidates: a dev-split score, replies with the candidate applied, or an activation intervention.</td></tr>
+    <tr><th scope="row">Writes</th><td colspan="2">One LoRA adapter, rank ${L.max_rank} or lower, on the attention output and MLP down projections of any layer.</td></tr>
+    <tr><th scope="row">Never</th><td colspan="2">Gradients, training, or its own copy of the network. Every model call goes through a budgeted service.</td></tr></tbody>`;
+  const rowsL = [["Wall clock per session", L.wall_hours + " h"], ["Generate calls", L.generate_calls + " × " + L.generate_prompts + " prompts"],
     ["Analysis calls", L.analysis_calls + " × " + L.analysis_items + " texts"], ["Candidates, Track B", L.candidates_track_b], ["Adapter rank", "≤ " + L.max_rank],
-    ["Attempts per ranked cell", "3"], ["Entries configured", D.entries.length]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    ["Attempts per cell", "1 in this release"], ["Damage flag", "a general check drops over 3 points"],
+    ["Entries", `${ENTRIES.length} (${models} editor models)`]].map(([k, v]) => `<tr><th scope="row">${k}</th><td class="n">${v}</td></tr>`).join("");
+  $("#limits").innerHTML = `<caption class="sr">Budget for every entry</caption><thead><tr><th scope="col">Budget</th><th scope="col" class="n">Per entry</th></tr></thead><tbody>${rowsL}</tbody>`;
 })();
 
 /* questions */
 (function questions() {
   const math = D.tasks.math_qwen08, L = D.limits;
   const qa = [
-    ["What does the editor get?", [`A frozen model, the user's one-sentence request, and a file of example problems where the task has one. It can read the model's replies and use interpretability tools on the unedited model: activation traces, token statistics, logit lens, direct logit attribution, attention, top activations and activation patching.`,
+    ["What does the editor get?", [`A frozen model, the user’s one-sentence request, and a file of example problems where the task has one. It can read the model’s replies and use interpretability tools on the unedited model: activation traces, token statistics, logit lens, direct logit attribution, attention, top activations and activation patching.`,
       `It has no gradients, no training loop and no copy of the network in its sandbox.`]],
     ["How is a run scored?", [`The committed adapter is applied and the model answers a held-out set the editor never saw, under the deployment settings the request describes.`,
-      `The raw metric is rescaled: 0 is the unedited model and 100 is the task's best reference. Leaderboard numbers will be the mean of three attempts with failures counted as 0, then the median across tasks.`]],
+      `The raw metric is rescaled: 0 is the unedited model and 100 is the task’s best reference. A session that ends without a committed adapter counts as 0. An entry’s mean is the average over the three tasks.`]],
     ["What does 100 mean on the math task?", math ? [`It is the full-weight edit from Takehi et al. (2026), which scores ${pct(bestRef(math))} on the same 200 MATH-500 problems. The unedited model scores ${pct(math.base)}; most of its replies loop in their reasoning until the token limit.`] : []],
     ["How does this differ from the full-weight result?", [["Their prompt named the failure (repetition, cut off at the token limit). Ours names none.",
       "Their rules excluded edits that make the model close its thinking early. Ours allow any edit that answers the request.",
       `Their editor compared edited and original models over 50 passes, which is closer to our Track B. It took ${(math && math.reference_cost || {}).wall_hours ?? "about 20"} hours; a session here is capped at ${L.wall_hours}.`]]],
-    ["Why is nothing ranked yet?", [["Every cell holds a single attempt, and nothing checks yet whether an edit damages the model's other abilities.",
-      "Only one editor model and one harness have run.",
-      "Pilot runs used earlier rules (a stale prompt line in v0.1, fewer tools in v0.1 and v0.2), so they are shown but will not be ranked."]]],
+    ["What is Agency, and what is its native harness?", [`[Agency](https://github.com/agency-project/Agency) is an interposition layer for agent stacks: a transparent shim that sits between an agent harness, the model provider and the sandbox. It monitors every LLM call and tool call, and can modify them, without changing the harness itself. Every run here goes through it, which is how each editor gets the same sandbox and budget and how usage is recorded in one format. It runs off-the-shelf harnesses unmodified (Codex, Claude Code, Kimi CLI, OpenCode) as well as its own native harness.`,
+      `The native harness is deliberately minimal: a ReAct loop, in which the model reasons, calls a tool, reads the result and repeats, with a bash tool. It shows what the model does with the least help and without the [harness tax](https://arena.ai/blog/coding-agents-harness-tax).`]],
+    ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent (Codex, Claude Code, Kimi CLI) than in Agency’s native loop, and on sycophancy it did. DeepSeek has no supported first-party harness yet, so it runs in OpenCode. Neither does Gemini (Agency has no Gemini CLI or Antigravity adapter yet), so it also runs in OpenCode.`]],
+    ["What counts as damage?", [`After scoring, the edited model also takes three general-ability checks: 300 MMLU questions, 200 GSM8K problems with thinking off, and a set of held-out facts. An edit is flagged when any of them drops by more than 3 points from the unedited model. Flags are shown next to the score and do not change it.`]],
+    ["How final are these numbers?", [["Every cell is one attempt. Expect a few points of noise, more on math, where one sample per problem is scored.",
+      "Editor input tokens include cached input. Most of every long session is cache reads, which providers bill at a fraction of the normal rate, so token counts overstate cost differences between providers. DeepSeek and Kimi CLI counts marked ≥ miss a few calls that returned no usage.",
+      "Gemini 4 Carbon is served only from Vertex AI, which at times held requests for several minutes before the first token. For the Gemini cells, queue time does not count toward the wall clock: per call, the time to first token beyond 60 seconds plus the model’s own thinking (reasoning tokens at 50 per second) is excluded, up to 6 hours per session. About one hour was excluded per Gemini session. A first set of Gemini runs without this rule was discarded as an infrastructure failure.",
+      "Fable 5.2 and Gemini ran on a newer Agency build with fixes for Gemini thought signatures and for a deadlock in which a resource reservation waited on a lock the session held. Earlier, that deadlock stalled some sessions, which were rerun; in three scored Codex sessions (GPT-6 Astra math and code, GPT-6.1 Sol sycophancy) the editor carried on after its reservation timed out, but without the extra CPU it had asked for.",
+      "Pilot runs used earlier rules (a stale prompt line in v0.1, fewer tools in v0.1 and v0.2) and the minimal loop. They appear in the runs list and, on request, in a task’s table, but never in an entry’s score."]]],
   ];
-  $("#qa").innerHTML = qa.filter(([, a]) => a.length).map(([q, a]) => `<details><summary>${esc(q)}</summary><div class="a">${a.map((x) =>
-    Array.isArray(x) ? `<ul>${x.map((y) => `<li>${esc(y)}</li>`).join("")}</ul>` : `<p>${esc(x)}</p>`).join("")}</div></details>`).join("");
+  const link = (t) => esc(t).replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');  /* answers may carry [text](https://…) links */
+  $("#qa").innerHTML = qa.filter(([, a]) => a.length).map(([q, a]) => `<article><h3>${esc(q)}</h3><div class="qa-a">${a.map((x) =>
+    Array.isArray(x) ? `<ul>${x.map((y) => `<li>${link(y)}</li>`).join("")}</ul>` : `<p>${link(x)}</p>`).join("")}</div></article>`).join("");
 })();
 
 /* header line and section highlighting */
-$("#updated").textContent = "Last updated: " + new Date(D.generated.slice(0, 10) + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+$("#updated").textContent = "Last updated: " + new Date(D.generated.replace(" UTC", "Z").replace(" ", "T")).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+$("#hero-facts").textContent = `${TASK_IDS.length} tasks, ${ENTRIES.filter((e) => TASK_IDS.some((tid) => cellRun(e.id, tid))).length} of ${ENTRIES.length} entries run, ${D.runs.filter((r) => !r.pilot).length} runs so far.`;
 $("#foot-l").textContent = `LoRA-Space Bench · ${D.generated.slice(0, 4)} · ${D.rules}`;
 (function spy() {
-  const links = [...document.querySelectorAll(".nav a")], byId = Object.fromEntries(links.map((a) => [a.getAttribute("href").slice(1), a]));
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) links.forEach((a) => a.setAttribute("aria-current", String(a === byId[e.target.id]))); }),
-    { rootMargin: "-20% 0px -70% 0px" });
-  Object.keys(byId).forEach((id) => { const s = document.getElementById(id); if (s) io.observe(s); });
-  addEventListener("scroll", () => { if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) links.forEach((a, i) => a.setAttribute("aria-current", String(i === links.length - 1))); }, { passive: true });
+  const links = [...document.querySelectorAll(".nav a")], secs = links.map((a) => document.getElementById(a.getAttribute("href").slice(1)));
+  let queued = false, last = -2; const nav = document.querySelector(".nav");
+  const mark = () => { queued = false; let cur = -1; secs.forEach((el, i) => { if (el.getBoundingClientRect().top <= innerHeight / 3) cur = i; });
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) cur = secs.length - 1;
+    links.forEach((a, i) => i === cur ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current"));
+    if (cur !== last) { last = cur; const a = links[cur]; if (a && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - nav.offsetLeft - 12; } };
+  const more = () => nav.classList.toggle("more", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+  nav.addEventListener("scroll", more, { passive: true }); addEventListener("resize", more); more();
+  addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(mark); } }, { passive: true });
+  mark();
 })();
 </script>
+</body>
+</html>
