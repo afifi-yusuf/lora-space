@@ -30,7 +30,8 @@ grid of editors and harnesses.
 
 An entry is an editor model paired with the harness it works in. Each model runs twice: once in Agency's native
 harness (a minimal ReAct loop with a bash tool) and once in its maker's own agent, such as Claude Code, Codex,
-OpenCode or Kimi CLI. [Agency](https://github.com/agency-project/Agency) sits between the harness, the model provider and the sandbox, which is
+OpenCode or Kimi CLI. [Agency](https://github.com/agency-project/Agency), developed by UC Berkeley's Sky Computing Lab
+([blog post](https://www.linkedin.com/pulse/introducing-agency-alvin-cheung-hd8xc)), sits between the harness, the model provider and the sandbox, which is
 how every entry gets the same tools and budget and how usage is recorded in one format.
 
 Entries are listed in [`lsbench/config/entries.toml`](lsbench/config/entries.toml).
