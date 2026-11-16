@@ -1090,7 +1090,7 @@ selectRun(FIRST.id);
     <tr><th scope="row">May test</th><td>Nothing. The edit is committed blind.</td><td>Up to ${L.candidates_track_b} candidates: a dev-split score, replies with the candidate applied, or an activation intervention.</td></tr>
     <tr><th scope="row">Writes</th><td colspan="2">One LoRA adapter, rank ${L.max_rank} or lower, on the attention output and MLP down projections of any layer.</td></tr>
     <tr><th scope="row">Never</th><td colspan="2">Gradients, training, or its own copy of the network. Every model call goes through a budgeted service.</td></tr></tbody>`;
-  const rowsL = [["Wall clock per session", L.wall_hours + " h"], ["Generate calls", L.generate_calls + " × " + L.generate_prompts + " prompts"],
+  const rowsL = [["Wall clock per session", L.wall_hours + " h"], ["GPU running the target model", "1 × NVIDIA L4, 24 GB"], ["Generate calls", L.generate_calls + " × " + L.generate_prompts + " prompts"],
     ["Analysis calls", L.analysis_calls + " × " + L.analysis_items + " texts"], ["Candidates, Track B", L.candidates_track_b], ["Adapter rank", "≤ " + L.max_rank],
     ["Attempts per cell", "1 in this release"], ["Damage flag", "a general check drops over 3 points"],
     ["Entries", `${ENTRIES.length} (${models} editor models)`]].map(([k, v]) => `<tr><th scope="row">${k}</th><td class="n">${v}</td></tr>`).join("");

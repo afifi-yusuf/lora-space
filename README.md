@@ -57,6 +57,7 @@ The limits are the same for every entry.
 | Limit | Value |
 |---|---|
 | Session wall time | 3 hours |
+| GPU running the target model | one NVIDIA L4 (24 GB), on an AWS g6 instance |
 | `generate` calls | 25, up to 32 prompts each |
 | Analysis calls (inspection and interpretability tools together) | 50, up to 32 items each |
 | Adapter rank | at most 8 per module |
