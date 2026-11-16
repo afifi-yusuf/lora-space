@@ -1,6 +1,6 @@
 # LoRA-Space Bench
 
-**A benchmark for LoRAs written by hand.**
+**A benchmark for hand-written LoRAs.**
 
 [Results](https://loraspace.org) · [Rules](#how-a-run-works) · [Run it](#running-it) · [Contributing](CONTRIBUTING.md) · [Citation](#citation) · [MIT license](LICENSE)
 
@@ -190,7 +190,7 @@ To report a result that looks wrong, or to propose an editor, harness or task, s
 
 ```bibtex
 @misc{afifi2026lorabench,
-  title  = {LoRA-Space Bench: A Benchmark for LoRAs Written by Hand},
+  title  = {LoRA-Space Bench: A Benchmark for Hand-Written LoRAs},
   author = {Afifi, Yusuf},
   year   = {2026},
   url    = {https://loraspace.org}

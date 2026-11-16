@@ -190,6 +190,17 @@ figure { margin: 0; }
 .dp-row { background: var(--bg); }
 .dp.solo .who span, .dp.multi .who span { display: block; margin-left: 0; }
 .csub { margin: 0; max-width: none; font-size: 0.9375rem; color: var(--ink-2); }
+/* the best math run beside the reference edit: three measures, each a pair of bars on its own scale. The reference is grey, the run its maker's colour. */
+.vs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 28px 48px; margin-top: 20px; }
+.vs h4 { margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); font-size: 0.9375rem; font-weight: 600; }
+.vs-row { display: grid; gap: 4px; padding-block: 6px; font-size: 0.875rem; color: var(--ink-2); }
+.vs > div { min-width: 0; } .vs-bar { position: relative; display: flex; align-items: center; gap: 8px; min-height: 1.5rem; }
+.vs-bar i { flex: 0 1 auto; align-self: stretch; min-width: 3px; min-height: 1.5rem; background: var(--c); border-radius: 0 3px 3px 0; }  /* the bar gives way before its label leaves the panel */
+.vs-bar b { flex: none; color: var(--ink); font-size: 0.9375rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vs-bar .base { position: absolute; top: 0; bottom: 0; z-index: 1; border-left: 2px solid var(--bg); }  /* a notch in both bars at the unedited model's score */
+.vs small { display: block; margin-top: 6px; font-size: 0.8125rem; color: var(--ink-3); }
+#vs-terms { margin-top: 28px; } #vs-terms th[scope="col"] { width: 30%; } #vs-terms td, #vs-terms th { white-space: normal; }
+.vs-note { margin: 20px 0 0; max-width: 68ch; color: var(--ink); }
 .hk { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 2px; border: 0; background: none; color: var(--ink-2); font-size: 0.875rem; cursor: pointer; border-radius: 4px; } .hk .sq { border-radius: 50%; }
 .hk:hover, .hk[aria-pressed="true"] { color: var(--ink); } .hk[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
 .hl-on :is(#cc, #hx, #wrote) [data-m]:not(.hl) :is(.bar, .mb, .dbl, .dbp, .dba, .cells, .mk), .hl-on #chart [data-m]:not(.hl) .pt, .hl-on .rl-t .d:not(.hl) { opacity: 0.22; }
@@ -565,7 +576,7 @@ footer a { color: inherit; }
 <main id="main">
 <div class="shell" id="top">
   <div class="hero">
-    <div class="hero-main"><h1>A benchmark for LoRAs written by hand</h1>
+    <div class="hero-main"><h1>A benchmark for hand-written LoRAs</h1>
       <div class="links">
         <a href="https://github.com/afifi-yusuf/lora-space"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>GitHub</a>
         <a class="ghost" href="https://rikiyat.github.io/blog/weight-space-programming/"><span class="by">Inspired by</span>Weight-Space Programming<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg></a>
@@ -612,6 +623,13 @@ footer a { color: inherit; }
       </div>
       <div class="scatter"><div class="legend" id="legend"></div>
         <div class="plot" id="plot"><svg id="chart" viewBox="0 0 1000 400" role="group" aria-label="Score against cost" tabindex="-1"></svg><div class="tip" id="tip" hidden></div></div></div>
+    </div>
+    <div class="block gap-tt" id="vs-block">
+      <div class="bar-row"><h3 class="pad-b">Math, against the full-weight edit</h3></div>
+      <p class="csub" id="vs-sub"></p>
+      <div class="vs" id="vs"></div>
+      <div class="scroll-x" role="region" aria-label="How the two setups differ" tabindex="0"><table id="vs-terms"></table></div>
+      <p class="vs-note" id="vs-note"></p>
     </div>
   </section>
 
@@ -1161,6 +1179,25 @@ addEventListener("scroll", () => { if (tipEl) tipShow(tipEl); }, { passive: true
 $("#chart").addEventListener("focusin", (e) => showTip(e.target.closest(".hit")));
 $("#chart").addEventListener("focusout", () => showTip(null));
 
+/* the best math run here beside the full-weight edit it is normalized against */
+function versus() {
+  const t = D.tasks.math_qwen08, ref = t && t.references && t.references.paper_full_weight_edit, cost = (t && t.reference_cost) || {};
+  const rs = D.runs.filter((r) => r.task === "math_qwen08" && !r.pilot && r.track === "A" && r.scored), r = rs.sort((a, b) => b.value - a.value)[0];
+  if (!ref || !r) { $("#vs-block").hidden = true; return; }
+  const SPACE = NLAYERS * D.limits.max_rank * ((1024 + 3584) + (1024 + 2048));  /* per layer: the MLP down projection and the attention output, each as B and A at the highest rank */
+  const who = `${modelName(r)}, ${harness(r)}`, c = makerColor(r), big = (n) => n.toLocaleString("en-US");
+  const row = (name, color, share, label, extra = "") => `<div class="vs-row"><span>${esc(name)}</span><div class="vs-bar" style="--c:${color}">${extra}<i style="width:${(100 * share).toFixed(2)}%"></i><b>${label}</b></div></div>`;
+  const panel = (title, a, b, foot) => `<div><h4>${title}</h4>${row("Full-weight edit", "var(--mk-ref)", a[0], a[1], a[2])}${row(who, c, b[0], b[1], b[2])}${foot ? `<small>${foot}</small>` : ""}</div>`;
+  const base = `<span class="base" style="left:${(100 * t.base / 0.75).toFixed(2)}%" aria-hidden="true"></span>`;
+  $("#vs-sub").textContent = "The best math run here beside the edit from Weight-Space Programming, on the same 200 problems.";
+  $("#vs").innerHTML = panel("MATH-500 accuracy", [ref / 0.75, pct(ref), base], [r.value / 0.75, pct(r.value), base], `The notch is the unedited model, ${pct(t.base)}.`)
+    + (cost.wall_hours ? panel("Editing time", [0.6, `${cost.wall_hours} h`], [0.6 * r.edit_hours / cost.wall_hours, `${fix(r.edit_hours, 1)} h`]) : "")
+    + panel("Numbers the editor may set", [0.6, "about 0.8 billion"], [0.6 * SPACE / 8e8, big(SPACE)], `Any weight, against adapters of rank ${D.limits.max_rank} or lower. This run set ${big(r.adapter.params)}.`);
+  $("#vs-terms").innerHTML = `<thead><tr><td></td><th scope="col">Full-weight edit</th><th scope="col">Here</th></tr></thead><tbody>`
+    + [["Told what the failure is", "Yes", "No"], ["Tests an edit before committing", "Yes, over 50 passes", "Never"], ["Edits that close the thinking early", "Excluded", "Allowed"]]
+      .map(([k, a, b]) => `<tr><th scope="row">${k}</th><td>${a}</td><td>${b}</td></tr>`).join("") + `</tbody>`;
+  $("#vs-note").textContent = `A rank-${D.limits.max_rank} adapter was enough to carry this fix on a 0.8B model. Whether that holds on larger models is the question the benchmark is built to ask.`;
+}
 function render(move) { tipFor = -1; $("#tip").hidden = true; tipHide(); bars(); board(); harnessFx(); chart(move); hl(null, true); syncURL(); }
 { const q = new URLSearchParams(location.search), t = q.get("task"), h = q.get("harness"), c = q.get("cost"); if (TASK_IDS.includes(t)) { state.view = t; state.ctask = t; } if (h === "native" || h === "own") state.h = h; if (c && Object.hasOwn(XAX, c)) state.x = c; }  /* only names this page defines; an inherited key such as "constructor" must not pass */
 const syncView = tabs("#f-view", [["all", "All tasks"], ...TASK_IDS.map((id) => [id, tname(id), GLY(id)])], "view", () => { if (state.view !== "all") state.ctask = state.view; render(true); });
@@ -1337,9 +1374,6 @@ selectRun(FIRST.id);
     ["How is a run scored?", [`The committed adapter is applied and the model answers a held-out set the editor never saw, under the deployment settings the request describes.`,
       `The raw metric is rescaled: 0 is the unedited model and 100 is the task’s best reference. A session that ends without a committed adapter counts as 0. An entry’s mean is the average over the three tasks.`]],
     ["What does 100 mean on the math task?", math ? [`It is the full-weight edit from Takehi et al. (2026), which scores ${pct(bestRef(math))} on the same 200 MATH-500 problems. The unedited model scores ${pct(math.base)}; most of its replies loop in their reasoning until the token limit.`] : []],
-    ["How does this differ from the full-weight result?", [["Their prompt named the failure (repetition, cut off at the token limit). Ours names none.",
-      "Their rules excluded edits that make the model close its thinking early. Ours allow any edit that answers the request.",
-      `Their editor compared edited and original models over 50 passes, where ours never sees an edited model. It took ${(math && math.reference_cost || {}).wall_hours ?? "about 20"} hours; a session here is capped at ${L.wall_hours}.`]]],
     ["What is Agency, and what is its native harness?", [`[Agency](https://github.com/agency-project/Agency), developed by UC Berkeley’s Sky Computing Lab ([blog post](https://www.linkedin.com/pulse/introducing-agency-alvin-cheung-hd8xc)), is an interposition layer for agent stacks: a transparent shim that sits between an agent harness, the model provider and the sandbox. It monitors every LLM call and tool call, and can modify them, without changing the harness itself. Every run here goes through it, which is how each editor gets the same sandbox and budget and how usage is recorded in one format. It runs off-the-shelf harnesses unmodified (Codex, Claude Code, Kimi CLI and others) as well as its own native harness.`,
       `The native harness is deliberately minimal: a ReAct loop, in which the model reasons, calls a tool, reads the result and repeats, with a bash tool. It shows what the model does with the least help and without the [harness tax](https://arena.ai/blog/coding-agents-harness-tax).`]],
     ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent (Codex, Claude Code, Kimi CLI) than in Agency’s native loop, and on sycophancy it did. DeepSeek runs in its own DeepSeek Harness, and Gemini in Google’s Antigravity CLI.`]],
@@ -1359,6 +1393,7 @@ selectRun(FIRST.id);
 })();
 
 /* header line and section highlighting */
+versus();
 $("#foot-l").textContent = `LoRA-Space Bench · ${D.generated.slice(0, 4)} · ${D.rules}`;
 (function spy() {
   const links = [...document.querySelectorAll(".nav a")], secs = links.map((a) => document.getElementById(a.getAttribute("href").slice(1)));
