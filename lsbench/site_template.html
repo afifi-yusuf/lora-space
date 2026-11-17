@@ -764,6 +764,7 @@ const ver = (r) => r.rules.replace("lsbench-", "");
 const modelName = (x) => x.label.replace(/ \(.*\)/, "");
 const harness = (x) => { const h = (x.label.match(/\((.*)\)/) || [])[1] || x.harness || ""; return h.charAt(0).toUpperCase() + h.slice(1); };
 const ownHarness = (x) => x.harness !== "native" && x.harness !== "minimal";
+const INTEXT = new Set(["paper_edit_as_rank1_lora"]);  /* a reference given in a sentence (the math comparison), not as a row */
 const bestRef = (t) => { const v = Object.values(t.references || {}); return v.length ? (t.higher_is_better ? Math.max(...v) : Math.min(...v)) : null; };
 const bestRefName = (t) => { const b = bestRef(t), k = Object.keys(t.references || {}).find((x) => t.references[x] === b); return (REFS[k] || [k])[0]; };
 const norm = (t, v) => { const b = bestRef(t); return b == null || b === t.base ? null : 100 * (v - t.base) / (b - t.base); };
@@ -953,7 +954,7 @@ function rowsFor(view) {
   const t = D.tasks[view];
   const runs = D.runs.filter((r) => r.task === view && (state.pilots || !r.pilot)).map((r) => ({ id: r.id, run: r, name: modelName(r), sub: harness(r) + (r.pilot ? `, pilot ${ver(r)}${fed(r)}` : ""), mk: markOf(r),
     normalized: r.scored ? r.normalized : failed(r) ? 0 : null, value: r.value, hours: r.edit_hours }));
-  const refs = Object.entries(t.references || {}).map(([k, v]) => ({ ref: 1, id: "ref-" + k, name: (REFS[k] || [k])[0], sub: "reference", note: (REFS[k] || [, ""])[1], mk: "",
+  const refs = Object.entries(t.references || {}).filter(([k]) => !INTEXT.has(k)).map(([k, v]) => ({ ref: 1, id: "ref-" + k, name: (REFS[k] || [k])[0], sub: "reference", note: (REFS[k] || [, ""])[1], mk: "",
     normalized: norm(t, v), value: v, hours: k === "paper_full_weight_edit" ? (t.reference_cost || {}).wall_hours : null }))
     .concat([{ ref: 1, id: "ref-base", name: "Unedited " + (TARGET[t.target] || "model"), sub: "no edit", mk: "", normalized: 0, value: t.base, hours: null }]);
   return runs.concat(refs);
@@ -1200,7 +1201,7 @@ function versus() {
   const panel = (title, a, b, foot) => `<div><h4>${title}</h4>${row("Full-weight edit", "var(--mk-ref)", a[0], a[1], a[2])}${row(who, c, b[0], b[1], b[2])}${foot ? `<small>${foot}</small>` : ""}</div>`;
   const base = `<span class="base" style="left:${(100 * t.base / 0.75).toFixed(2)}%" aria-hidden="true"></span>`;
   $("#vs-sub").textContent = "The best math run here beside the edit from Weight-Space Programming, on the same 200 problems.";
-  $("#vs").innerHTML = panel("MATH-500 accuracy", [ref / 0.75, pct(ref), base], [r.value / 0.75, pct(r.value), base], `The notch is the unedited model, ${pct(t.base)}.`)
+  $("#vs").innerHTML = panel("MATH-500 accuracy", [ref / 0.75, pct(ref), base], [r.value / 0.75, pct(r.value), base], `The notch is the unedited model, ${pct(t.base)}.${t.references.paper_edit_as_rank1_lora ? ` Converted to a rank-1 LoRA with no retraining, the paper’s edit scores ${pct(t.references.paper_edit_as_rank1_lora)}.` : ""}`)
     + (cost.wall_hours ? panel("Editing time", [0.6, `${cost.wall_hours} h`], [0.6 * r.edit_hours / cost.wall_hours, `${fix(r.edit_hours, 1)} h`]) : "")
     + panel("Numbers the editor may set", [0.6, "about 0.8 billion"], [0.6 * SPACE / 8e8, big(SPACE)], `Any weight, against adapters of rank ${D.limits.max_rank} or lower. This run set ${big(r.adapter.params)}.`);
   $("#vs-terms").innerHTML = `<thead><tr><td></td><th scope="col">Full-weight edit</th><th scope="col">Here</th></tr></thead><tbody>`
@@ -1234,7 +1235,7 @@ $("#task-list").innerHTML = TASK_IDS.map((id) => {
       <div class="rl-l">${refv == null ? "" : lab(refv, `best reference, ${pct(refv)}`)}</div><div class="rl-n"><span>${pct(t.higher_is_better ? 0 : top, 0)}</span><span>further right is better →</span><span>${pct(t.higher_is_better ? top : 0, 0)}</span></div></div>
       <p class="sr">${sc.length} scored runs between ${pct(Math.min(...sc.map((r) => r.value)))} and ${pct(Math.max(...sc.map((r) => r.value)))}.</p></div>` : `<div class="part"><h4>Every scored run</h4><p class="small">No scored runs yet.</p></div>`;
   const best = sc.length ? sc.reduce((a, b) => ((b.value > a.value) === t.higher_is_better ? b : a)) : null;
-  const refs = Object.entries(t.references || {}).map(([k, v]) => `<div><dt>${esc((REFS[k] || [k])[0])}</dt><dd>${pct(v)}</dd></div>`).join("");
+  const refs = Object.entries(t.references || {}).filter(([k]) => !INTEXT.has(k)).map(([k, v]) => `<div><dt>${esc((REFS[k] || [k])[0])}</dt><dd>${pct(v)}</dd></div>`).join("");
   return `<article class="task"><div class="task-head"><h3>${GLY(id)}${esc(m.name || id)}</h3>
       <span class="small">${esc(TARGET[t.target] || t.target || "")}, thinking ${t.thinking ? "on" : "off"} · ${rs.length ? rs.length + " run" + (rs.length > 1 ? "s" : "") : "no runs yet"}</span></div>
     ${ASK(t.request)}
