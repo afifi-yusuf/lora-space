@@ -1292,6 +1292,7 @@ function selectRun(id) {
       ${kv("Editor tokens", tk.input ? (tk.lower_bound ? "≥ " : "") + (tk.input / 1e6).toFixed(2) + "M" : "–", tk.input ? "input" + (tk.output ? ", " + (tk.output / 1e3).toFixed(0) + "K output" : "") : (tk.note || ""))}
       ${kv("Damage", r.scored ? (dmgText(r) ? "flagged" : "none") : "–", esc(dmgText(r)))}
       ${kv("Adapter", ad.params ? ad.params.toLocaleString("en-US") : "–", ad.params ? `numbers, rank ${ad.max_rank}` : "")}</dl>
+      ${ad.params ? `<p class="small"><a href="https://github.com/afifi-yusuf/lora-space/tree/main/results/lsbench/runs/${encodeURIComponent(r.id)}">This run’s files on GitHub</a>: the adapter (<span class="mono">adapter.npz</span>), its score and every tool call.</p>` : ""}
     <div class="part"><h4>The edit, in the editor’s words</h4>${prose(r.explanation || (failed(r) ? "No adapter was committed." : "No explanation was recorded."), 420, "explanation")}${mods && !r.edit_map ? `<p class="small wrap-any">${mods}</p>` : ""}</div>
     ${r.final_message ? `<div class="part"><h4>${failed(r) || /^The harness/.test(r.final_message) ? "How the session ended" : "The editor’s last message"}</h4>${prose(r.final_message, 320, "message")}</div>` : ""}
     ${cands.length || r.track === "B" ? `<div class="part"><h4>Candidates tested before committing</h4>${cand}</div>` : ""}
