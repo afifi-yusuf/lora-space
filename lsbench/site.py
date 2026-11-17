@@ -208,7 +208,7 @@ def collect() -> dict:
     for i, root in enumerate(SRC):
         for d in sorted(root.glob("*")):
             r = _run(d, pilot=(i == 1))
-            if r and r["harness"] not in UNLISTED:
+            if r and r["harness"] not in UNLISTED and not r["pilot"]:   # pilots stay in the repo, off the site
                 runs.append(r)
     tasks = {}
     for t in spec.all_tasks():

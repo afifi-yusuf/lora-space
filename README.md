@@ -177,7 +177,8 @@ findings the benchmark builds on:
 
 - The paper's winning Qwen3.5-0.8B math edit is exactly rank 1 per tensor, so a LoRA can represent it
   ([`results/m0/`](results/m0/)).
-- Applied as a rank-1 LoRA, that edit scores 51.2% on MATH-500, against 7.9% for the unedited model.
+- Applied as a rank-1 LoRA, that edit scores 51.2% on MATH-500, against 7.9% for the unedited model (all 500
+  problems, four samples each; on the benchmark's 200-problem subset the figures are 53.5% and 8.0%).
 
 The original research brief is [`docs/lso-research-brief.md`](docs/lso-research-brief.md).
 
