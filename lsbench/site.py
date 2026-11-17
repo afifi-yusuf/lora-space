@@ -218,6 +218,11 @@ def collect() -> dict:
                     "metric": task["score"]["metric"], "base": task["score"]["base"],
                     "higher_is_better": task["score"]["higher_is_better"], "references": task["score"].get("references", {}),
                     "reference_cost": task["score"].get("reference_cost", {})}
+        # the prompt as the editors received it (task.txt, written by the runner); every listed run of a task got the same text
+        texts = Counter(f.read_text() for f in (SRC[0] / r["id"] / "task.txt" for r in runs if r["task"] == t) if f.exists())
+        if texts:
+            tasks[t]["prompt"] = texts.most_common(1)[0][0].strip()
+            tasks[t]["prompt_same"] = len(texts) == 1
     entries, limits = spec.load_entries()
     roster = [{k: e.get(k) for k in ("id", "label", "model", "harness", "effort", "provider")} for e in entries.values()
               if e.get("harness") not in UNLISTED]

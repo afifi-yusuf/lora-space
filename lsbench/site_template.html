@@ -454,6 +454,7 @@ tr.refrow .model { font-weight: 400; }
 .more > summary::-webkit-details-marker, .fold > summary::-webkit-details-marker { display: none; }
 .more[open] .s-more, .more:not([open]) .s-less { display: none; }
 .more[open] > summary { margin-bottom: 8px; }
+.ptext pre { margin: 0; max-height: 26rem; overflow: auto; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; font-family: var(--f-mono); font-size: 0.8125rem; line-height: 1.55; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
 .fold { display: grid; gap: 10px; }
 .explain { color: var(--ink-2); overflow-wrap: anywhere; }
 .explain p, .explain ul, .explain ol { max-width: 70ch; }
@@ -1233,6 +1234,7 @@ $("#task-list").innerHTML = TASK_IDS.map((id) => {
   return `<article class="task"><div class="task-head"><h3>${GLY(id)}${esc(m.name || id)}</h3>
       <span class="small">${esc(TARGET[t.target] || t.target || "")}, thinking ${t.thinking ? "on" : "off"} · ${rs.length ? rs.length + " run" + (rs.length > 1 ? "s" : "") : "no runs yet"}</span></div>
     ${ASK(t.request)}
+    ${t.prompt ? `<details class="more ptext"><summary><span class="s-more">Show the full prompt</span><span class="s-less">Hide the full prompt</span></summary><pre tabindex="0" aria-label="The full prompt for ${esc(m.name || id)}">${esc(t.prompt)}</pre></details>` : ""}
     ${m.flow ? `<div class="part"><h4>What goes wrong, and what a good edit changes</h4><figure class="flow${m.code ? " code" : ""}" style="--c:${colorOf({ task: id })}">
       <p class="fb u"><span class="fk">A user</span><span>${esc(m.flow[0])}</span></p>
       <p class="fb x"><span class="fk">The unedited model</span><span class="ft">${esc(m.flow[1])}</span><span class="fv">✗ ${esc(m.flow[2])}</span></p>
