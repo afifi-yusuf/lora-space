@@ -231,6 +231,8 @@ def build() -> Path:
     OUT.mkdir(exist_ok=True)
     out = OUT / "index.html"
     out.write_text(tpl.replace("/*__LSB_DATA__*/null", json.dumps(data, separators=(",", ":")).replace("</", "<\\/")))
+    for f in sorted((spec.PKG / "static").glob("*")):  # files served beside the page (the share image)
+        (OUT / f.name).write_bytes(f.read_bytes())
     print(f"wrote {out} ({out.stat().st_size // 1024} KB, {len(data['runs'])} runs)")
     return out
 

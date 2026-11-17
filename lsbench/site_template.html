@@ -4,7 +4,16 @@
 <meta charset="utf-8">
 <title>LoRA-Space Bench</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="A benchmark for writing LoRA adapters by hand: an editor model inspects a frozen model and writes the adapter as arrays of numbers, without gradients.">
+<meta name="description" content="A benchmark for hand-written LoRAs: an editor model writes a LoRA adapter for a frozen model, without gradients.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://loraspace.org/">
+<meta property="og:title" content="LoRA-Space Bench">
+<meta property="og:description" content="A benchmark for hand-written LoRAs: an editor model writes a LoRA adapter for a frozen model, without gradients.">
+<meta property="og:image" content="https://loraspace.org/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LoRA-Space Bench: a benchmark for hand-written LoRAs.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect y='6' width='4' height='14' rx='1' fill='%23c24a12'/%3E%3Crect x='6' width='14' height='4' rx='1' fill='%232a52d1'/%3E%3Crect x='6' y='6' width='14' height='14' rx='1.5' fill='%23161616'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,6 +108,7 @@ figure { margin: 0; }
 .icon-btn:hover { color: var(--ink); background: var(--fill); }
 .icon-btn svg { width: 19px; height: 19px; }
 @media (max-width: 700px) { .top .shell { gap: 8px; } .brand { min-width: 44px; } .brand span { display: none; } .nav { gap: 12px; } }
+@media (max-width: 30em) { .top .icon-btn { display: none; } .top .shell { gap: 4px; } .nav { gap: 9px; } .nav a { font-size: 0.8125rem; } #f-h, #f-h2 { gap: 4px 12px; } #f-h button, #f-h2 button { font-size: 0.8125rem; } }  /* all five sections in view; GitHub is the first button in the hero */
 @media (max-width: 1040px), (pointer: coarse) { .nav a { min-width: 44px; justify-content: center; } }
 
 /* hero */
@@ -195,7 +205,7 @@ figure { margin: 0; }
 .vs h4 { margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); font-size: 0.9375rem; font-weight: 600; }
 .vs-row { display: grid; gap: 4px; padding-block: 6px; font-size: 0.875rem; color: var(--ink-2); }
 .vs > div { min-width: 0; } .vs-bar { position: relative; display: flex; align-items: center; gap: 8px; min-height: 1.5rem; }
-.vs-bar i { flex: 0 1 auto; align-self: stretch; min-width: 3px; min-height: 1.5rem; background: var(--c); border-radius: 0 3px 3px 0; }  /* the bar gives way before its label leaves the panel */
+.vs-bar i { flex: 0 1 auto; align-self: stretch; min-width: 3px; min-height: 1.5rem; background: var(--c); border-radius: 0 3px 3px 0; forced-color-adjust: none; }  /* the bar gives way before its label leaves the panel */
 .vs-bar b { flex: none; color: var(--ink); font-size: 0.9375rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .vs-bar .base { position: absolute; top: 0; bottom: 0; z-index: 1; border-left: 2px solid var(--bg); }  /* a notch in both bars at the unedited model's score */
 .vs small { display: block; margin-top: 6px; font-size: 0.8125rem; color: var(--ink-3); }
@@ -1201,7 +1211,7 @@ function versus() {
 function render(move) { tipFor = -1; $("#tip").hidden = true; tipHide(); bars(); board(); harnessFx(); chart(move); hl(null, true); syncURL(); }
 { const q = new URLSearchParams(location.search), t = q.get("task"), h = q.get("harness"), c = q.get("cost"); if (TASK_IDS.includes(t)) { state.view = t; state.ctask = t; } if (h === "native" || h === "own") state.h = h; if (c && Object.hasOwn(XAX, c)) state.x = c; }  /* only names this page defines; an inherited key such as "constructor" must not pass */
 const syncView = tabs("#f-view", [["all", "All tasks"], ...TASK_IDS.map((id) => [id, tname(id), GLY(id)])], "view", () => { if (state.view !== "all") state.ctask = state.view; render(true); });
-const HOPTS = [["native", "Shared harness"], ["own", "Maker’s own harness"]], syncH = [tabs("#f-h", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); }), tabs("#f-h2", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); })];
+const HOPTS = [["native", "Shared harness (Agency native)"], ["own", "Maker’s own harness"]], syncH = [tabs("#f-h", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); }), tabs("#f-h2", HOPTS, "h", () => { syncH.forEach((f) => f()); render(true); })];
 tabs("#f-x", Object.entries(XAX).map(([k, a]) => [k, a.tab]), "x", () => { tipFor = -1; $("#tip").hidden = true; chart(true); hl(null, true); syncURL(); });
 function setTask(id) { state.view = id; state.ctask = id; syncView(); render(); }
 $("#s-pilots").addEventListener("change", (e) => { state.pilots = e.target.checked; render(); });
