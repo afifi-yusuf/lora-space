@@ -51,7 +51,11 @@
     "gsm8k_off": 0.0
    },
    "flagged": [],
-   "threshold": 0.03
+   "threshold": {
+    "mmlu": 0.03,
+    "facts": 0.03,
+    "gsm8k_off": 0.1
+   }
   },
   "score_gpu_s": 622
  },

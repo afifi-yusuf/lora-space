@@ -193,7 +193,8 @@ figure { margin: 0; }
 .dp.multi .dp-row { grid-template-columns: 1.375rem minmax(0, 15rem) minmax(8rem, 1fr) repeat(var(--n, 3), 8.25rem); }
 .dp.solo .dp-track, .dp.multi .dp-track { margin-right: 3.25rem; }
 .mhd { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); font-weight: 600; white-space: nowrap; }
-.mn { display: grid; grid-template-columns: minmax(0, 1fr) 2.9em; gap: 8px; align-items: center; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.mn .fl { display: inline-block; width: 0.6em; text-align: right; color: var(--warn); font-weight: 600; }
+.mn { display: grid; grid-template-columns: minmax(0, 1fr) 3.5em; gap: 8px; align-items: center; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 .mn > .gl { display: none; } .mn .mv { text-align: right; } .mn .mv.dim { color: var(--ink-3); font-size: 0.8125rem; white-space: nowrap; } .mn .mv.wide { grid-column: 1 / -1; }
 .mn .mt { position: relative; height: 0.625rem; } .mn .mt .g { position: absolute; top: -3px; bottom: -3px; border-left: 1px solid var(--rule-2); } .mn .mt .g.z { border-left-color: var(--ctl); }
 .mn .mb { position: absolute; top: 0; bottom: 0; background: var(--tc, var(--ink-2)); border-radius: 1px; }
@@ -950,7 +951,7 @@ function colsFor(view) {
     { key: "rank", label: "Rank", sub: "Highest rank among the adapter’s matrices", n: 1, group: "Edit", get: (x) => x.ref || !(r0(x).adapter || {}).params ? null : r0(x).adapter.max_rank, html: (x) => x.ref || !(r0(x).adapter || {}).params ? NA : String(r0(x).adapter.max_rank) },
     { key: "layers", label: "Layers", sub: "Each cell is one of the model’s layers; upper half attention output, lower half MLP", group: "Edit", get: (x) => x.ref || !editsOf(r0(x)).length ? null : editsOf(r0(x)).length, html: (x) => x.ref || !editsOf(r0(x)).length ? NA : `${strip(r0(x))}<span class="sr">${esc(editWords(r0(x)))}</span>` },
     { key: "size", label: "Size", sub: "Largest ‖ΔW‖ / ‖W‖ over the edited matrices", n: 1, group: "Edit", get: (x) => x.ref || !(r0(x).adapter || {}).rel_norms ? null : Math.max(...Object.values(r0(x).adapter.rel_norms)), html: (x) => x.ref || !(r0(x).adapter || {}).rel_norms ? NA : pct(Math.max(...Object.values(r0(x).adapter.rel_norms))) },
-    { key: "dmg", label: "Damage", sub: "General-ability points lost", group: "Edit", get: (x) => x.ref ? null : dmgText(r0(x)) || null, html: (x) => x.ref || !r0(x).scored ? NA : dmgText(r0(x)) ? `<span class="flag" aria-hidden="true">†</span> ${esc(dmgText(r0(x)))}` : `<span class="dim">none</span>` });
+    { key: "dmg", label: "Damage", sub: "General-ability points lost", group: "Edit", get: (x) => x.ref ? null : dmgText(r0(x)) || null, html: (x) => x.ref || !r0(x).scored ? NA : dmgText(r0(x)) ? `<span class="flag" aria-hidden="true">†</span> ${esc(dmgText(r0(x)))}` : `<span class="dim">not flagged</span>` });
   return cols;
 }
 function rowsFor(view) {
@@ -1026,8 +1027,8 @@ function bars() {
     const parts = all ? r.rs.map((run, i) => `${tname(TASK_IDS[i])} ${failed(run) ? "no commit, 0" : fix(run.normalized)}`).join(", ") : `raw ${pct(r.rs[0].value)}`;
     return `<span class="mh" data-key="m:${esc(r.model)}" tabindex="-1" role="img" style="left:${Math.min(x(0), x(r.v)).toFixed(2)}%;width:max(1.5rem, ${Math.abs(x(r.v) - x(0)).toFixed(2)}%);margin-left:0" aria-label="${esc(`${who(r)}: ${all ? "mean " : ""}${fix(r.v)}. ${parts}`)}" data-tip="${esc(all ? `${r.model} · ${harness(r.e)} | Mean ${fix(r.v)}. ${parts}` : `${r.model} · ${harness(r.e)} | ${tname(view)}: ${fix(r.v)} (${(TASK[view] || {}).short || "raw"} ${pct(r.rs[0].value)})`)}"></span>`; };
   /* All tasks: beside the mean, the same model’s score on each task, on the same scale */
-  const mini = (run, tid) => `<span class="mn" aria-hidden="true" style="--tc:${colorOf({ task: tid })}"${run && run.scored ? ` data-tip="${esc(`${tname(tid)} | ${fix(run.normalized)} normalized, ${pct(run.value)} ${(TASK[tid] || {}).short || "raw"}`)}"` : ""}>${GLY(tid)}`
-    + (run && run.scored ? `<span class="mt"><i class="g z" style="left:${x(0).toFixed(2)}%"></i><i class="g" style="left:${x(100).toFixed(2)}%"></i><i class="mb" style="${span(run.normalized)}"></i></span><span class="mv">${fix(run.normalized)}</span>` : `<span class="mv dim wide">${run && failed(run) ? "no commit" : "–"}</span>`) + `</span>`;
+  const mini = (run, tid) => `<span class="mn" aria-hidden="true" style="--tc:${colorOf({ task: tid })}"${run && run.scored ? ` data-tip="${esc(`${tname(tid)} | ${fix(run.normalized)} normalized, ${pct(run.value)} ${(TASK[tid] || {}).short || "raw"}${dmgText(run) ? ` | † damage: ${dmgText(run)}` : ""}`)}"` : ""}>${GLY(tid)}`
+    + (run && run.scored ? `<span class="mt"><i class="g z" style="left:${x(0).toFixed(2)}%"></i><i class="g" style="left:${x(100).toFixed(2)}%"></i><i class="mb" style="${span(run.normalized)}"></i></span><span class="mv">${fix(run.normalized)}<span class="fl">${dmgText(run) ? "†" : ""}</span></span>` : `<span class="mv dim wide">${run && failed(run) ? "no commit" : "–"}</span>`) + `</span>`;
   $("#cc-title").textContent = all ? "Mean normalized score, and each task" : `Normalized score, ${tname(view)}`;
   $("#cc-legend").innerHTML = VENDOR.filter(([, id]) => MODELS.some((m) => vendorOf({ label: m })[1] === id)).map(([, id, name]) => `<button class="hk" type="button" data-hk="${id}" aria-pressed="${HL.pin === id}"><i class="sq" style="--c:var(--mk-${id})"></i>${esc(name)}</button>`).join("") + `<span class="hint">Arrow keys move between bars.</span>`;
   moved($("#cc"), () => {
@@ -1050,8 +1051,8 @@ function harnessFx() {
   const rows = MODELS.map((m) => { const a = entryFor(m, "native"), b = entryFor(m, "own"); const r1 = (v) => v == null ? null : Math.round(v * 10) / 10; return { m, a, b, va: r1(sc(a)), vb: r1(sc(b)), na: nc(a), nb: nc(b) }; })  /* rounded first, so each change equals the difference of the two numbers shown */.filter((r) => r.va != null && r.vb != null).sort((p, q) => (q.vb - q.va) - (p.vb - p.va));
   const sign = (v) => (v > 0 ? "+" : "") + fix(v), val = (v, n) => (n ? "no commit" : fix(v));
   $("#hx-title").textContent = all ? "Harness effect on the mean" : `Harness effect, ${tname(view)}`;
-  const clean = rows.filter((r) => !r.na && !r.nb), top = clean[0], down = clean.filter((r) => r.vb < r.va).length, none = rows.filter((r) => r.na || r.nb);
-  $("#hx-sub").textContent = !rows.length ? "" : `${top && top.vb > top.va ? `Some models perform better in their maker’s own harness; ${top.m} gains most, ${sign(top.vb - top.va)}.` : ""}${none.length ? ` ${none.map((r) => `${r.m} committed nothing in ${r.na && r.nb ? "either" : r.na ? "the shared harness" : "its own"}`).join("; ")}.` : ""}`;
+  const clean = rows.filter((r) => !r.na && !r.nb), top = clean[0], bot = clean[clean.length - 1], down = clean.filter((r) => r.vb < r.va).length, none = rows.filter((r) => r.na || r.nb);
+  $("#hx-sub").textContent = !rows.length ? "" : `${top && top.vb > top.va ? (bot.vb < bot.va ? `The harness can move a model’s ${all ? "mean" : "score"} either way: ${top.m} gains ${fix(top.vb - top.va)} in ${harness(top.b)}, ${bot.m} loses ${fix(bot.va - bot.vb)} in ${harness(bot.b)}.` : `${top.m} gains most in its maker’s own harness, ${sign(top.vb - top.va)}.`) : ""}${none.length ? ` ${none.map((r) => `${r.m} committed nothing in ${r.na && r.nb ? "either" : r.na ? "the shared harness" : "its own"}`).join("; ")}.` : ""}`;
   $("#hx-legend").innerHTML = `<span><i class="dbp o key"></i>Shared harness</span><span><i class="dbp key"></i>Maker’s own harness</span>${none.length ? `<span><i class="dbp x key"></i>No commit, scored 0</span>` : ""}<span class="hint">Arrow keys move between rows.</span>`;
   moved($("#hx"), () => {
     $("#hx").innerHTML = rows.length ? `<div class="dp hx" role="list">${AXIS.head("Change")}` + rows.map((r) => { const lo = Math.min(x(r.va), x(r.vb)), w = Math.abs(x(r.vb) - x(r.va)), lv = r.va < r.vb ? [r.va, r.na] : [r.vb, r.nb], rv = r.va < r.vb ? [r.vb, r.nb] : [r.va, r.na];
@@ -1090,9 +1091,9 @@ function board() {
     `† The edit lowered a general-ability check by more than 3 points (10 for GSM8K); a drop of 10 or more shows its size. The score stands.`,
     ...D.runs.filter((r) => !r.pilot && r.late_min && (view === "all" || r.task === view)).slice(0, 1).map((r) => `‡ Committed ${r.late_min} min after the ${D.limits.wall_hours}-hour limit. The score stands.`),
     ...(nFail ? [`“No commit”: the session ended without an adapter and scores 0 (${nFail} of ${nRuns} runs).`] : []),
-    view === "all" ? `Every score is one attempt, so a few points either way is noise.${norun.length ? ` Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
+    view === "all" ? `${norun.length ? `Not yet run: ${norun.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}.` : ""}`
       : `${norunT.length ? `Not yet run: ${norunT.map((e) => `${esc(modelName(e))} in ${esc(harness(e))}`).join(", ")}. ` : ""}0 is the unedited model at ${pct(t.base)}; 100 is ${esc(bestRefName(t).toLowerCase())} at ${pct(bestRef(t))}${t.higher_is_better ? "" : " (lower is better)"}.`,
-  ]).map((x) => `<p>${x}</p>`).join("");
+  ]).filter(Boolean).map((x) => `<p>${x}</p>`).join("");
   $("#board-notes").innerHTML = `<div class="np">${$("#board-notes").innerHTML}</div>` + (empty ? "" : `<details class="more"><summary>Column definitions</summary><dl class="defs">${cols.filter((c) => c.sub && !c.sub.startsWith(c.label)).map((c) => `<dt>${esc(c.label)}</dt><dd>${esc(c.sub)}</dd>`).join("")}</dl></details>`);
 }
 $("#board").addEventListener("click", (e) => {
@@ -1305,7 +1306,7 @@ function selectRun(id) {
     <dl class="kv">${kv("Normalized", r.normalized == null ? "–" : fix(r.normalized))}
       ${r.cut_share == null ? "" : kv("Replies cut off at the token limit", pct(r.cut_share, 0))}${kv("Edit time", fix(r.edit_hours, 2) + " h")}
       ${kv("Editor tokens", tk.input ? (tk.lower_bound ? "≥ " : "") + (tk.input / 1e6).toFixed(2) + "M" : "–", tk.input ? "input" + (tk.output ? ", " + (tk.output / 1e3).toFixed(0) + "K output" : "") : (tk.note || ""))}
-      ${kv("Damage", r.scored ? (dmgText(r) ? "flagged" : "none") : "–", esc(dmgText(r)))}
+      ${kv("Damage", r.scored ? (dmgText(r) ? "flagged" : "not flagged") : "–", esc(dmgText(r)))}
       ${kv("Adapter", ad.params ? ad.params.toLocaleString("en-US") : "–", ad.params ? `numbers, rank ${ad.max_rank}` : "")}</dl>
       ${ad.params ? `<p class="small"><a href="https://github.com/afifi-yusuf/lora-space/tree/main/results/lsbench/runs/${encodeURIComponent(r.id)}">This run’s files on GitHub</a>: the adapter (<span class="mono">adapter.npz</span>), its score and every tool call.</p>` : ""}
     <div class="part"><h4>The edit, in the editor’s words</h4>${prose(r.explanation || (failed(r) ? "No adapter was committed." : "No explanation was recorded."), 420, "explanation")}${mods && !r.edit_map ? `<p class="small wrap-any">${mods}</p>` : ""}</div>
@@ -1364,7 +1365,7 @@ selectRun(FIRST.id);
         <div class="s-nums">${num(L.generate_calls, "generate calls", `up to ${L.generate_prompts} prompts each`)}${num(L.analysis_calls, "interpretability calls", `up to ${L.analysis_items} texts each`)}${num(1, "commit", "final")}</div>
         <div class="s-tools"><span id="s-tools-h">Mechanistic interpretability tools</span><ul class="s-chips" aria-labelledby="s-tools-h">${S_TOOLS.map(([t], k) => `<li><button type="button" data-tool="${k}" aria-expanded="false" aria-controls="s-tip">${t}</button></li>`).join("")}</ul></div><div class="s-tip" id="s-tip" role="status" hidden></div></div>
     </div>
-    <div class="s-sc"><h3 class="s-step">After the session</h3><p>Scored on held-out problems, with a damage check and an audit.</p></div>`;
+    <div class="s-sc"><h3 class="s-step">After the session</h3><p>Scored on held-out problems, with a damage check and an audit of traces.</p></div>`;
   /* a chip opens its description under the list; another chip, a click elsewhere or Escape closes it */
   const box = $("#setup .s-box"), tip = $("#s-tip");
   const closeTip = () => { tip.hidden = true; box.querySelectorAll(".s-chips button").forEach((b) => b.setAttribute("aria-expanded", "false")); };
@@ -1391,7 +1392,7 @@ selectRun(FIRST.id);
     ["What is Agency, and what is its native harness?", [`[Agency](https://github.com/agency-project/Agency), developed by UC Berkeley’s Sky Computing Lab ([blog post](https://www.linkedin.com/pulse/introducing-agency-alvin-cheung-hd8xc)), is an interposition layer for agent stacks: a transparent shim that sits between an agent harness, the model provider and the sandbox. It monitors every LLM call and tool call, and can modify them, without changing the harness itself. Every run here goes through it, which is how each editor gets the same sandbox and budget and how usage is recorded in one format. It runs off-the-shelf harnesses unmodified (Codex, Claude Code, Kimi CLI and others) as well as its own native harness.`,
       `The native harness is deliberately minimal: a ReAct loop, in which the model reasons, calls a tool, reads the result and repeats, with a bash tool. It shows what the model does with the least help and without the [harness tax](https://arena.ai/blog/coding-agents-harness-tax).`]],
     ["Why pair each model with two harnesses?", [`The harness is part of what is measured. The same model can work very differently in its maker’s own agent than in Agency’s native loop, and on sycophancy it did.`]],
-    ["What counts as damage?", [`After scoring, the edited model also takes three general-ability checks: 300 MMLU questions, 200 GSM8K problems with thinking off, and a set of held-out facts. An edit is flagged when MMLU or the facts drop by more than 3 points from the unedited model, or GSM8K by more than 10. The paper’s own math edit, run through the same check, loses 0.3 points on MMLU, none on the facts and 4.5 on GSM8K, so it is not flagged. Flags are shown next to the score and do not change it.`]],
+    ["What counts as damage?", [`After scoring, the edited model also takes three general-ability checks: 300 MMLU questions, 200 GSM8K problems with thinking off, and a set of held-out facts. An edit is flagged when MMLU or the facts drop by more than 3 points from the unedited model, or GSM8K by more than 10. The full-weight edit from Weight-Space Programming, run through the same check, loses 0.3 points on MMLU, none on the facts and 4.5 on GSM8K, so it is not flagged. Flags are shown next to the score and do not change it.`]],
     ["How final are these numbers?", [["Every cell is one attempt. Expect a few points of noise, more on math, where one sample per problem is scored.",
       "Editor input tokens include cached input. Most of every long session is cache reads, which providers bill at a fraction of the normal rate, so token counts overstate cost differences between providers.",
       "Gemini 4 Carbon is served only from Vertex AI, which at times queued a request for minutes. For the Gemini cells that queue time does not count toward the 3 hours: per call, the wait for the first token beyond 60 seconds and the model’s own thinking is excluded. Between ten minutes and about an hour was excluded per session. The Antigravity CLI cells ran on Vertex’s priority tier.",
