@@ -5,7 +5,10 @@
   facts       held-out simple facts (sycophancy split), plain question, correct-vs-wrong answer log-prob
 
 The unedited model's numbers are cached in bench/lsbench/damage_base.json. A metric is flagged when it drops by more
-than FLAG_DROP (absolute) from the unedited model.
+than its FLAG_DROP (absolute) from the unedited model. GSM8K's is 10 points (2026-11-18): re-measuring the unedited
+model with the same greedy settings moved it 5 points (57.5% cached, 52.5% re-run), side-by-side traces of ten edits
+with recorded drops of 3.5-9 showed them losing and gaining about as many problems (net -6 to +5), and at 3 points
+the paper's own 50-pass math edit was flagged (-4.5 thinking off). Results: results/lsbench/gsm8k_traces/.
 """
 from __future__ import annotations
 
@@ -15,11 +18,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
-
 from .spec import ROOT
 
-FLAG_DROP = 0.03
+FLAG_DROP = {"mmlu": 0.03, "facts": 0.03, "gsm8k_off": 0.10}
 CACHE = ROOT / "bench/lsbench"
 N_MMLU, N_GSM = 300, 200
 
@@ -113,8 +114,11 @@ def report(G, adapter: dict, ckpt: Path) -> dict:
     b = base(G)
     e = measure(G, adapter, ckpt)
     drop = {k: round(b[k] - e[k], 4) for k in b}
-    return {"base": b, "edited": e, "drop": drop, "flagged": [k for k, d in drop.items() if d > FLAG_DROP],
-            "threshold": FLAG_DROP}
+    return {"base": b, "edited": e, "drop": drop, "flagged": flagged(drop), "threshold": FLAG_DROP}
+
+
+def flagged(drop: dict) -> list[str]:
+    return [k for k, d in drop.items() if d > FLAG_DROP.get(k, 0.03) + 1e-9]
 
 
 if __name__ == "__main__":  # measure and cache the unedited model's numbers:  python -m lsbench.damage qwen

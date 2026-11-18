@@ -1,0 +1,37 @@
+{
+ "status": "committed",
+ "wall_s": 843,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 4444171,
+  "output": 97017,
+  "cache_read": 0,
+  "cache_write": 231922,
+  "calls": 30,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 625.3
+ },
+ "tool_counts": {
+  "generate": 13,
+  "analysis": 18,
+  "candidates": 0
+ },
+ "explanation": "Closed-form LoRA for Python function generation with thinking off. Paired, same-code-prefix specification traces and frozen activation patches identified a requirement-sensitive channel in layer 15, with supporting components in layers 19 and 20. The adapter amplifies native outputs along those background-whitened directions. A small final MLP update attenuates measured damping and targets three localized formatting decisions: starting the Python block, avoiding runaway docstring examples, and closing the block before unsolicited tests. Ranks are 8, 8, 5, and 6; the maximum relative Frobenius norm is 0.059. No gradients, training, or edited-model evaluation were used.",
+ "final_message": "Prepared `/workspace/work/python_function_lora.npz` for short Python function requests with thinking off. Execution tests on the frozen model found two recurring problems: code that ignored a specific requirement, and runaway examples or assertions that obscured otherwise usable code. Activation patching and matched prompt traces identified attention components that carry task requirements into code-token choices. The adapter amplifies those existing components and makes a targeted final-layer adjustment to favor a complete Python block over unsolicited examples and tests. Its readout directions were checked against separate frozen activations from prose, other programming languages, requested doctests, and required helpers. The four updates have ranks 8, 8, 5, and 6; the largest is 5.9% of its base matrix\u2019s Frobenius norm. The adapter was constructed without gradients or training. As required, the edited model was not run, so its effect on hidden-test accuracy and other abilities remains unmeasured.",
+ "adapter": {
+  "modules": 4,
+  "params": 99840,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0183,
+   "model.layers.15.self_attn.o_proj": 0.059,
+   "model.layers.19.self_attn.o_proj": 0.0209,
+   "model.layers.20.mlp.down_proj": 0.0157
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_23-37-25_r60462f85/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 891
+}

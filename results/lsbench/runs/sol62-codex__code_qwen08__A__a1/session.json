@@ -1,0 +1,36 @@
+{
+ "status": "committed",
+ "wall_s": 1234,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 7466801,
+  "output": 137754,
+  "cache_read": 0,
+  "cache_write": 399688,
+  "calls": 85,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1033.8
+ },
+ "tool_counts": {
+  "generate": 14,
+  "analysis": 22,
+  "candidates": 0
+ },
+ "explanation": "Three closed-form rank-eight updates reweight native task-sensitive projections: amplify layer 18 MLP and layer 19 attention signals, and partially damp the selected competing layer 23 MLP component. Directions use unedited matched-prefix contrasts with regularized background controls. The archive passed structural and norm validation; no edited model was run.",
+ "final_message": "With thinking off, the frozen model\u2019s extracted functions passed 4/24 diagnostic tasks, 2/12 separate holdout tasks, and 4/16 additional short tasks. It often dropped a constraint or chose a familiar but wrong implementation. Forcing one corrected branch and then continuing with frozen weights produced passing implementations for min_coins, decode_runs, format_tags, and get_extension. This showed that at least some failures came from branch selection, not an inability to finish the implementation.\n\nMatched-prefix traces showed that layer 18\u2019s MLP and layer 19\u2019s attention carried information about differences in the requested behavior. A frozen layer-19 attention-output swap changed the preference between returning an index and returning a value. The final MLP often weakened the correct distinction on paired probes; final-attention effects were mixed, so I left that projection unchanged.\n\nThe adapter amplifies native task-sensitive components in layer 18\u2019s MLP and layer 19\u2019s attention, and attenuates a selected component of layer 23\u2019s MLP. Each update is a closed-form rank-eight projection built from matched-prefix activation differences, with regularized background statistics from prompt-end, routine Python, prose, and other-language code states to limit spillover. The holdout tasks and reserved assert contrasts were not used to compute the factors.\n\nThe archive passed key, shape, rank, finiteness, and norm checks. Update Frobenius norms are 7.50%, 9.90%, and 4.77% of their respective frozen weights. No gradients, training, or edited-model evaluation were performed. Post-edit correctness and preservation of other abilities remain unmeasured.",
+ "adapter": {
+  "modules": 3,
+  "params": 98304,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0477,
+   "model.layers.18.mlp.down_proj": 0.075,
+   "model.layers.19.self_attn.o_proj": 0.099
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_23-06-41_r7a3fa65f/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 1282
+}

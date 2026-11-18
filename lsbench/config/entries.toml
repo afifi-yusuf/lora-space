@@ -52,6 +52,8 @@ base_url = "https://principle.services.ai.azure.com/anthropic"
 harness = "native"
 effort = "high"
 
+
+
 [[entry]]
 id = "sol61-native"
 label = "GPT-6.1 Sol (Agency native)"
@@ -69,6 +71,42 @@ provider = "openai_responses"
 base_url = "https://principle.openai.azure.com/openai/v1"
 harness = "codex"
 effort = "xhigh"
+
+[[entry]]
+id = "astra62-native"
+label = "GPT-6.2 Astra (Agency native)"
+model = "gpt-6.2-astra"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "native"
+effort = "max"
+
+[[entry]]
+id = "astra62-codex"
+label = "GPT-6.2 Astra (Codex)"
+model = "gpt-6.2-astra"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "codex"
+effort = "max"
+
+[[entry]]
+id = "sol62-native"
+label = "GPT-6.2 Sol (Agency native)"
+model = "gpt-6.2-sol"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "native"
+effort = "max"
+
+[[entry]]
+id = "sol62-codex"
+label = "GPT-6.2 Sol (Codex)"
+model = "gpt-6.2-sol"
+provider = "openai_responses"
+base_url = "https://principle.openai.azure.com/openai/v1"
+harness = "codex"
+effort = "max"
 
 [[entry]]
 id = "kimi31-native"

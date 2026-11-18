@@ -1,0 +1,78 @@
+{
+ "run": "astra62-codex__math_qwen08__A__a1",
+ "entry": "astra62-codex",
+ "label": "GPT-6.2 Astra (Codex)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "8d6017abd3448c68",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.485,
+  "normalized": 83.1,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.485,
+   "cut_share": 0.335,
+   "mean_tokens": 12471.635,
+   "problems": 200,
+   "samples": 1,
+   "ok": 97,
+   "total": 200,
+   "seconds": 2820
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.56
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.015
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 3253
+ },
+ "cost": {
+  "gpu_hours": 1.56,
+  "session_hours": 0.66,
+  "llm_tokens": {
+   "input": 3315081,
+   "output": 93824,
+   "cache_read": 0,
+   "cache_write": 399635,
+   "calls": 41,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1017.3
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1306
+  }
+ },
+ "explanation": "This rank-2 edit targets the dominant observed failure: a math scratchpad revisits a result instead of handing it off for the final boxed answer. It uses phase-sensitive frozen activation contrasts and targeted output directions in the last MLP, leaving the rest of the network untouched. Static validation passed; the adapter was not evaluated.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-17T23:58:57Z"
+}

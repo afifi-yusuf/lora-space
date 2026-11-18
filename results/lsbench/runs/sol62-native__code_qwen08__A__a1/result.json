@@ -1,0 +1,91 @@
+{
+ "run": "sol62-native__code_qwen08__A__a1",
+ "entry": "sol62-native",
+ "label": "GPT-6.2 Sol (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "0a306373170c4d6f",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2778,
+  "normalized": 3.5,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2778,
+   "mbpp_plus": 0.2249,
+   "humaneval_base": 0.3476,
+   "humaneval_plus": 0.311,
+   "mbpp_buckets": {
+    "no_code": 114,
+    "pass": 85,
+    "wrong_output": 84,
+    "syntax_error": 24,
+    "exception:TypeError": 24,
+    "plus_only": 20,
+    "truncated": 12,
+    "exception:ValueError": 6,
+    "exception:AssertionError": 3,
+    "exception:NameError": 2,
+    "exception:IndexError": 2,
+    "exception:ZeroDivisionError": 2
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.565
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.01
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 526
+ },
+ "cost": {
+  "gpu_hours": 0.39,
+  "session_hours": 0.25,
+  "llm_tokens": {
+   "input": 4444171,
+   "output": 97017,
+   "cache_read": 0,
+   "cache_write": 231922,
+   "calls": 30,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 625.3
+  }
+ },
+ "adapter": {
+  "modules": 4,
+  "params": 99840,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0183,
+   "model.layers.15.self_attn.o_proj": 0.059,
+   "model.layers.19.self_attn.o_proj": 0.0209,
+   "model.layers.20.mlp.down_proj": 0.0157
+  }
+ },
+ "explanation": "Closed-form LoRA for Python function generation with thinking off. Paired, same-code-prefix specification traces and frozen activation patches identified a requirement-sensitive channel in layer 15, with supporting components in layers 19 and 20. The adapter amplifies native outputs along those background-whitened directions. A small final MLP update attenuates measured damping and targets three localized formatting decisions: starting the Python block, avoiding runaway docstring examples, and closing the block before unsolicited tests. Ranks are 8, 8, 5, and 6; the maximum relative Frobenius norm is 0.059. No gradients, training, or edited-model evaluation were used.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-18T00:01:04Z"
+}

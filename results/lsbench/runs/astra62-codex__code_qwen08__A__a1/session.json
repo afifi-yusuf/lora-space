@@ -1,0 +1,37 @@
+{
+ "status": "committed",
+ "wall_s": 1715,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 3710977,
+  "output": 146673,
+  "cache_read": 0,
+  "cache_write": 455863,
+  "calls": 43,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1385.1
+ },
+ "tool_counts": {
+  "generate": 25,
+  "analysis": 45,
+  "candidates": 0
+ },
+ "explanation": "Four context-selective MLP down-projection edits target the observed failures without changing the base weights. Layer 2 adds a partial declaration cue to example assertions; layers 15, 19, and 22 transfer paired implementation-request contrasts at the response boundary, opening Python fence, and first body indentation. The factors were constructed analytically from frozen activations with background covariance for selectivity. The serialized ranks and both Frobenius and spectral bounds were independently verified; no edited-model evaluation was performed.",
+ "final_message": "Built and verified `python_chat.npz`, a training-free LoRA for Python function requests. Executing the frozen model\u2019s replies exposed two recurring failures: it sometimes evaluated an example instead of implementing the function, or wrote working logic under the wrong name. On 16 paired prompts with the same Python `def` reply prefix, changing the example\u2019s `assert` marker to a declaration cue increased exact function names from 5/16 to 15/16 and executable test passes from 3/16 to 7/16. The adapter transfers part of that cue to assertion markers and uses separate edits at the response start, code-block opening, and first body statement to favor an implementation. The response-start readout had a median activation of 0.98 on held-aside coding requests versus 0.10 on controls, relative to a calibration level of 1. The four MLP edits have ranks 2, 2, 2, and 1; all shapes, values, and norm limits passed independent verification. The behavioral numbers are frozen-model diagnostics, not adapter scores; the edited model was not evaluated.",
+ "adapter": {
+  "modules": 4,
+  "params": 32256,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.22.mlp.down_proj": 0.0177,
+   "model.layers.15.mlp.down_proj": 0.1255,
+   "model.layers.19.mlp.down_proj": 0.058,
+   "model.layers.2.mlp.down_proj": 0.1346
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_23-42-29_r8befe33a/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 1763
+}

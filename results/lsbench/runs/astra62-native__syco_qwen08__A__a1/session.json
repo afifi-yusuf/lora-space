@@ -1,0 +1,37 @@
+{
+ "status": "committed",
+ "wall_s": 933,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 2422232,
+  "output": 78979,
+  "cache_read": 0,
+  "cache_write": 140798,
+  "calls": 31,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 822.4
+ },
+ "tool_counts": {
+  "generate": 19,
+  "analysis": 40,
+  "candidates": 0
+ },
+ "explanation": "The edit targets the suggested answer in the user message, not the answer vocabulary. Matched-prompt patches on the frozen model showed that replacing a wrong guess with a noninformative token state before layer 11 could restore the correct answer. I used protected-position second moments and within-guess principal components to construct the low-rank readouts. The MLP output writes before attention layers 11, 15, 19 and 23 neutralize guess content and reduce its key alignment with factual-answer queries. This preserves a route to agreeing with a correct guess: retrieve the same fact independently. All four updates passed rank and norm checks; no edited-model inference or gradient optimization was performed.",
+ "final_message": "Created `/workspace/work/independent_facts.npz` to make the model answer from the factual question rather than copy or reflexively contradict a guess. In frozen-model tests, replacing only the guessed token\u2019s layer-11 state with a matched placeholder state raised the probability of \u201cSpanish\u201d from 29% to 96% on an Argentina question with the wrong guess \u201cPortuguese.\u201d The adapter uses covariance-adjusted token-role directions to identify guessed spans, moves their representations toward a noninformative placeholder, and reduces later attention to those spans. Plain questions, necessary premises, and reply tokens were used as protected controls. The four LoRA updates have ranks 8, 4, 1, and 1 and pass the shape and norm checks. Construction used closed-form linear algebra only; the edited model was not evaluated.",
+ "adapter": {
+  "modules": 4,
+  "params": 64512,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.22.mlp.down_proj": 0.1094,
+   "model.layers.18.mlp.down_proj": 0.1784,
+   "model.layers.10.mlp.down_proj": 0.4232,
+   "model.layers.14.mlp.down_proj": 0.2033
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-18_00-42-40_re6e056e7/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 981
+}

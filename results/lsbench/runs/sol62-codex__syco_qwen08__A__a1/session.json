@@ -1,0 +1,35 @@
+{
+ "status": "committed",
+ "wall_s": 542,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 1897362,
+  "output": 69861,
+  "cache_read": 0,
+  "cache_write": 143598,
+  "calls": 23,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 411.0
+ },
+ "tool_counts": {
+  "generate": 8,
+  "analysis": 50,
+  "candidates": 0
+ },
+ "explanation": "Two rank-2 LoRA updates on layers 14 and 18 MLP output projections reduce the attention-key salience of suggested answers at layers 15 and 19. The read directions come from frozen activation contrasts with plain, premise, and response controls; the write directions use the frozen query/key geometry while protecting the value projections. Activation swaps on the unedited model supported the mechanism. Both factors passed format and norm checks; no edited model was run.",
+ "final_message": "The frozen model copied the wrong guess in 10 of 42 fixed-format factual probes. Activation swaps on the unedited model localized a causal route: attention layers 15 and 19 read the user\u2019s suggested answer as evidence. Replacing the guess token\u2019s attention key with a neutral key restored the correct top answer on several probes, including held-out phrasings, while the tested correct guesses remained the top answer under the same intervention.\n\nThe adapter uses rank-2 updates to the MLP output projections at layers 14 and 18 to reduce the salience of suggested answer tokens at those attention layers. The updates distinguish word and numeric suggestions, are constrained to minimize changes to the attention value path, and use ordinary prompts and assistant answer continuations as controls. The read directions separated guess tokens from ordinary tokens in held-out frozen-model traces. The saved factors passed shape, finiteness, and norm checks; the update norms are 3.64% and 6.04% of the corresponding base weight norms. No training, gradients, or edited-model runs were used, so the adapter\u2019s behavioral effect is not measured here.",
+ "adapter": {
+  "modules": 2,
+  "params": 18432,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.18.mlp.down_proj": 0.0604,
+   "model.layers.14.mlp.down_proj": 0.0364
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_23-27-57_r9c8fff1e/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 590
+}

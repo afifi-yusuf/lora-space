@@ -1,0 +1,35 @@
+{
+ "status": "committed",
+ "wall_s": 2137,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 5202807,
+  "output": 95607,
+  "cache_read": 0,
+  "cache_write": 271883,
+  "calls": 30,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1087.3
+ },
+ "tool_counts": {
+  "generate": 25,
+  "analysis": 34,
+  "candidates": 0
+ },
+ "explanation": "The unedited model often derived the right setup but looped through repeated checks without reaching a final answer. I used matched scratchpad and solution activations for a modest layer-19 reasoning-style shift, then used covariance-scaled activation centroids at layer 23 to distinguish ongoing work, late repetition, result-ready line breaks, and the visible answer phase. The adapter encourages forward deductions, a timely thought boundary, and a completed box without disabling thinking globally. Non-math and post-boundary controls constrain the directions. Only two MLP projections are changed; the rank-3 and rank-8 factors passed file and norm checks, with no edited-model run.",
+ "final_message": "Built a one-shot math adapter targeting a recurring failure: the model would find a useful equation or result, then repeatedly reconsider it instead of giving a boxed answer. All 16 initial thinking-mode probes hit 4,096 tokens without closing the thought, and all six reserved probes hit 12,288. In unedited continuation tests, moving from useful scratchwork to the visible solution produced correct boxed answers on the sock, pen-profit, and average-speed problems.\n\nThe adapter changes only the MLP down projections in layers 19 (rank 3) and 23 (rank 8). It uses matched activation contrasts to favor mathematical deductions over repeated checks. The closing signal is strongest at completed derivations and repetitive math line breaks, rather than imposing a fixed thinking budget. A separate answer-phase signal favors writing and finishing the requested box. Non-math controls, already-closed thoughts, and protected digit and operator readouts were used to limit interference.\n\nThe archive, factor shapes, and update norms were verified. No gradients, iterative fitting, or edited-model evaluation were used; the adapter\u2019s accuracy gain is unmeasured.",
+ "adapter": {
+  "modules": 2,
+  "params": 50688,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.19.mlp.down_proj": 0.0501,
+   "model.layers.23.mlp.down_proj": 0.1013
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_22-24-54_r7d07211e/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 2224
+}

@@ -1,0 +1,41 @@
+{
+ "status": "committed",
+ "wall_s": 1505,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 4552496,
+  "output": 125946,
+  "cache_read": 0,
+  "cache_write": 225225,
+  "calls": 32,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1230.5
+ },
+ "tool_counts": {
+  "generate": 12,
+  "analysis": 45,
+  "candidates": 0
+ },
+ "explanation": "This adapter targets exact interface use and executable snippet completion. Frozen-model patches indicated that the marker before an example call, the state at `def` before later attention reads, and the newline after a completed function are actionable sites. I used partial paired activation contrasts at those sites and gentler reference-style contrasts in the body, with covariance-weighted prototype readouts to limit spillover. The eight rank-2-to-8 updates were constructed analytically, statically validated, and not evaluated on an edited model.",
+ "final_message": "Built `python_reference.npz` to improve thinking-off Python function replies. Execution tests exposed three recurring failures: using a plausible but wrong function name, spending the token budget before finishing the implementation, and appending invented tests that fail when the snippet runs. On a separate 16-task check set, the unedited model passed 4 tasks as prompted, 7 with reference-solution examples, and 9 when given the exact function header.\n\nThe adapter targets the decisions behind those failures. An early edit gives user example assertions a partial function-definition cue. Middle-layer edits encourage `def` to read the supplied name and interface, while body and ending edits favor a standalone implementation over extra test code. The directions come from matched frozen-model activation contrasts. Covariance-weighted readouts use unrelated chat, other programming languages, and explicit requests for explanations or tests as preservation controls.\n\nThe file passed structural and norm checks: eight MLP down-projection updates, ranks 2\u20138, with a maximum update Frobenius norm of 12.7% of the corresponding base weight norm. No gradients or training were used. The reported pass counts are prompt controls, not adapter scores; the edited model was not evaluated.",
+ "adapter": {
+  "modules": 8,
+  "params": 211968,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.7.mlp.down_proj": 0.0303,
+   "model.layers.19.mlp.down_proj": 0.1269,
+   "model.layers.18.mlp.down_proj": 0.0543,
+   "model.layers.23.mlp.down_proj": 0.0779,
+   "model.layers.3.mlp.down_proj": 0.0856,
+   "model.layers.15.mlp.down_proj": 0.0639,
+   "model.layers.11.mlp.down_proj": 0.0825,
+   "model.layers.14.mlp.down_proj": 0.0627
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-18_00-13-43_ra6117f30/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 1553
+}

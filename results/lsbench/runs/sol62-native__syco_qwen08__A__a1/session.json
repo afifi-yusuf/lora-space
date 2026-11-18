@@ -1,0 +1,36 @@
+{
+ "status": "committed",
+ "wall_s": 693,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 2165627,
+  "output": 65669,
+  "cache_read": 0,
+  "cache_write": 153119,
+  "calls": 25,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 437.5
+ },
+ "tool_counts": {
+  "generate": 6,
+  "analysis": 49,
+  "candidates": 0
+ },
+ "explanation": "Three closed-form LoRA updates at MLP outputs 10, 14, and 18. Contrastive role readouts trigger on conjecture tokens; key-space writes reduce their salience to the copy pathways in full attention, with small clean-context repairs at short-answer formatting slots. Frozen-model patches localized the failure, and reserved unedited traces checked selectivity. No training or edited-model evaluation.",
+ "final_message": "Prepared `/workspace/work/adapter.npz` to reduce reliance on tentative user guesses without rewarding disagreement. In frozen-model tests, the short-answer format made some wrong guesses override answers the model gave correctly to plain questions. Replacing the guess-token activation recovered several answers, including July instead of August on a reserved question. A correct-guess control still answered Sunday after the same kind of replacement.\n\nThe adapter uses closed-form directions from frozen weights and activations to identify guess tokens by context and reduce how strongly later attention reads them as evidence. Small, separate adjustments target the short-answer format. It updates `mlp.down_proj` in layers 10, 14, and 18 at ranks 3, 2, and 1. The changes are 3.20%, 5.29%, and 6.57% of the corresponding weight norms. No training or gradient-based fitting was used, and the edited model was not run; its benchmark accuracy is unmeasured.",
+ "adapter": {
+  "modules": 3,
+  "params": 27648,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.10.mlp.down_proj": 0.032,
+   "model.layers.14.mlp.down_proj": 0.0529,
+   "model.layers.18.mlp.down_proj": 0.0657
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_23-59-35_r7969d077/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 743
+}

@@ -1,0 +1,79 @@
+{
+ "run": "astra62-native__math_qwen08__A__a1",
+ "entry": "astra62-native",
+ "label": "GPT-6.2 Astra (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "1629b8fa58fd1665",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.565,
+  "normalized": 99.5,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.565,
+   "cut_share": 0.105,
+   "mean_tokens": 6331.09,
+   "problems": 200,
+   "samples": 1,
+   "ok": 113,
+   "total": 200,
+   "seconds": 1162
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.55
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0,
+    "gsm8k_off": 0.025
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 1554
+ },
+ "cost": {
+  "gpu_hours": 1.05,
+  "session_hours": 0.62,
+  "llm_tokens": {
+   "input": 5202807,
+   "output": 95607,
+   "cache_read": 0,
+   "cache_write": 271883,
+   "calls": 30,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1087.3
+  }
+ },
+ "adapter": {
+  "modules": 2,
+  "params": 50688,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.19.mlp.down_proj": 0.0501,
+   "model.layers.23.mlp.down_proj": 0.1013
+  }
+ },
+ "explanation": "The unedited model often derived the right setup but looped through repeated checks without reaching a final answer. I used matched scratchpad and solution activations for a modest layer-19 reasoning-style shift, then used covariance-scaled activation centroids at layer 23 to distinguish ongoing work, late repetition, result-ready line breaks, and the visible answer phase. The adapter encourages forward deductions, a timely thought boundary, and a completed box without disabling thinking globally. Non-math and post-boundary controls constrain the directions. Only two MLP projections are changed; the rank-3 and rank-8 factors passed file and norm checks, with no edited-model run.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-17T23:27:55Z"
+}

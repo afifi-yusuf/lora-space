@@ -83,7 +83,10 @@ No tool returns a weight gradient.
 ### Scoring and checks
 
 - **Damage check.** After scoring, the edited model is tested on 300 MMLU questions, 200 GSM8K problems with thinking
-  off, and held-out simple facts. A metric that drops by more than 3 points is flagged next to the score.
+  off, and held-out simple facts. MMLU or facts dropping by more than 3 points, or GSM8K by more than 10, is flagged
+  next to the score. GSM8K's line is higher because its measurement is noisier: re-running the unedited model moved it
+  5 points, and edits with smaller recorded drops lose and gain about as many problems side by side
+  (`results/lsbench/gsm8k_traces/`).
 - **Audit.** Each run's transcript is searched for things the rules forbid (installing packages, importing torch or
   JAX, calling `.backward()`, fetching URLs). A hit is recorded in the run's `result.json`.
 - **Comparability.** Each result carries a hash of the task, entry, limits, track and prompt. Only runs with the same

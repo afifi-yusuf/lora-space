@@ -1,0 +1,48 @@
+{
+ "metric": "mbpp_base",
+ "value": 0.2434,
+ "normalized": -19.0,
+ "reference": "rename_ceiling",
+ "reference_value": 0.426,
+ "raw": {
+  "mbpp_base": 0.2434,
+  "mbpp_plus": 0.2011,
+  "humaneval_base": 0.3354,
+  "humaneval_plus": 0.3049,
+  "mbpp_buckets": {
+   "no_code": 107,
+   "wrong_output": 92,
+   "pass": 76,
+   "syntax_error": 28,
+   "exception:TypeError": 24,
+   "plus_only": 16,
+   "truncated": 13,
+   "exception:AssertionError": 11,
+   "exception:ValueError": 5,
+   "exception:IndexError": 3,
+   "exception:ZeroDivisionError": 1,
+   "exception:AttributeError": 1,
+   "timeout": 1
+  }
+ },
+ "damage": {
+  "base": {
+   "mmlu": 0.4733,
+   "facts": 1.0,
+   "gsm8k_off": 0.575
+  },
+  "edited": {
+   "mmlu": 0.4833,
+   "facts": 0.9938,
+   "gsm8k_off": 0.56
+  },
+  "drop": {
+   "mmlu": -0.01,
+   "facts": 0.0062,
+   "gsm8k_off": 0.015
+  },
+  "flagged": [],
+  "threshold": 0.03
+ },
+ "score_gpu_s": 557
+}

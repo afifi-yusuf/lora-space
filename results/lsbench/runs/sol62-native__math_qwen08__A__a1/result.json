@@ -1,0 +1,80 @@
+{
+ "run": "sol62-native__math_qwen08__A__a1",
+ "entry": "sol62-native",
+ "label": "GPT-6.2 Sol (Agency native)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "278e80b9664af94f",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.62,
+  "normalized": 110.8,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.62,
+   "cut_share": 0.08,
+   "mean_tokens": 8012.235,
+   "problems": 200,
+   "samples": 1,
+   "ok": 124,
+   "total": 200,
+   "seconds": 1334
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.48,
+    "facts": 1.0,
+    "gsm8k_off": 0.53
+   },
+   "drop": {
+    "mmlu": -0.0067,
+    "facts": 0.0,
+    "gsm8k_off": 0.045
+   },
+   "flagged": [
+    "gsm8k_off"
+   ],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 1727
+ },
+ "cost": {
+  "gpu_hours": 0.95,
+  "session_hours": 0.47,
+  "llm_tokens": {
+   "input": 4422641,
+   "output": 84725,
+   "cache_read": 0,
+   "cache_write": 243902,
+   "calls": 29,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 575.7
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 27648,
+  "max_rank": 6,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.3593
+  }
+ },
+ "explanation": "Rank-six final-MLP control-flow edit, derived with frozen activation contrasts and constrained unembedding directions. Unedited runs frequently derived the answer and then looped through checks until the token cap. The edit preserves the scratchpad at the opener, favors its normal handoff at complete or repeatedly stalled math turns, dampens redundant review, and supports a boxed visible conclusion. No answer values are inserted; digits and common equation tokens are protected from direct bias. Reserved unedited traces checked state selectivity. Serialized A/B factors and weight norms were verified; no edited behavior was evaluated.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-17T23:39:55Z"
+}

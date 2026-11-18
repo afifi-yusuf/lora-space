@@ -1,0 +1,91 @@
+{
+ "run": "sol62-codex__code_qwen08__A__a1",
+ "entry": "sol62-codex",
+ "label": "GPT-6.2 Sol (Codex)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "983465e47fb588c2",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2434,
+  "normalized": -19.0,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2434,
+   "mbpp_plus": 0.2011,
+   "humaneval_base": 0.3354,
+   "humaneval_plus": 0.3049,
+   "mbpp_buckets": {
+    "no_code": 107,
+    "wrong_output": 92,
+    "pass": 76,
+    "syntax_error": 28,
+    "exception:TypeError": 24,
+    "plus_only": 16,
+    "truncated": 13,
+    "exception:AssertionError": 11,
+    "exception:ValueError": 5,
+    "exception:IndexError": 3,
+    "exception:ZeroDivisionError": 1,
+    "exception:AttributeError": 1,
+    "timeout": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4833,
+    "facts": 0.9938,
+    "gsm8k_off": 0.56
+   },
+   "drop": {
+    "mmlu": -0.01,
+    "facts": 0.0062,
+    "gsm8k_off": 0.015
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 557
+ },
+ "cost": {
+  "gpu_hours": 0.51,
+  "session_hours": 0.36,
+  "llm_tokens": {
+   "input": 7466801,
+   "output": 137754,
+   "cache_read": 0,
+   "cache_write": 399688,
+   "calls": 85,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1033.8
+  }
+ },
+ "adapter": {
+  "modules": 3,
+  "params": 98304,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0477,
+   "model.layers.18.mlp.down_proj": 0.075,
+   "model.layers.19.self_attn.o_proj": 0.099
+  }
+ },
+ "explanation": "Three closed-form rank-eight updates reweight native task-sensitive projections: amplify layer 18 MLP and layer 19 attention signals, and partially damp the selected competing layer 23 MLP component. Directions use unedited matched-prefix contrasts with regularized background controls. The archive passed structural and norm validation; no edited model was run.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-17T23:37:23Z"
+}

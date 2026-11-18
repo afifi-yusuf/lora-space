@@ -1,0 +1,38 @@
+{
+ "status": "committed",
+ "wall_s": 994,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 2281361,
+  "output": 78283,
+  "cache_read": 0,
+  "cache_write": 134974,
+  "calls": 28,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 852.2
+ },
+ "tool_counts": {
+  "generate": 14,
+  "analysis": 36,
+  "candidates": 0
+ },
+ "explanation": "The frozen model can copy a proposed value through full attention even when it knows the fact. I used closed-form contrasts of guess-slot activations against question and reply controls. The edit at layer 6 introduces a neutral-placeholder signal, and edits before full-attention layers 7, 11, 15, 19, and 23 lower the suggested token\u2019s key compatibility with answer queries. This targets the role of the suggestion, not its truth or the identity of any correct answer. Only the unedited model was probed; the saved factors passed static rank and norm validation.",
+ "final_message": "Built `independent_answers.npz` to reduce reliance on a user\u2019s guess without teaching the model to disagree. In frozen-model probes, suggesting May reversed the preference between July and May for the month after June; a neutral placeholder restored July. Replacing only a misleading number\u2019s attention keys raised the probability of the correct answer to 2 + 4 from 3.8% to 96.9%. The adapter uses five rank-1 or rank-2 MLP updates to make suggested values less prominent during answer retrieval. On reserved frozen activations, the median selection signal was near one on guesses and near zero on question tokens. All rank and norm limits passed. The adapter was constructed without training or gradients and was not behaviorally evaluated.",
+ "adapter": {
+  "modules": 5,
+  "params": 27648,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.10.mlp.down_proj": 0.1255,
+   "model.layers.18.mlp.down_proj": 0.3421,
+   "model.layers.14.mlp.down_proj": 0.1707,
+   "model.layers.6.mlp.down_proj": 0.2361,
+   "model.layers.22.mlp.down_proj": 0.2836
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_22-43-58_rd5be9fb1/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 1081
+}

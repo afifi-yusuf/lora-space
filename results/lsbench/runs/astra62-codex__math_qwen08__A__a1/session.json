@@ -1,0 +1,34 @@
+{
+ "status": "committed",
+ "wall_s": 2287,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 3315081,
+  "output": 93824,
+  "cache_read": 0,
+  "cache_write": 399635,
+  "calls": 41,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 1017.3
+ },
+ "tool_counts": {
+  "generate": 25,
+  "analysis": 35,
+  "candidates": 0
+ },
+ "explanation": "This rank-2 edit targets the dominant observed failure: a math scratchpad revisits a result instead of handing it off for the final boxed answer. It uses phase-sensitive frozen activation contrasts and targeted output directions in the last MLP, leaving the rest of the network untouched. Static validation passed; the adapter was not evaluated.",
+ "final_message": "The frozen model often found a useful result and then repeatedly rechecked it instead of giving a final answer. None of 16 initial math probes produced a boxed final answer within 4,608 tokens, and all eight longer probes reached 16,384 tokens without leaving thinking mode. In a text-only test on two reserved problems, explicitly ending the scratchpad after useful intermediate work yielded the correct boxed answer in three of four continuations, versus neither untreated problem finishing within its probe budget.\n\nI constructed a rank-2 LoRA on model.layers.23.mlp.down_proj only. The main direction favors ending the scratchpad once a math calculation appears complete or repetitive; a smaller direction discourages repeated \u201cWait\u201d restarts. Both use closed-form statistics from the frozen model, with early reasoning, final-answer prose, and nonmath tasks as controls. The output directions spare digits, math notation, and common tokens. The artifact passed shape, rank, finiteness, and norm checks: its Frobenius norm is 0.131 times the base projection\u2019s and its operator norm is 1.594 times the base\u2019s. No edited model was run, so the accuracy gain and retention of other abilities are unmeasured.",
+ "adapter": {
+  "modules": 1,
+  "params": 9216,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.1306
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_22-25-04_r0320b04e/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 2375
+}

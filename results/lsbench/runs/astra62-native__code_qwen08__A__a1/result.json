@@ -1,0 +1,96 @@
+{
+ "run": "astra62-native__code_qwen08__A__a1",
+ "entry": "astra62-native",
+ "label": "GPT-6.2 Astra (Agency native)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "8aa48875a10bec97",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.2011,
+  "normalized": -46.5,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.2011,
+   "mbpp_plus": 0.1534,
+   "humaneval_base": 0.311,
+   "humaneval_plus": 0.2683,
+   "mbpp_buckets": {
+    "syntax_error": 161,
+    "wrong_output": 91,
+    "pass": 58,
+    "no_code": 31,
+    "plus_only": 18,
+    "exception:TypeError": 9,
+    "exception:ValueError": 3,
+    "exception:NameError": 2,
+    "exception:AttributeError": 1,
+    "timeout": 1,
+    "exception:RuntimeError": 1,
+    "exception:IndexError": 1,
+    "exception:RecursionError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4767,
+    "facts": 1.0,
+    "gsm8k_off": 0.555
+   },
+   "drop": {
+    "mmlu": -0.0034,
+    "facts": 0.0,
+    "gsm8k_off": 0.02
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 518
+ },
+ "cost": {
+  "gpu_hours": 0.58,
+  "session_hours": 0.43,
+  "llm_tokens": {
+   "input": 4552496,
+   "output": 125946,
+   "cache_read": 0,
+   "cache_write": 225225,
+   "calls": 32,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1230.5
+  }
+ },
+ "adapter": {
+  "modules": 8,
+  "params": 211968,
+  "max_rank": 8,
+  "rel_norms": {
+   "model.layers.7.mlp.down_proj": 0.0303,
+   "model.layers.19.mlp.down_proj": 0.1269,
+   "model.layers.18.mlp.down_proj": 0.0543,
+   "model.layers.23.mlp.down_proj": 0.0779,
+   "model.layers.3.mlp.down_proj": 0.0856,
+   "model.layers.15.mlp.down_proj": 0.0639,
+   "model.layers.11.mlp.down_proj": 0.0825,
+   "model.layers.14.mlp.down_proj": 0.0627
+  }
+ },
+ "explanation": "This adapter targets exact interface use and executable snippet completion. Frozen-model patches indicated that the marker before an example call, the state at `def` before later attention reads, and the newline after a completed function are actionable sites. I used partial paired activation contrasts at those sites and gentler reference-style contrasts in the body, with covariance-weighted prototype readouts to limit spillover. The eight rank-2-to-8 updates were constructed analytically, statically validated, and not evaluated on an edited model.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-18T00:48:17Z"
+}

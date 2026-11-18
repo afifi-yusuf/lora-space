@@ -1,0 +1,34 @@
+{
+ "status": "committed",
+ "wall_s": 1685,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 5007737,
+  "output": 120599,
+  "cache_read": 0,
+  "cache_write": 386719,
+  "calls": 64,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 865.0
+ },
+ "tool_counts": {
+  "generate": 19,
+  "analysis": 24,
+  "candidates": 0
+ },
+ "explanation": "Rank-three final MLP edit addressing frozen-model restart loops and failed boxed-answer handoffs. It uses orthogonalized frozen-activation contrasts and protected tied-head readout directions; the saved factors passed static validation. No edited inference was performed.",
+ "final_message": "I built a training-free, rank-three adapter for `model.layers.23.mlp.down_proj`. It targets a specific math failure: the model often reaches a result, then restarts its reasoning instead of returning it. The frozen model produced no boxed answer on 16 fresh problems by 4,096 tokens or on six longer retries by 16,384 tokens. It returned a correct box on 1 of 16 supplied examples.\n\nThe edit uses matched frozen-activation contrasts and the tied output readout. It favors `</think>` over redundant indentation at completed math states, suppresses restart markers in entrenched loops, and favors the opening backslash of `\\boxed{}` at the math answer handoff. The input projections account for startup in both thinking modes, legitimate uses of \u201cWait,\u201d native non-math conclusions, and ordinary prose and code. The output projections protect selected digit and syntax directions.\n\nOn held-out frozen traces, the completion feature ranked the concluded state higher in all 12 completed/intermediate pairs, and the repetition feature rose in all nine matched loop pairs. The handoff feature also separated all three checked boxed-answer states from their plain-answer and pre-handoff controls. Static validation confirmed finite factors of shapes `(3, 3584)` and `(1024, 3)`, and an update Frobenius norm of 0.723819, or 4.41% of the frozen weight norm. No edited model was run, so the effect on accuracy remains unmeasured.",
+ "adapter": {
+  "modules": 1,
+  "params": 13824,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0441
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_23-39-57_r18ce2416/logs/agent_lsb-codex_0000_data.sqlite3",
+ "session_s": 1733
+}

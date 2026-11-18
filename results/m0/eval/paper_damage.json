@@ -1,0 +1,35 @@
+{
+ "base": {
+  "mmlu": 0.4733,
+  "facts": 1.0,
+  "gsm8k_off": 0.575
+ },
+ "p50c_exact": {
+  "edited": {
+   "mmlu": 0.47,
+   "facts": 1.0,
+   "gsm8k_off": 0.53
+  },
+  "drop": {
+   "mmlu": 0.0033,
+   "facts": 0.0,
+   "gsm8k_off": 0.045
+  },
+  "flagged": [
+   "gsm8k_off"
+  ]
+ },
+ "p50c_r1": {
+  "edited": {
+   "mmlu": 0.47,
+   "facts": 1.0,
+   "gsm8k_off": 0.56
+  },
+  "drop": {
+   "mmlu": 0.0033,
+   "facts": 0.0,
+   "gsm8k_off": 0.015
+  },
+  "flagged": []
+ }
+}

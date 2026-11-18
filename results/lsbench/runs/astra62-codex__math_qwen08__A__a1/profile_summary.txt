@@ -1,0 +1,22 @@
+label                        calls    wall_s    cpu_s   runq_s blocked_s   cpu%
+-------------------------------------------------------------------------------
+run:write_lora_adapter           1   2276.71      n/a      n/a       n/a    n/a
+engine:execute                   1   2276.71     2.98     0.01   2273.71   0.1%
+harness:attempt_rpc              1   2248.07     0.00     0.00   2248.07   0.0%
+harness:await_cli                1   2244.45      n/a      n/a       n/a    n/a
+llm:attempt                     41   1017.28     5.13     0.08   1012.07   0.5%
+tool:mcp__agency__generate      25    937.73      n/a      n/a       n/a    n/a
+tool:Bash                       41    411.60      n/a      n/a       n/a    n/a
+tool:mcp__agency__trace         29    143.55      n/a      n/a       n/a    n/a
+tool:mcp__agency__token_stats     1     48.14      n/a      n/a       n/a    n/a
+run:container_call              13     23.13     0.00     0.00     23.12   0.0%
+teardown:commit                  1     22.47     0.00     0.00     22.46   0.0%
+sandbox:commit                   1     22.28     0.00     0.00     22.28   0.0%
+checkpoint.total                 1     22.28     0.00     0.00     22.28   0.0%
+checkpoint.fs_snapshot           1     22.28     0.00     0.00     22.28   0.0%
+tool:mcp__agency__attribution     2      5.94      n/a      n/a       n/a    n/a
+tool:mcp__agency__logit_lens     2      5.01      n/a      n/a       n/a    n/a
+sandbox:ensure_daemon            1      4.71     1.06     0.00      3.65  22.5%
+runtime.harness_start            1      4.71     1.06     0.00      3.65  22.5%
+syscall:connect                930      2.59      n/a      n/a       n/a    n/a
+tool:mcp__agency__inspect_module_inputs     2      1.97      n/a      n/a       n/a    n/a

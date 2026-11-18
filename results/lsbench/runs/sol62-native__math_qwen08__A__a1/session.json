@@ -1,0 +1,34 @@
+{
+ "status": "committed",
+ "wall_s": 1595,
+ "provider_queue_excluded_s": 0.0,
+ "llm_tokens": {
+  "input": 4422641,
+  "output": 84725,
+  "cache_read": 0,
+  "cache_write": 243902,
+  "calls": 29,
+  "failed_calls": 0,
+  "rejected_calls": 0,
+  "usage_missing_calls": 0,
+  "lower_bound": false,
+  "llm_wait_s": 575.7
+ },
+ "tool_counts": {
+  "generate": 16,
+  "analysis": 19,
+  "candidates": 0
+ },
+ "explanation": "Rank-six final-MLP control-flow edit, derived with frozen activation contrasts and constrained unembedding directions. Unedited runs frequently derived the answer and then looped through checks until the token cap. The edit preserves the scratchpad at the opener, favors its normal handoff at complete or repeatedly stalled math turns, dampens redundant review, and supports a boxed visible conclusion. No answer values are inserted; digits and common equation tokens are protected from direct bias. Reserved unedited traces checked state selectivity. Serialized A/B factors and weight norms were verified; no edited behavior was evaluated.",
+ "final_message": "Built `math_handoff.npz`, a rank-6 LoRA on `model.layers.23.mlp.down_proj` only. The dominant failure in the frozen model was repeated rereading and checking, often after it had already derived the correct result. Seventeen of 18 initial thinking runs hit a 4,096-token cap, and all eight fresh math probes hit a 16,384-token cap. Rather than disable thinking, the edit favors a handoff after a completed derivation or sustained stall, discourages redundant restarts, and nudges the visible solution toward the requested boxed conclusion.\n\nThe directions were constructed with closed-form linear algebra on frozen activations and weights. Reserved math, coding, writing, and language traces were used to check the selectivity of the state readouts. The output directions protect digits and common equation tokens from direct bias. The saved update is 0.359\u00d7 the frozen weight's Frobenius norm and 4.293\u00d7 its operator norm. No gradients or optimizer were used, and the edited model was not run or scored.",
+ "adapter": {
+  "modules": 1,
+  "params": 27648,
+  "max_rank": 6,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.3593
+  }
+ },
+ "agency_db": "/home/ubuntu/lso/agency_runs/2026-11-17_22-43-03_r2229fa80/logs/agent_lsb-native_0000_data.sqlite3",
+ "session_s": 1683
+}

@@ -16,6 +16,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import spec
+from .damage import flagged as damage_flags
 from .usage import profiler_usage
 
 OUT = spec.ROOT / "site"
@@ -82,7 +83,7 @@ def _run(d: Path, pilot: bool) -> dict | None:
             "harness": e.get("harness"), "task": task_id, "track": track, "attempt": int(att[1:]), "rules": rules,
             "pilot": pilot or entry_id == "astra-minimal", "status": (res or {}).get("status") or sess.get("status"),
             "scored": bool(score), "provider": e.get("provider"), "effort": e.get("effort"),
-            "damage": {"flagged": dmg.get("flagged") or [], "drop": dmg.get("drop") or {}} if dmg else None,
+            "damage": {"flagged": damage_flags(dmg.get("drop") or {}), "drop": dmg.get("drop") or {}} if dmg else None,
             "final_message": _final(sess.get("final_message") or ""),
             "value": score.get("value"), "normalized": score.get("normalized"),
             "cut_share": raw.get("cut_share"), "mean_tokens": raw.get("mean_tokens"),

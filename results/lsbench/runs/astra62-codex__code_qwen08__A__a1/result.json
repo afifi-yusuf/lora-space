@@ -1,0 +1,94 @@
+{
+ "run": "astra62-codex__code_qwen08__A__a1",
+ "entry": "astra62-codex",
+ "label": "GPT-6.2 Astra (Codex)",
+ "task": "code_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "ec5426e20b0831fc",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "mbpp_base",
+  "value": 0.381,
+  "normalized": 70.7,
+  "reference": "rename_ceiling",
+  "reference_value": 0.426,
+  "raw": {
+   "mbpp_base": 0.381,
+   "mbpp_plus": 0.2989,
+   "humaneval_base": 0.3354,
+   "humaneval_plus": 0.3049,
+   "mbpp_buckets": {
+    "pass": 113,
+    "wrong_output": 106,
+    "syntax_error": 61,
+    "plus_only": 31,
+    "no_code": 26,
+    "exception:TypeError": 18,
+    "exception:ValueError": 8,
+    "exception:IndexError": 6,
+    "truncated": 2,
+    "exception:NameError": 2,
+    "exception:KeyError": 1,
+    "exception:RecursionError": 1,
+    "timeout": 1,
+    "exception:ZeroDivisionError": 1,
+    "exception:SyntaxError": 1
+   }
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4633,
+    "facts": 0.9877,
+    "gsm8k_off": 0.57
+   },
+   "drop": {
+    "mmlu": 0.01,
+    "facts": 0.0123,
+    "gsm8k_off": 0.005
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 527
+ },
+ "cost": {
+  "gpu_hours": 0.64,
+  "session_hours": 0.49,
+  "llm_tokens": {
+   "input": 3710977,
+   "output": 146673,
+   "cache_read": 0,
+   "cache_write": 455863,
+   "calls": 43,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 1385.1
+  }
+ },
+ "adapter": {
+  "modules": 4,
+  "params": 32256,
+  "max_rank": 2,
+  "rel_norms": {
+   "model.layers.22.mlp.down_proj": 0.0177,
+   "model.layers.15.mlp.down_proj": 0.1255,
+   "model.layers.19.mlp.down_proj": 0.058,
+   "model.layers.2.mlp.down_proj": 0.1346
+  }
+ },
+ "explanation": "Four context-selective MLP down-projection edits target the observed failures without changing the base weights. Layer 2 adds a partial declaration cue to example assertions; layers 15, 19, and 22 transfer paired implementation-request contrasts at the response boundary, opening Python fence, and first body indentation. The factors were constructed analytically from frozen activations with background covariance for selectivity. The serialized ranks and both Frobenius and spectral bounds were independently verified; no edited-model evaluation was performed.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-18T00:20:41Z"
+}

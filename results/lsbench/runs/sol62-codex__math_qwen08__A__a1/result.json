@@ -1,0 +1,78 @@
+{
+ "run": "sol62-codex__math_qwen08__A__a1",
+ "entry": "sol62-codex",
+ "label": "GPT-6.2 Sol (Codex)",
+ "task": "math_qwen08",
+ "track": "A",
+ "attempt": 1,
+ "settings_hash": "8a60e9b9ddabe0fc",
+ "rules": "lsbench-v0.3",
+ "status": "committed",
+ "score": {
+  "metric": "acc",
+  "value": 0.37,
+  "normalized": 59.5,
+  "reference": "paper_full_weight_edit",
+  "reference_value": 0.5675,
+  "raw": {
+   "acc": 0.37,
+   "cut_share": 0.605,
+   "mean_tokens": 21059.99,
+   "problems": 200,
+   "samples": 1,
+   "ok": 74,
+   "total": 200,
+   "seconds": 5098
+  },
+  "damage": {
+   "base": {
+    "mmlu": 0.4733,
+    "facts": 1.0,
+    "gsm8k_off": 0.575
+   },
+   "edited": {
+    "mmlu": 0.4733,
+    "facts": 0.9938,
+    "gsm8k_off": 0.55
+   },
+   "drop": {
+    "mmlu": 0.0,
+    "facts": 0.0062,
+    "gsm8k_off": 0.025
+   },
+   "flagged": [],
+   "threshold": 0.03
+  },
+  "score_gpu_s": 5486
+ },
+ "cost": {
+  "gpu_hours": 2.01,
+  "session_hours": 0.48,
+  "llm_tokens": {
+   "input": 5007737,
+   "output": 120599,
+   "cache_read": 0,
+   "cache_write": 386719,
+   "calls": 64,
+   "failed_calls": 0,
+   "rejected_calls": 0,
+   "usage_missing_calls": 0,
+   "lower_bound": false,
+   "llm_wait_s": 865.0
+  }
+ },
+ "adapter": {
+  "modules": 1,
+  "params": 13824,
+  "max_rank": 3,
+  "rel_norms": {
+   "model.layers.23.mlp.down_proj": 0.0441
+  }
+ },
+ "explanation": "Rank-three final MLP edit addressing frozen-model restart loops and failed boxed-answer handoffs. It uses orthogonalized frozen-activation contrasts and protected tied-head readout directions; the saved factors passed static validation. No edited inference was performed.",
+ "audit": {
+  "flags": {},
+  "clean": true
+ },
+ "finished": "2026-11-18T01:40:19Z"
+}
