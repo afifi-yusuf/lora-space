@@ -168,7 +168,7 @@ reads only `results/lsbench/` and the config files.
 ## Status
 
 - **Rules version:** `lsbench-v0.3`.
-- **Grid:** Track A, one attempt per cell, seven editor models across three tasks. Every cell has a scored run.
+- **Grid:** Track A, one attempt per cell, nine editor models across three tasks. Every cell has a scored run.
 - **Not done yet:** repeated attempts, Track B, larger targets (Qwen3.5-2B is defined but has no tasks), and
   gradient-LoRA references for the math and coding tasks.
 
