@@ -758,7 +758,6 @@ const TASK = {
 const TARGET = { qwen: "Qwen3.5-0.8B" };
 const REFS = {
   paper_full_weight_edit: ["Full-weight edit", "Takehi et al. 2026, 50 passes"],
-  paper_edit_as_rank1_lora: ["Same edit as a rank-1 LoRA", "our SVD of the paper’s edit"],
   rename_ceiling: ["Unedited, function name corrected", "function name fixed, not an adapter"],
   gradient_lora_r8: ["Gradient LoRA, rank 8", "trained with Adam"],
 };
@@ -773,7 +772,7 @@ const ver = (r) => r.rules.replace("lsbench-", "");
 const modelName = (x) => x.label.replace(/ \(.*\)/, "");
 const harness = (x) => { const h = (x.label.match(/\((.*)\)/) || [])[1] || x.harness || ""; return h.charAt(0).toUpperCase() + h.slice(1); };
 const ownHarness = (x) => x.harness !== "native" && x.harness !== "minimal";
-const INTEXT = new Set(["paper_edit_as_rank1_lora"]);  /* a reference given in a sentence (the math comparison), not as a row */
+const INTEXT = new Set(["paper_edit_as_rank1_lora"]);  /* a reference kept in the task config and not shown on the site */
 const bestRef = (t) => { const v = Object.values(t.references || {}); return v.length ? (t.higher_is_better ? Math.max(...v) : Math.min(...v)) : null; };
 const bestRefName = (t) => { const b = bestRef(t), k = Object.keys(t.references || {}).find((x) => t.references[x] === b); return (REFS[k] || [k])[0]; };
 const norm = (t, v) => { const b = bestRef(t); return b == null || b === t.base ? null : 100 * (v - t.base) / (b - t.base); };
@@ -1217,7 +1216,7 @@ function versus() {
   const panel = (title, a, b, foot) => `<div><h4>${title}</h4>${row("Full-weight edit", "var(--mk-ref)", a[0], a[1], a[2])}${row(who, c, b[0], b[1], b[2])}${foot ? `<small>${foot}</small>` : ""}</div>`;
   const base = `<span class="base" style="left:${(100 * t.base / 0.75).toFixed(2)}%" aria-hidden="true"></span>`;
   $("#vs-sub").textContent = "The best math run here beside the edit from Weight-Space Programming, on the same 200 problems.";
-  $("#vs").innerHTML = panel("MATH-500 accuracy", [ref / 0.75, pct(ref), base], [r.value / 0.75, pct(r.value), base], `The notch is the unedited model, ${pct(t.base)}.${t.references.paper_edit_as_rank1_lora ? ` Converted to a rank-1 LoRA with no retraining, the paper’s edit scores ${pct(t.references.paper_edit_as_rank1_lora)}.` : ""}`)
+  $("#vs").innerHTML = panel("MATH-500 accuracy", [ref / 0.75, pct(ref), base], [r.value / 0.75, pct(r.value), base], `The notch is the unedited model, ${pct(t.base)}.`)
     + (cost.wall_hours ? panel("Editing time", [0.6, `${cost.wall_hours} h`], [0.6 * r.edit_hours / cost.wall_hours, `${fix(r.edit_hours, 1)} h`]) : "")
     + panel("Numbers the editor may set", [0.6, "about 0.8 billion"], [0.6 * SPACE / 8e8, big(SPACE)], `Any weight, against adapters of rank ${D.limits.max_rank} or lower. This run set ${big(r.adapter.params)}.`);
   $("#vs-terms").innerHTML = `<thead><tr><td></td><th scope="col">Full-weight edit</th><th scope="col">Here</th></tr></thead><tbody>`
